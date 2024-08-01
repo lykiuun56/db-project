@@ -5,10 +5,14 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy": "sh deploy.sh"
   },
   "dependencies": {
     "@vue/compiler-sfc": "^3.4.33",
+    "ag-grid-community": "^32.0.2",
+    "ag-grid-vue3": "^32.0.2",
+    "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "core-js": "^3.8.3",
     "element-plus": "^2.7.7",

@@ -1,11 +1,14 @@
 <template>
-  <v-container>
+  <v-container class="add-to-database-container">
     <v-row justify="center">
       <v-col cols="12" class="text-center">
-        <h1>Management Email</h1>
+        <h1>Add to Collaborated Database</h1>
       </v-col>
     </v-row>
     <v-row justify="center">
+      <v-col cols="12" md="5">
+        <v-textarea v-model="inputText" label="请输入" outlined></v-textarea>
+      </v-col>
       <v-col cols="12" md="5">
         <v-file-input v-model="selectedFile" label="选择文件" outlined></v-file-input>
       </v-col>
@@ -22,36 +25,39 @@
 import axios from 'axios';
 
 export default {
-  name: 'ManagementEmail',
+  name: 'CDAdd',
   data() {
     return {
+      inputText: '',
       selectedFile: null,
     };
   },
   methods: {
     async submit() {
-      if (!this.selectedFile) {
-        alert('Please select a file to upload.');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('file', this.selectedFile);
-
       try {
-        await axios.post('/api/management/add', formData, {
+        const formData = new FormData();
+        formData.append('text', this.inputText);
+        if (this.selectedFile) {
+          formData.append('file', this.selectedFile);
+        }
+
+        const response = await axios.post('http://localhost:8081/api/collaborated/add', formData, {
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+            'Content-Type': 'multipart/form-data',
+          },
         });
-        alert('File uploaded successfully');
-        this.selectedFile = null;
+
+        if (response.status === 200) {
+          alert('提交成功');
+          this.inputText = '';
+          this.selectedFile = null;
+        }
       } catch (error) {
         console.error(error);
-        alert('Failed to upload file.');
+        alert('提交失败');
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

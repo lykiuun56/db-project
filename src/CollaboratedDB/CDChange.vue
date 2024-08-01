@@ -26,7 +26,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in items" :key="item.id" @click="selectItem(item)">
+              <tr v-for="item in items" :key="item.col1">
                 <td class="col-25">{{ item.col1 }}</td>
                 <td class="col-25">{{ item.col2 }}</td>
                 <td class="col-25">{{ item.col3 }}</td>
@@ -103,67 +103,56 @@ export default {
       name: '',
       selectedCategories: [],
       selectedOption: null,
-      options: [],
-      categoriesOptions: [
-        'Electronics/3C', 'Beauty & Personal Care', 'Health & Wellness', 
-        'Outdoor & Gardening', 'Arts & Crafts', 'Food & Beverage', 
-        'Automotive & Motorcycle', 'Family & Couple', 'Apparel Clothing', 
-        'Toy & Games', 'Jewelry & Accessories', 'Sports & Recreation', 
-        'Pets & Animal', 'Luggage & Bags', 'Mother & Baby', 'Others'
-      ],
-      items: []
+      options: ['选项1', '选项2', '选项3', '选项4'],
+      categoriesOptions: ['选项1', '选项2', '选项3', '选项4'],
+      items: [],
     };
   },
   methods: {
     async search() {
       try {
-        const response = await axios.get('/api/total/search', {
+        const response = await axios.get('http://localhost:8081/api/collaborated/search', {
           params: {
             handleName: this.handleName,
             email: this.email,
           },
         });
         this.items = response.data;
-        this.options = response.data.map(item => ({ text: item.handleName, value: item.id }));
       } catch (error) {
         console.error(error);
         alert('Search failed');
       }
     },
-    selectItem(item) {
-      this.selectedOption = item.id;
-      this.newHandleName = item.handleName;
-      this.newEmail = item.email;
-      this.followers = item.followers;
-      this.gmv = item.gmv;
-      this.name = item.name;
-      this.selectedCategories = item.categories;
-    },
     async submit() {
-      if (!this.selectedOption) {
-        alert('Please select an item to update.');
-        return;
-      }
-
-      const data = {
-        handleName: this.newHandleName,
-        email: this.newEmail,
-        followers: this.followers,
-        gmv: this.gmv,
-        name: this.name,
-        categories: this.selectedCategories
-      };
-
       try {
-        await axios.put(`/api/total/update/${this.selectedOption}`, data);
-        alert('Update successful');
-        this.search();
+        const data = {
+          handleName: this.newHandleName,
+          email: this.newEmail,
+          followers: this.followers,
+          gmv: this.gmv,
+          name: this.name,
+          categories: this.selectedCategories,
+        };
+        const response = await axios.put(`/api/collaborated/update/${this.selectedOption}`, data);
+        if (response.status === 200) {
+          alert('Submit successful');
+          this.clearForm();
+        }
       } catch (error) {
         console.error(error);
-        alert('Update failed');
+        alert('Submit failed');
       }
-    }
-  }
+    },
+    clearForm() {
+      this.newHandleName = '';
+      this.newEmail = '';
+      this.followers = '';
+      this.gmv = '';
+      this.name = '';
+      this.selectedCategories = [];
+      this.selectedOption = null;
+    },
+  },
 };
 </script>
 
@@ -171,6 +160,7 @@ export default {
 .full-width {
   width: 100%;
 }
+
 .col-25 {
   width: 25%;
   text-align: center;

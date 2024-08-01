@@ -32,6 +32,12 @@
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
+        <v-list-item @click="$router.push('/tiktok-home')">
+          <v-btn text block>Tik Tok Service</v-btn>
+        </v-list-item>
+        <v-list-item @click="$router.push('/email-extra')">
+          <v-btn text block>Email Extraction</v-btn>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
   </v-app>
@@ -62,6 +68,7 @@ export default {
   justify-content: center;
   margin-left: 30px;
 }
+
 .exp-icon {
   margin-left: 28px;
 }

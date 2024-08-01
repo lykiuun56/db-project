@@ -22,7 +22,8 @@
             :items="items"
             class="elevation-1"
             :items-per-page="5"
-            @click:row="selectItem"
+            @item-selected="selectItem"
+            item-value="id"
           ></v-data-table>
         </v-col>
       </v-row>
@@ -39,7 +40,7 @@
 import axios from 'axios';
 
 export default {
-  name: 'RemoveFromDatabase',
+  name: 'CDRemove',
   data() {
     return {
       handleName: '',
@@ -58,7 +59,7 @@ export default {
   methods: {
     async search() {
       try {
-        const response = await axios.get('/api/total/search', {
+        const response = await axios.get('http://localhost:8081/api/collaborated/search', {
           params: {
             handleName: this.handleName,
             email: this.email,
@@ -70,23 +71,22 @@ export default {
         alert('Search failed');
       }
     },
+    async remove() {
+      if (this.selectedItem) {
+        try {
+          await axios.delete(`http://localhost:8081/api/collaborated/delete/${this.selectedItem}`);
+          alert('Record removed successfully');
+          this.search(); 
+        } catch (error) {
+          console.error(error);
+          alert('Remove failed');
+        }
+      } else {
+        alert('Please select an item to remove');
+      }
+    },
     selectItem(item) {
       this.selectedItem = item;
-    },
-    async remove() {
-      if (!this.selectedItem) {
-        alert('Please select an item to remove.');
-        return;
-      }
-
-      try {
-        await axios.delete(`/api/total/delete/${this.selectedItem.id}`);
-        alert('Record removed successfully');
-        this.search(); 
-      } catch (error) {
-        console.error(error);
-        alert('Remove failed');
-      }
     }
   }
 };

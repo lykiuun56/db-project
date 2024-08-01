@@ -1,8 +1,13 @@
 <template>
-  <v-container>
+  <v-container class="add-to-database-container">
     <v-row justify="center">
       <v-col cols="12" class="text-center">
-        <h1>Management Email</h1>
+        <h1>TikTok Hash Search</h1>
+      </v-col>
+    </v-row>
+    <v-row justify="center">
+      <v-col cols="12" md="5">
+        <v-textarea v-model="inputText" label="请输入" outlined></v-textarea>
       </v-col>
     </v-row>
     <v-row justify="center">
@@ -15,6 +20,12 @@
         <v-btn color="primary" @click="submit">提交</v-btn>
       </v-col>
     </v-row>
+    <v-row justify="center" v-if="result">
+      <v-col cols="12" md="8">
+        <h2>Search Results</h2>
+        <p>{{ result }}</p>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -22,33 +33,22 @@
 import axios from 'axios';
 
 export default {
-  name: 'ManagementEmail',
+  name: 'TiktokHash',
   data() {
     return {
+      inputText: '',
       selectedFile: null,
+      result: null,
     };
   },
   methods: {
     async submit() {
-      if (!this.selectedFile) {
-        alert('Please select a file to upload.');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('file', this.selectedFile);
-
       try {
-        await axios.post('/api/management/add', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        alert('File uploaded successfully');
-        this.selectedFile = null;
+        const response = await axios.get('/tiktok/searchCreatorsByHashtag');
+        this.result = response.data;
       } catch (error) {
         console.error(error);
-        alert('Failed to upload file.');
+        alert('Failed to search TikTok creators by hashtag.');
       }
     }
   }

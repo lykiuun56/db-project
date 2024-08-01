@@ -1,11 +1,14 @@
 <template>
-  <v-container>
+  <v-container class="add-to-database-container">
     <v-row justify="center">
       <v-col cols="12" class="text-center">
-        <h1>Management Email</h1>
+        <h1>Email Extraction</h1>
       </v-col>
     </v-row>
     <v-row justify="center">
+      <v-col cols="12" md="5">
+        <v-textarea v-model="inputText" label="请输入" outlined></v-textarea>
+      </v-col>
       <v-col cols="12" md="5">
         <v-file-input v-model="selectedFile" label="选择文件" outlined></v-file-input>
       </v-col>
@@ -22,9 +25,10 @@
 import axios from 'axios';
 
 export default {
-  name: 'ManagementEmail',
+  name: 'EmailExtra',
   data() {
     return {
+      inputText: '',
       selectedFile: null,
     };
   },
@@ -39,16 +43,22 @@ export default {
       formData.append('file', this.selectedFile);
 
       try {
-        await axios.post('/api/management/add', formData, {
+        const response = await axios.post('/upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
-          }
+          },
+          responseType: 'blob'
         });
-        alert('File uploaded successfully');
-        this.selectedFile = null;
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'processed_file.xlsx'); 
+        document.body.appendChild(link);
+        link.click();
       } catch (error) {
         console.error(error);
-        alert('Failed to upload file.');
+        alert('Failed to process the file.');
       }
     }
   }

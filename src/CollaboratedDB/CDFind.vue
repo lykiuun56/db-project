@@ -58,7 +58,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in items" :key="item.id">
+              <tr v-for="item in items" :key="item.col1">
                 <td class="col-25">{{ item.col1 }}</td>
                 <td class="col-25">{{ item.col2 }}</td>
                 <td class="col-25">{{ item.col3 }}</td>
@@ -90,23 +90,23 @@ export default {
         'Outdoor & Gardening', 'Arts & Crafts', 'Food & Beverage', 
         'Automotive & Motorcycle', 'Family & Couple', 'Apparel Clothing', 
         'Toy & Games', 'Jewelry & Accessories', 'Sports & Recreation', 
-        'Pets & Animal', 'Luggage & Bags', 'Mother & Baby', 'Others'
+        'Pets & Animal', 'Luggage & Baggs', 'Mother & Baby', 'Others'
       ],
-      items: []
+      items: [],
     };
   },
   methods: {
     async search() {
       try {
-        const response = await axios.get('/api/total/search', {
+        const response = await axios.get('http://localhost:8081/api/collaborated/search', {
           params: {
             handleName: this.handleName,
             email: this.email,
             state: this.state,
             followerOption: this.followerOption,
             followerNumber: this.followerNumber,
-            categories: this.selectedCategories
-          }
+            categories: this.selectedCategories,
+          },
         });
         this.items = response.data;
       } catch (error) {
@@ -116,13 +116,13 @@ export default {
     },
     async searchProcess() {
       try {
-        const response = await axios.post('/api/total/searchProcess', {
+        const response = await axios.post('/api/collaborated/searchProcess', {
           handleName: this.handleName,
           email: this.email,
           state: this.state,
           followerOption: this.followerOption,
           followerNumber: this.followerNumber,
-          categories: this.selectedCategories
+          categories: this.selectedCategories,
         });
         this.items = response.data;
       } catch (error) {
@@ -138,6 +138,7 @@ export default {
 .full-width {
   width: 100%;
 }
+
 .col-25 {
   width: 25%;
   text-align: center;

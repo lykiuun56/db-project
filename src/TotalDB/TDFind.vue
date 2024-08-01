@@ -19,21 +19,21 @@
       <v-col cols="3">
         <h4>Followers:</h4>
         <v-select
-          v-model="followerOption"
-          :items="followerOptions"
-          label="Followers"
-          dense
+            v-model="followerOption"
+            :items="followerOptions"
+            label="Followers"
+            dense
         ></v-select>
         <v-text-field v-model="followerNumber" label="Number" dense></v-text-field>
       </v-col>
       <v-col cols="3">
         <h4>Categories:</h4>
         <v-select
-          v-model="selectedCategories"
-          :items="categoriesOptions"
-          label="Categories"
-          dense
-          multiple
+            v-model="selectedCategories"
+            :items="categoriesOptions"
+            label="Categories"
+            dense
+            multiple
         ></v-select>
       </v-col>
     </v-row>
@@ -50,20 +50,20 @@
         <v-simple-table class="full-width">
           <template v-slot:default>
             <thead>
-              <tr>
-                <th class="col-25">Column 1</th>
-                <th class="col-25">Column 2</th>
-                <th class="col-25">Column 3</th>
-                <th class="col-25">Column 4</th>
-              </tr>
+            <tr>
+              <th class="col-25">Column 1</th>
+              <th class="col-25">Column 2</th>
+              <th class="col-25">Column 3</th>
+              <th class="col-25">Column 4</th>
+            </tr>
             </thead>
             <tbody>
-              <tr v-for="item in items" :key="item.col1">
-                <td class="col-25">{{ item.col1 }}</td>
-                <td class="col-25">{{ item.col2 }}</td>
-                <td class="col-25">{{ item.col3 }}</td>
-                <td class="col-25">{{ item.col4 }}</td>
-              </tr>
+            <tr v-for="item in items" :key="item.id">
+              <td class="col-25">{{ item.col1 }}</td>
+              <td class="col-25">{{ item.col2 }}</td>
+              <td class="col-25">{{ item.col3 }}</td>
+              <td class="col-25">{{ item.col4 }}</td>
+            </tr>
             </tbody>
           </template>
         </v-simple-table>
@@ -86,27 +86,27 @@ export default {
       selectedCategories: [],
       followerOptions: ['Less than', 'More than'],
       categoriesOptions: [
-        'Electronics/3C', 'Beauty & Personal Care', 'Health & Wellness', 
-        'Outdoor & Gardening', 'Arts & Crafts', 'Food & Beverage', 
-        'Automotive & Motorcycle', 'Family & Couple', 'Apparel Clothing', 
-        'Toy & Games', 'Jewelry & Accessories', 'Sports & Recreation', 
-        'Pets & Animal', 'Luggage & Baggs', 'Mother & Baby', 'Others'
+        'Electronics/3C', 'Beauty & Personal Care', 'Health & Wellness',
+        'Outdoor & Gardening', 'Arts & Crafts', 'Food & Beverage',
+        'Automotive & Motorcycle', 'Family & Couple', 'Apparel Clothing',
+        'Toy & Games', 'Jewelry & Accessories', 'Sports & Recreation',
+        'Pets & Animal', 'Luggage & Bags', 'Mother & Baby', 'Others'
       ],
-      items: [],
+      items: []
     };
   },
   methods: {
     async search() {
       try {
-        const response = await axios.get('http://localhost:8081/api/collaborated/search', {
+        const response = await axios.get('http://localhost:8081/api/total/search', {
           params: {
             handleName: this.handleName,
             email: this.email,
             state: this.state,
             followerOption: this.followerOption,
             followerNumber: this.followerNumber,
-            categories: this.selectedCategories,
-          },
+            categories: this.selectedCategories
+          }
         });
         this.items = response.data;
       } catch (error) {
@@ -116,13 +116,13 @@ export default {
     },
     async searchProcess() {
       try {
-        const response = await axios.post('http://localhost:8081/api/collaborated/searchProcess', {
+        const response = await axios.post('http://localhost:8081/api/total/searchProcess', {
           handleName: this.handleName,
           email: this.email,
           state: this.state,
           followerOption: this.followerOption,
           followerNumber: this.followerNumber,
-          categories: this.selectedCategories,
+          categories: this.selectedCategories
         });
         this.items = response.data;
       } catch (error) {
@@ -138,7 +138,6 @@ export default {
 .full-width {
   width: 100%;
 }
-
 .col-25 {
   width: 25%;
   text-align: center;

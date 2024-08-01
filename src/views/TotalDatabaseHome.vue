@@ -7,16 +7,16 @@
       </v-row>
       <v-row justify="center">
         <v-col cols="12" md="3">
-          <v-btn block @click="$router.push('/add-to-database')">Add To Total Database</v-btn>
+          <v-btn block @click="$router.push('/td-add')">Add To Total Database</v-btn>
         </v-col>
         <v-col cols="12" md="3">
-            <v-btn block @click="$router.push('/remove-from-database')">Remove From Total Database</v-btn>
+            <v-btn block @click="$router.push('/td-remove')">Remove From Total Database</v-btn>
         </v-col>
         <v-col cols="12" md="3">
-            <v-btn block @click="$router.push('/find-creator')">Find Creators</v-btn>
+            <v-btn block @click="$router.push('/td-find')">Find Creators</v-btn>
         </v-col>
         <v-col cols="12" md="3">
-            <v-btn block @click="$router.push('/change-info')">Change Information</v-btn>
+            <v-btn block @click="$router.push('/td-change')">Change Information</v-btn>
         </v-col>
       </v-row>
     </v-container>

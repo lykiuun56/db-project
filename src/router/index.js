@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import TotalDatabase from '@/views/TotalDatabase.vue';
 import TotalDatabaseHome from '@/views/TotalDatabaseHome.vue';
-import AddToDatabase from '@/views/AddToDatabase.vue';
-import RemoveFromDatabase from '@/views/RemoveFromDatabase.vue'; 
-import ChangeInfo from '@/views/ChangeInfo.vue'; 
-import FindCreator from '@/views/FindCreator.vue';
+import AddToDatabase from '@/unused/AddToDatabase.vue';
+import RemoveFromDatabase from '@/unused/RemoveFromDatabase.vue';
+import ChangeInfo from '@/unused/ChangeInfo.vue';
+import FindCreator from '@/unused/FindCreator.vue';
 import CollaboratedDatabase from "@/views/CollaboratedDatabase.vue";
 import BlackList from "@/views/BlackList.vue";
 import ManagementEmail from "@/views/ManagementEmail.vue";
@@ -16,12 +16,21 @@ import TiktokHandle from '@/TiktokService/TiktokHandle.vue';
 
 import EmailExtra from '@/TiktokService/EmailExtra.vue';
 
+import TDAdd from "@/TotalDB/TDAdd.vue";
+import TDChange from "@/TotalDB/TDChange.vue";
+import TDFind from "@/TotalDB/TDFind.vue";
+import TDRemove from "@/TotalDB/TDRemove.vue";
 
 import CDAdd from '@/CollaboratedDB/CDAdd.vue';
 import CDFind from '@/CollaboratedDB/CDFind.vue';
 import CDRemove from '@/CollaboratedDB/CDRemove.vue';
 import CDChange from '@/CollaboratedDB/CDChange.vue';
 import CDGrid from "@/CollaboratedDB/CDGrid.vue";
+
+import BLAdd from "@/BlackListDB/BLAdd.vue";
+import BLGrid from "@/BlackListDB/BLGrid.vue";
+
+
 
 const routes = [
   {
@@ -95,6 +104,26 @@ const routes = [
     component: EmailExtra
   },
   {
+    path: '/td-add',
+    name: 'TDAdd',
+    component: TDAdd
+  },
+  {
+    path: '/td-find',
+    name: 'TDFind',
+    component: TDFind
+  },
+  {
+    path: '/td-change',
+    name: 'TDChange',
+    component: TDChange
+  },
+  {
+    path: '/td-remove',
+    name: 'TDRemove',
+    component: TDRemove
+  },
+  {
     path: '/cd-add',
     name: 'CDAdd',
     component: CDAdd
@@ -118,7 +147,17 @@ const routes = [
     path: '/cd-grid',
     name: 'CDGrid',
     component: CDGrid
-  }
+  },
+  {
+    path: '/bl-add',
+    name: 'Bl-Add',
+    component: BLAdd
+  },
+  {
+    path: '/bl-grid',
+    name: 'BLGrid',
+    component: BLGrid
+  },
 ];
 
 

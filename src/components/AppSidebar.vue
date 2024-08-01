@@ -20,18 +20,12 @@
         <v-list-item @click="$router.push('/remove-duplicate')">
           <v-btn text block>Remove Duplicate</v-btn>
         </v-list-item>
-        <v-expansion-panels>
-          <v-expansion-panel class="exp">
-            <v-expansion-panel-title class="exp-title">
-              Block Someone
-              <img src="@/assets/down.png" alt="down" class="exp-icon" />
-            </v-expansion-panel-title>
-            <v-expansion-panel-text class="exp-text">
-              <v-list-item @click="$router.push('/block-someone/black-list')">Black List</v-list-item>
-              <v-list-item @click="$router.push('/block-someone/management-email')">Management Email</v-list-item>
-            </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
+        <v-list-item @click="$router.push('/block-someone/black-list')">
+          <v-btn text block>Black List</v-btn>
+        </v-list-item>
+        <v-list-item @click="$router.push('/block-someone/management-email')">
+          <v-btn text block >Management Email</v-btn>
+        </v-list-item>
         <v-list-item @click="$router.push('/tiktok-home')">
           <v-btn text block>Tik Tok Service</v-btn>
         </v-list-item>

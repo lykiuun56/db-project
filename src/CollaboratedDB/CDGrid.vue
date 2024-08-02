@@ -3,6 +3,7 @@
     <v-row>
       <v-col cols="12">
         <h1>Collaborated Database</h1>
+        <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn> <!-- Button to trigger export -->
       </v-col>
     </v-row>
     <v-row>
@@ -24,6 +25,8 @@
 <script>
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 export default {
   name: 'CollaboratedDatabaseGrid',
@@ -63,17 +66,33 @@ export default {
         console.error('Error fetching data:', error);
       }
     },
+    exportToExcel() {
+      if (!this.rowData || this.rowData.length === 0) {
+        alert("No data available to export!");
+        return;
+      }
+
+      const worksheet = XLSX.utils.json_to_sheet(this.rowData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Collaborated Database");
+
+      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      this.saveAsExcelFile(excelBuffer, "collaborated_database");
+    },
+    saveAsExcelFile(buffer, fileName) {
+      const data = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
+      FileSaver.saveAs(data, `${fileName}_export_${new Date().getTime()}.xlsx`);
+    },
   },
 };
 </script>
 
 <style>
-/* Ensure you have included the ag-Grid styles correctly */
 @import "~ag-grid-community/styles/ag-grid.css";
 @import "~ag-grid-community/styles/ag-theme-alpine.css";
 
 .ag-theme-alpine {
   width: 100%;
-  height: 400px; /* Adjust this height based on your needs */
+  height: 400px;
 }
 </style>

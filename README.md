@@ -20,5 +20,13 @@ npm run build
 npm run lint
 ```
 
+### Export Grid as a excel file
+
+```
+npm install xlsx file-saver --save
+
+
+```
+
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).

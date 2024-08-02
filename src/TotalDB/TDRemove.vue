@@ -74,6 +74,7 @@ export default {
   },
   methods: {
     async search() {
+      console.log('Search button clicked'); // Add this line
       this.loading = true;
       try {
         const response = await axios.get('http://localhost:8081/api/total/findTotalDatabaseEntries', {

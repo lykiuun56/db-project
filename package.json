@@ -16,10 +16,12 @@
     "chart.js": "^4.4.3",
     "core-js": "^3.8.3",
     "element-plus": "^2.7.7",
+    "file-saver": "^2.0.5",
     "vue": "^3.2.13",
     "vue-chartjs": "^5.3.1",
     "vue-router": "^4.0.13",
-    "vuetify": "^3.6.13-3.7.0-beta.0.0"
+    "vuetify": "^3.6.13-3.7.0-beta.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

@@ -1,57 +1,33 @@
 <template>
-  <v-container>
+  <v-container class="database-preview-container">
     <v-row justify="center">
       <v-col cols="12" class="text-center">
-        <h1>Management Email</h1>
+        <h1>Management Database Home</h1>
       </v-col>
     </v-row>
     <v-row justify="center">
-      <v-col cols="12" md="5">
-        <v-file-input v-model="selectedFile" label="选择文件" outlined></v-file-input>
+      <v-col cols="12" md="3">
+        <v-btn block @click="$router.push('/md-add')">Add To Database</v-btn>
       </v-col>
-    </v-row>
-    <v-row justify="center">
-      <v-col cols="12" class="text-center">
-        <v-btn color="primary" @click="submit">提交</v-btn>
+<!--      <v-col cols="12" md="3">-->
+<!--        <v-btn block @click="$router.push('/cd-remove')">Remove From Database</v-btn>-->
+<!--      </v-col>-->
+      <v-col cols="12" md="3">
+        <v-btn block @click="$router.push('/md-find')">Find Creators</v-btn>
+      </v-col>
+<!--      <v-col cols="12" md="3">-->
+<!--        <v-btn block @click="$router.push('/cd-change')">Change Information</v-btn>-->
+<!--      </v-col>-->
+      <v-col cols="12" md="3">
+        <v-btn block @click="$router.push('/md-grid')"> View the database</v-btn>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import axios from 'axios';
-
 export default {
-  name: 'ManagementEmail',
-  data() {
-    return {
-      selectedFile: null,
-    };
-  },
-  methods: {
-    async submit() {
-      if (!this.selectedFile) {
-        alert('Please select a file to upload.');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('file', this.selectedFile);
-
-      try {
-        await axios.post('/api/management/add', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        alert('File uploaded successfully');
-        this.selectedFile = null;
-      } catch (error) {
-        console.error(error);
-        alert('Failed to upload file.');
-      }
-    }
-  }
+  name: 'ManagementDatabase'
 };
 </script>
 
@@ -59,7 +35,7 @@ export default {
 .text-center {
   text-align: center;
 }
-.add-to-database-container {
+.database-preview-container {
   padding-top: 16px;
 }
 </style>

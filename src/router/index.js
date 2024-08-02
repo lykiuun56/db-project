@@ -30,6 +30,9 @@ import CDGrid from "@/CollaboratedDB/CDGrid.vue";
 import BLAdd from "@/BlackListDB/BLAdd.vue";
 import BLGrid from "@/BlackListDB/BLGrid.vue";
 
+import MDFind from "@/ManagementDB/MDFind.vue";
+import MDAdd from "@/ManagementDB/MDAdd.vue";
+import MDGrid from "@/ManagementDB/MDGrid.vue";
 
 
 const routes = [
@@ -158,6 +161,22 @@ const routes = [
     name: 'BLGrid',
     component: BLGrid
   },
+  {
+    path: '/md-find',
+    name: 'MDFind',
+    component: MDFind
+  },
+  {
+    path: '/md-add',
+    name: 'MDAdd',
+    component: MDAdd
+  },
+  {
+    path: '/md-grid',
+    name: 'MDGrid',
+    component: MDGrid
+  },
+
 ];
 
 

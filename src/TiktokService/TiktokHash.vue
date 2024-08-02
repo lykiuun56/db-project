@@ -44,7 +44,7 @@ export default {
   methods: {
     async submit() {
       try {
-        const response = await axios.get('/tiktok/searchCreatorsByHashtag');
+        const response = await axios.get('http://localhost:8081/tiktok/searchCreatorsByHashtag');
         this.result = response.data;
       } catch (error) {
         console.error(error);

@@ -33,6 +33,7 @@ import BLGrid from "@/BlackListDB/BLGrid.vue";
 import MDFind from "@/ManagementDB/MDFind.vue";
 import MDAdd from "@/ManagementDB/MDAdd.vue";
 import MDGrid from "@/ManagementDB/MDGrid.vue";
+import TDGrid from "@/TotalDB/TDGrid.vue";
 
 
 const routes = [
@@ -125,6 +126,11 @@ const routes = [
     path: '/td-remove',
     name: 'TDRemove',
     component: TDRemove
+  },
+  {
+    path: '/td-grid',
+    name: 'TDGrid',
+    component: TDGrid
   },
   {
     path: '/cd-add',

@@ -1,5 +1,6 @@
 <template>
   <v-container fluid>
+    <!-- Simple Search Row -->
     <v-row>
       <v-col cols="3">
         <v-text-field v-model="handleName" label="Handle Name" dense></v-text-field>
@@ -8,10 +9,11 @@
         <v-text-field v-model="email" label="Email" dense></v-text-field>
       </v-col>
       <v-col cols="3" class="text-center">
-        <v-btn color="primary" @click="search">Search</v-btn>
+        <v-btn color="primary" @click="simpleSearch">Simple Search</v-btn>
       </v-col>
     </v-row>
 
+    <!-- Advanced Search Row -->
     <v-row>
       <v-col cols="3">
         <v-text-field v-model="state" label="State" dense></v-text-field>
@@ -19,51 +21,49 @@
       <v-col cols="3">
         <h4>Followers:</h4>
         <v-select
-          v-model="followerOption"
-          :items="followerOptions"
-          label="Followers"
-          dense
+            v-model="followerOption"
+            :items="followerOptions"
+            label="Followers"
+            dense
         ></v-select>
         <v-text-field v-model="followerNumber" label="Number" dense></v-text-field>
       </v-col>
       <v-col cols="3">
         <h4>Categories:</h4>
         <v-select
-          v-model="selectedCategories"
-          :items="categoriesOptions"
-          label="Categories"
-          dense
-          multiple
+            v-model="selectedCategories"
+            :items="categoriesOptions"
+            label="Categories"
+            dense
+            multiple
         ></v-select>
       </v-col>
-    </v-row>
-
-    <v-row class="text-center">
-      <v-col>
-        <v-btn color="primary" @click="searchProcess">Search(Process Button)</v-btn>
+      <v-col cols="3" class="text-center">
+        <v-btn color="primary" @click="advancedSearch">Advanced Search</v-btn>
       </v-col>
     </v-row>
 
+    <!-- Search Results -->
     <v-row>
       <v-col cols="12">
-        <h3 class="text-center">Search Result</h3>
+        <h3 class="text-center">Search Results</h3>
         <v-simple-table class="full-width">
           <template v-slot:default>
             <thead>
-              <tr>
-                <th class="col-25">Column 1</th>
-                <th class="col-25">Column 2</th>
-                <th class="col-25">Column 3</th>
-                <th class="col-25">Column 4</th>
-              </tr>
+            <tr>
+              <th class="col-25">Handle Name</th>
+              <th class="col-25">Email</th>
+              <th class="col-25">State</th>
+              <th class="col-25">Categories</th>
+            </tr>
             </thead>
             <tbody>
-              <tr v-for="item in items" :key="item.col1">
-                <td class="col-25">{{ item.col1 }}</td>
-                <td class="col-25">{{ item.col2 }}</td>
-                <td class="col-25">{{ item.col3 }}</td>
-                <td class="col-25">{{ item.col4 }}</td>
-              </tr>
+            <tr v-for="item in items" :key="item.handle_name">
+              <td class="col-25">{{ item.handle_name }}</td>
+              <td class="col-25">{{ item.email }}</td>
+              <td class="col-25">{{ item.state }}</td>
+              <td class="col-25">{{ Array.isArray(item.categories) ? item.categories.join(', ') : item.categories }}</td>
+            </tr>
             </tbody>
           </template>
         </v-simple-table>
@@ -86,48 +86,57 @@ export default {
       selectedCategories: [],
       followerOptions: ['Less than', 'More than'],
       categoriesOptions: [
-        'Electronics/3C', 'Beauty & Personal Care', 'Health & Wellness', 
-        'Outdoor & Gardening', 'Arts & Crafts', 'Food & Beverage', 
-        'Automotive & Motorcycle', 'Family & Couple', 'Apparel Clothing', 
-        'Toy & Games', 'Jewelry & Accessories', 'Sports & Recreation', 
-        'Pets & Animal', 'Luggage & Baggs', 'Mother & Baby', 'Others'
+        'Electronics/3C', 'Beauty & Personal Care', 'Health & Wellness',
+        'Outdoor & Gardening', 'Arts & Crafts', 'Food & Beverage',
+        'Automotive & Motorcycle', 'Family & Couple', 'Apparel Clothing',
+        'Toy & Games', 'Jewelry & Accessories', 'Sports & Recreation',
+        'Pets & Animal', 'Luggage & Bags', 'Mother & Baby', 'Others'
       ],
       items: [],
     };
   },
   methods: {
-    async search() {
+    async simpleSearch() {
+      if (!this.handleName && !this.email) {
+        alert('Please enter either Handle Name or Email for search.');
+        return;
+      }
       try {
-        const response = await axios.get('http://localhost:8081/api/collaborated/search', {
-          params: {
-            handleName: this.handleName,
-            email: this.email,
-            state: this.state,
-            followerOption: this.followerOption,
-            followerNumber: this.followerNumber,
-            categories: this.selectedCategories,
-          },
-        });
+        const params = {};
+        if (this.handleName) params.handleName = this.handleName;
+        if (this.email) params.email = this.email;
+
+        const response = await axios.get('http://localhost:8081/api/collaborated/singleSearch', { params });
         this.items = response.data;
       } catch (error) {
         console.error(error);
-        alert('Search failed');
+        alert('Simple search failed');
       }
     },
-    async searchProcess() {
+    async advancedSearch() {
+      if (!this.state && !this.followerOption && !this.selectedCategories.length) {
+        alert('Please enter at least one advanced search criteria.');
+        return;
+      }
       try {
-        const response = await axios.post('http://localhost:8081/api/collaborated/searchProcess', {
-          handleName: this.handleName,
-          email: this.email,
-          state: this.state,
-          followerOption: this.followerOption,
-          followerNumber: this.followerNumber,
-          categories: this.selectedCategories,
-        });
+        const searchCriteriaList = [];
+
+        if (this.state) {
+          searchCriteriaList.push({key: 'state', operation: ':', value: this.state});
+        }
+        if (this.followerOption && this.followerNumber) {
+          const operation = this.followerOption === 'Less than' ? '<' : '>';
+          searchCriteriaList.push({key: 'followers', operation, value: this.followerNumber});
+        }
+        if (this.selectedCategories.length) {
+          searchCriteriaList.push({key: 'categories', operation: ':', value: this.selectedCategories});
+        }
+
+        const response = await axios.post('http://localhost:8081/api/collaborated/search', searchCriteriaList);
         this.items = response.data;
       } catch (error) {
         console.error(error);
-        alert('Search process failed');
+        alert('Advanced search failed');
       }
     },
   },

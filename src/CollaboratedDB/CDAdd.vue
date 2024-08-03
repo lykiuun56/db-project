@@ -102,15 +102,6 @@
             color="primary"
         ></v-text-field>
       </v-col>
-      <v-col cols="12" md="4">
-        <v-text-field
-            v-model="collaborate_time"
-            label="Collaborate Time"
-            outlined
-            dense
-            color="primary"
-        ></v-text-field>
-      </v-col>
     </v-row>
     <v-row justify="center" class="mb-4">
       <v-col cols="12" md="9" class="text-center">
@@ -153,8 +144,7 @@ export default {
       full_address: '',
       email: '',
       phone: '',
-      // collaborated_time: '',
-      // collaborate_time: '',
+      collaborated_time: '',
       selectedFile: null,
     };
   },
@@ -171,8 +161,8 @@ export default {
           full_address: this.full_address|| null,
           email: this.email|| null,
           phone: this.phone|| null,
-          // collaborated_time: this.collaborated_time|| null,
-          // collaborate_time: this.collaborate_time || new Date().toISOString(), // Set default to current time if not provided
+          collaborated_time: this.collaborated_time|| null,
+
         };
 
         const response = await axios.post('http://localhost:8081/api/collaborated/add', data);
@@ -219,7 +209,6 @@ export default {
       this.email = '';
       this.phone = '';
       this.collaborated_time = '';
-      this.collaborate_time = '';
       this.selectedFile = null;
     }
   },

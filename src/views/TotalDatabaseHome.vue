@@ -18,6 +18,9 @@
         <v-col cols="12" md="3">
             <v-btn block @click="$router.push('/td-change')">Change Information</v-btn>
         </v-col>
+        <v-col cols="12" md="3">
+          <v-btn block @click="$router.push('/td-grid')"> View the database</v-btn>
+        </v-col>
       </v-row>
     </v-container>
   </template>

@@ -18,20 +18,20 @@
         <v-simple-table class="full-width">
           <template v-slot:default>
             <thead>
-              <tr>
-                <th class="col-25">Column 1</th>
-                <th class="col-25">Column 2</th>
-                <th class="col-25">Column 3</th>
-                <th class="col-25">Column 4</th>
-              </tr>
+            <tr>
+              <th class="col-25">Handle Name</th>
+              <th class="col-25">Email</th>
+              <th class="col-25">Followers</th>
+              <th class="col-25">GMV</th>
+            </tr>
             </thead>
             <tbody>
-              <tr v-for="item in items" :key="item.col1">
-                <td class="col-25">{{ item.col1 }}</td>
-                <td class="col-25">{{ item.col2 }}</td>
-                <td class="col-25">{{ item.col3 }}</td>
-                <td class="col-25">{{ item.col4 }}</td>
-              </tr>
+            <tr v-for="(item, index) in items" :key="index">
+              <td class="col-25">{{ item.handleName }}</td>
+              <td class="col-25">{{ item.email }}</td>
+              <td class="col-25">{{ item.followers }}</td>
+              <td class="col-25">{{ item.gmv }}</td>
+            </tr>
             </tbody>
           </template>
         </v-simple-table>
@@ -42,10 +42,10 @@
       <v-col cols="12" class="text-center">
         <h3>Index (Which one you want to change)</h3>
         <v-select
-          v-model="selectedOption"
-          :items="options"
-          label="Select Option"
-          dense
+            v-model="selectedOption"
+            :items="options"
+            label="Select Option"
+            dense
         ></v-select>
       </v-col>
     </v-row>
@@ -71,11 +71,11 @@
     <v-row>
       <v-col cols="12" class="text-center">
         <v-select
-          v-model="selectedCategories"
-          :items="categoriesOptions"
-          label="Add or Remove Categories"
-          multiple
-          dense
+            v-model="selectedCategories"
+            :items="categoriesOptions"
+            label="Add or Remove Categories"
+            multiple
+            dense
         ></v-select>
       </v-col>
     </v-row>
@@ -105,18 +105,19 @@ export default {
       selectedOption: null,
       options: ['选项1', '选项2', '选项3', '选项4'],
       categoriesOptions: ['选项1', '选项2', '选项3', '选项4'],
-      items: [],
+      items: [], // List to hold the search results
     };
   },
   methods: {
     async search() {
       try {
-        const response = await axios.get('http://localhost:8081/api/collaborated/search', {
+        const response = await axios.get('http://localhost:8081/api/collaborated/singleSearch', {
           params: {
             handleName: this.handleName,
             email: this.email,
           },
         });
+        // Assuming response.data is an array of objects
         this.items = response.data;
       } catch (error) {
         console.error(error);

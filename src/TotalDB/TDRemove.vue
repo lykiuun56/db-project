@@ -61,10 +61,10 @@ export default {
       email: '',
       headers: [
         { text: 'ID', value: 'id' },
-        { text: 'Column 1', value: 'col1' },
-        { text: 'Column 2', value: 'col2' },
-        { text: 'Column 3', value: 'col3' },
-        { text: 'Column 4', value: 'col4' }
+        { text: 'Handle Name', value: 'handle_name' },
+        { text: 'Email', value: 'email' },
+        { text: 'Followers', value: 'followers' },
+        { text: 'Is_Blocked', value: 'is_blocked'}
       ],
       items: [],
       selectedItem: null,
@@ -74,12 +74,11 @@ export default {
   },
   methods: {
     async search() {
-      console.log('Search button clicked'); // Add this line
       this.loading = true;
       try {
-        const response = await axios.get('http://localhost:8081/api/total/findTotalDatabaseEntries', {
+        const response = await axios.get('http://localhost:8081/api/total/singleSearch', {
           params: {
-            handleName: this.handleName || null, // Ensure these values are correctly passed
+            handleName: this.handleName || null,
             email: this.email || null,
           },
         });
@@ -95,6 +94,10 @@ export default {
       this.selectedItem = item;
     },
     confirmRemove() {
+      if (!this.selectedItem) {
+        alert('Please select an item to remove.');
+        return;
+      }
       this.confirmationDialog = true;
     },
     async remove() {
@@ -105,9 +108,10 @@ export default {
       }
 
       try {
-        await axios.delete(`http://localhost:8081/api/total/delete/${this.selectedItem.id}`);
+        const id = this.selectedItem.id;
+        await axios.delete(`http://localhost:8081/api/total/delete/${id}`);
         alert('Record removed successfully');
-        this.search();
+        this.search(); // Re-run the search to refresh the results after deletion
       } catch (error) {
         console.error(error);
         alert('Remove failed');
@@ -120,7 +124,7 @@ export default {
       this.selectedItem = null;
     }
   }
-};
+}
 </script>
 
 <style>

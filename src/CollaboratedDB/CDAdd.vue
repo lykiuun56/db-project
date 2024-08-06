@@ -102,24 +102,6 @@
             color="primary"
         ></v-text-field>
       </v-col>
-      <v-col cols="12" md="4">
-        <v-text-field
-            v-model="poc"
-            label="POC"
-            outlined
-            dense
-            color="primary"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-text-field
-            v-model="notes"
-            label="Notes"
-            outlined
-            dense
-            color="primary"
-        ></v-text-field>
-      </v-col>
     </v-row>
     <v-row justify="center" class="mb-4">
       <v-col cols="12" md="9" class="text-center">
@@ -153,8 +135,6 @@ export default {
   name: 'CDAdd',
   data() {
     return {
-      totalDatabaseId: '', // Input for Total Database ID
-      poc: '', // Input for POC
       handle_name: '',
       tiktok_url: '',
       followers: '',
@@ -165,63 +145,35 @@ export default {
       email: '',
       phone: '',
       collaborated_time: '',
-      notes: '',
       selectedFile: null,
     };
   },
   methods: {
     async submitManual() {
       try {
-        const totalDatabaseId = this.totalDatabaseId || null;
-        const poc = this.poc || null;
+        const data = {
+          handle_name: this.handle_name|| null,
+          tiktok_url: this.tiktok_url|| null,
+          followers: this.followers|| null,
+          categories: this.categories|| null,
+          full_name: this.full_name|| null,
+          state: this.state|| null,
+          full_address: this.full_address|| null,
+          email: this.email|| null,
+          phone: this.phone|| null,
+          collaborated_time: this.collaborated_time|| null,
 
-        if (!totalDatabaseId || !poc) {
-          alert('Please enter Total Database ID and POC');
-          return;
-        }
+        };
 
-        // Try to add from TotalDatabase first
-        try {
-          const response = await axios.post(`http://localhost:8081/api/collaborated/newCollaborated/${totalDatabaseId}/${poc}`);
+        const response = await axios.post('http://localhost:8081/api/collaborated/add', data);
 
-          if (response.status === 200) {
-            alert('Successfully added from Total Database');
-            this.resetForm();
-          }
-        } catch (error) {
-          // If not found in TotalDatabase, fallback to manual addition
-          if (error.response && error.response.status === 400) {
-            // Prepare data for manual addition
-            const data = {
-              handle_name: this.handle_name || null,
-              tiktok_url: this.tiktok_url || null,
-              followers: this.followers || null,
-              categories: this.categories || null,
-              full_name: this.full_name || null,
-              state: this.state || null,
-              full_address: this.full_address || null,
-              email: this.email || null,
-              phone: this.phone || null,
-              collaborated_time: this.collaborated_time || null,
-              poc: this.poc || null,
-              notes: this.notes || null,
-            };
-
-            // Add to CollaboratedDatabase manually
-            const manualAddResponse = await axios.post('http://localhost:8081/api/collaborated/add', data);
-
-            if (manualAddResponse.status === 200) {
-              alert('Entry not found in Total Database, added manually to Collaborated Database');
-              this.resetForm();
-            }
-          } else {
-            console.error(error);
-            alert('An unexpected error occurred');
-          }
+        if (response.status === 200) {
+          alert('手动提交成功');
+          this.resetForm();
         }
       } catch (error) {
         console.error(error);
-        alert('Manual submission failed');
+        alert('手动提交失败');
       }
     },
     async submitFile() {
@@ -231,24 +183,22 @@ export default {
           formData.append('file', this.selectedFile);
         }
 
-        const response = await axios.post('http://localhost:8081/api/collaborated/addByFile', formData, {
+        const response = await axios.post('http://localhost:8081/api/collaborated/addFile', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
 
         if (response.status === 200) {
-          alert('File submission succeeded');
+          alert('文件提交成功');
           this.resetForm();
         }
       } catch (error) {
         console.error(error);
-        alert('File submission failed');
+        alert('文件提交失败');
       }
     },
     resetForm() {
-      this.totalDatabaseId = '';
-      this.poc = '';
       this.handle_name = '';
       this.tiktok_url = '';
       this.followers = '';

@@ -122,7 +122,7 @@ export default {
           formData.append('file', this.selectedFile);
         }
 
-        const response = await axios.post('http://localhost:8081/api/total/addFile', formData, {
+        const response = await axios.post('http://localhost:8081/api/total/addByFile', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

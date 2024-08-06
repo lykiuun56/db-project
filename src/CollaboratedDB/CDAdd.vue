@@ -8,6 +8,26 @@
     <v-row justify="center" class="mb-3">
       <v-col cols="12" md="4">
         <v-text-field
+            v-model="poc"
+            label="Project Name"
+            outlined
+            dense
+            color="primary"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-text-field
+            v-model="projectName"
+            label="PoC"
+            outlined
+            dense
+            color="primary"
+        ></v-text-field>
+      </v-col>
+    </v-row>
+    <v-row justify="center" class="mb-3">
+      <v-col cols="12" md="4">
+        <v-text-field
             v-model="handle_name"
             label="Handle Name"
             outlined
@@ -91,12 +111,21 @@
             color="primary"
         ></v-text-field>
       </v-col>
-</v-row>
+    </v-row>
     <v-row justify="center" class="mb-3">
       <v-col cols="12" md="4">
         <v-text-field
             v-model="collaborated_time"
             label="Collaborated Time"
+            outlined
+            dense
+            color="primary"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-text-field
+            v-model="notes"
+            label="Notes"
             outlined
             dense
             color="primary"
@@ -135,6 +164,8 @@ export default {
   name: 'CDAdd',
   data() {
     return {
+      projectName: '', // Input for Project Name
+      poc: '', // Input for POC
       handle_name: '',
       tiktok_url: '',
       followers: '',
@@ -145,35 +176,50 @@ export default {
       email: '',
       phone: '',
       collaborated_time: '',
+      notes: '',
       selectedFile: null,
     };
   },
   methods: {
     async submitManual() {
       try {
-        const data = {
-          handle_name: this.handle_name|| null,
-          tiktok_url: this.tiktok_url|| null,
-          followers: this.followers|| null,
-          categories: this.categories|| null,
-          full_name: this.full_name|| null,
-          state: this.state|| null,
-          full_address: this.full_address|| null,
-          email: this.email|| null,
-          phone: this.phone|| null,
-          collaborated_time: this.collaborated_time|| null,
+        const projectName = this.projectName || null;
+        const poc = this.poc || null;
 
+        if (!projectName || !poc) {
+          alert('Please enter Project Name and POC');
+          return;
+        }
+
+        // Prepare data for manual addition
+        const data = {
+          handle_name: this.handle_name || null,
+          tiktok_url: this.tiktok_url || null,
+          followers: this.followers || null,
+          categories: this.categories || null,
+          full_name: this.full_name || null,
+          state: this.state || null,
+          full_address: this.full_address || null,
+          email: this.email || null,
+          phone: this.phone || null,
+          collaborated_time: this.collaborated_time || null,
+          notes: this.notes || null,
         };
 
-        const response = await axios.post('http://localhost:8081/api/collaborated/add', data);
+        // Add to CollaboratedDatabase with Project Name and POC
+        const response = await axios.post(`http://localhost:8081/api/collaborated/add/${projectName}/${poc}`, data);
 
         if (response.status === 200) {
-          alert('手动提交成功');
+          alert('Successfully added to Collaborated Database');
           this.resetForm();
         }
       } catch (error) {
-        console.error(error);
-        alert('手动提交失败');
+        if (error.response && error.response.status === 400) {
+          alert('Failed to add to Collaborated Database: ' + error.response.data.message);
+        } else {
+          console.error(error);
+          alert('An unexpected error occurred');
+        }
       }
     },
     async submitFile() {
@@ -183,22 +229,24 @@ export default {
           formData.append('file', this.selectedFile);
         }
 
-        const response = await axios.post('http://localhost:8081/api/collaborated/addFile', formData, {
+        const response = await axios.post('http://localhost:8081/api/collaborated/addByFile', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
 
         if (response.status === 200) {
-          alert('文件提交成功');
+          alert('File submission succeeded');
           this.resetForm();
         }
       } catch (error) {
         console.error(error);
-        alert('文件提交失败');
+        alert('File submission failed');
       }
     },
     resetForm() {
+      this.projectName = '';
+      this.poc = '';
       this.handle_name = '';
       this.tiktok_url = '';
       this.followers = '';

@@ -12,6 +12,10 @@
       <v-col cols="12" md="3">
         <v-btn block @click="$router.push('/bl-grid')"> View the BlackList</v-btn>
       </v-col>
+      <v-col cols="12" md="3">
+        <v-btn block @click="$router.push('/bl-remove')"> Remove from BlackList</v-btn>
+      </v-col>
+
     </v-row>
   </v-container>
 </template>

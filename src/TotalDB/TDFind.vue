@@ -23,6 +23,7 @@
       <v-col cols="3">
         <h4>Blocked:</h4>
         <v-select
+            v-if="Is_blockedOptions.length > 0"
             v-model="selectedIs_blocked"
             :items="Is_blockedOptions"
             item-text="text"
@@ -46,13 +47,11 @@ export default {
       email: '',
       minFollowers: '',
       maxFollowers: '',
-      selectedIs_blocked: null,
-      Is_blockedOptions: [
-        { text: 'Yes', value: 1 },
-        { text: 'No', value: 0 }
-      ],
+      selectedIs_blocked: [],
+      Is_blockedOptions: ['1','0'],
     };
   },
+
   methods: {
     simpleSearch() {
       this.$router.push({ name: 'TDFindResult', query: { handleName: this.handleName, email: this.email } });
@@ -65,7 +64,7 @@ export default {
           email: this.email,
           minFollowers: this.minFollowers,
           maxFollowers: this.maxFollowers,
-          selectedIs_blocked: this.selectedIs_blocked,
+          is_blocked: this.selectedIs_blocked,
         }
       });
     }

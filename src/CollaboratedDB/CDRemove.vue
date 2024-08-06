@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <v-container>
+      <!-- Search Inputs -->
       <v-row class="mb-5" justify="center">
         <v-col cols="12" md="5">
           <v-text-field v-model="handleName" label="Handle Name" outlined></v-text-field>
@@ -9,26 +10,35 @@
           <v-text-field v-model="email" label="Email" outlined></v-text-field>
         </v-col>
       </v-row>
+
+      <!-- Search and Reset Buttons -->
       <v-row class="mb-5" justify="center">
         <v-col cols="8" class="text-center">
           <v-btn color="primary" @click="search" :loading="loading">Search</v-btn>
           <v-btn color="secondary" @click="reset" class="ml-3">Reset</v-btn>
         </v-col>
       </v-row>
+
+      <!-- ag-Grid for displaying search results -->
       <v-row class="mb-5" justify="center">
         <v-col cols="8" md="10">
-          <h2 v-if="items.length">Search Result</h2>
+          <h2 v-if="rowData.length">Search Result</h2>
           <p v-else>No results found</p>
-          <v-data-table
-              v-if="items.length"
-              :headers="headers"
-              :items="items"
-              class="elevation-1"
-              :items-per-page="5"
-              @click:row="selectItem"
-          ></v-data-table>
+          <div v-if="rowData.length" class="ag-theme-alpine" style="height: 400px;">
+            <ag-grid-vue
+                class="ag-theme-alpine"
+                :columnDefs="columnDefs"
+                :rowData="rowData"
+                rowSelection="single"
+                @rowSelected="onRowSelected"
+                @firstDataRendered="onFirstDataRendered"
+                :defaultColDef="defaultColDef"
+            ></ag-grid-vue>
+          </div>
         </v-col>
       </v-row>
+
+      <!-- Remove Button -->
       <v-row justify="center">
         <v-col cols="12" class="text-center">
           <v-btn color="primary" @click="confirmRemove" :disabled="!selectedItem">Remove</v-btn>
@@ -36,6 +46,7 @@
       </v-row>
     </v-container>
 
+    <!-- Confirmation Dialog -->
     <v-dialog v-model="confirmationDialog" max-width="290">
       <v-card>
         <v-card-title class="headline">Confirm</v-card-title>
@@ -51,25 +62,36 @@
 </template>
 
 <script>
+import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 
 export default {
-  name: 'RemoveFromDatabase',
+  name: 'RemoveFromDatabaseWithAgGrid',
+  components: {
+    AgGridVue,
+  },
   data() {
     return {
       handleName: '',
       email: '',
-      headers: [
-        { text: 'ID', value: 'id' },
-        { text: 'Handle Name', value: 'handle_name' },
-        { text: 'Email', value: 'email' },
-        { text: 'Followers', value: 'followers' },
-        { text: 'Is_Blocked', value: 'is_blocked'}
+      columnDefs: [
+        { headerName: 'ID', field: 'id' },
+        { headerName: 'Handle Name', field: 'handle_name' },
+        { headerName: 'Email', field: 'email' },
+        { headerName: 'Followers', field: 'followers' },
+        { headerName: 'Is Blocked', field: 'is_blocked', valueFormatter: params => params.value ? 'Yes' : 'No' }
       ],
-      items: [],
+      rowData: [],
       selectedItem: null,
       loading: false,
       confirmationDialog: false,
+      gridApi: null,
+      gridColumnApi: null,
+      defaultColDef: {
+        sortable: true,
+        filter: true,
+        resizable: true,
+      },
     };
   },
   methods: {
@@ -82,7 +104,7 @@ export default {
             email: this.email || null,
           },
         });
-        this.items = response.data;
+        this.rowData = response.data;
       } catch (error) {
         console.error(error);
         alert('Search failed');
@@ -90,8 +112,8 @@ export default {
         this.loading = false;
       }
     },
-    selectItem(item) {
-      this.selectedItem = item;
+    onRowSelected(event) {
+      this.selectedItem = event.node.isSelected() ? event.node.data : null;
     },
     confirmRemove() {
       if (!this.selectedItem) {
@@ -120,11 +142,15 @@ export default {
     reset() {
       this.handleName = '';
       this.email = '';
-      this.items = [];
+      this.rowData = [];
       this.selectedItem = null;
-    }
-  }
-}
+    },
+    onFirstDataRendered(params) {
+      this.gridApi = params.api;
+      this.gridColumnApi = params.columnApi;
+    },
+  },
+};
 </script>
 
 <style>
@@ -134,7 +160,7 @@ export default {
 .mb-5 {
   margin-bottom: 10px;
 }
-.v-data-table {
-  max-height: 400px;
+.ag-theme-alpine {
+  width: 100%;
 }
 </style>

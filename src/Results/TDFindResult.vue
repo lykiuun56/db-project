@@ -75,7 +75,7 @@ export default {
         });
       }
       if (query.selectedIs_blocked !== null) {
-        searchCriteriaList.push({ key: 'is_blocked', operation: '=', value: query.selectedIs_blocked });
+        searchCriteriaList.push({ key: 'is_blocked', operation: ':', value: `${query.selectedIs_blocked}`});
       }
 
       axios.post('http://localhost:8081/api/total/search', searchCriteriaList)

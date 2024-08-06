@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <v-container>
+      <!-- Search Inputs -->
       <v-row class="mb-5" justify="center">
         <v-col cols="12" md="5">
           <v-text-field v-model="handleName" label="Handle Name" outlined></v-text-field>
@@ -9,14 +10,18 @@
           <v-text-field v-model="email" label="Email" outlined></v-text-field>
         </v-col>
       </v-row>
+
+      <!-- Search and Reset Buttons -->
       <v-row class="mb-5" justify="center">
         <v-col cols="8" class="text-center">
           <v-btn color="primary" @click="search" :loading="loading">Search</v-btn>
           <v-btn color="secondary" @click="reset" class="ml-3">Reset</v-btn>
         </v-col>
       </v-row>
+
+      <!-- ag-Grid for displaying search results -->
       <v-row class="mb-5" justify="center">
-        <v-col cols="12" md="10">
+        <v-col cols="8" md="10">
           <h2 v-if="rowData.length">Search Result</h2>
           <p v-else>No results found</p>
           <div v-if="rowData.length" class="ag-theme-alpine" style="height: 400px;">
@@ -32,24 +37,27 @@
           </div>
         </v-col>
       </v-row>
+
+      <!-- Remove Button -->
       <v-row justify="center">
         <v-col cols="12" class="text-center">
           <v-btn color="primary" @click="confirmRemove" :disabled="!selectedItem">Remove</v-btn>
         </v-col>
       </v-row>
-
-      <v-dialog v-model="confirmationDialog" max-width="290">
-        <v-card>
-          <v-card-title class="headline">Confirm</v-card-title>
-          <v-card-text>Are you sure you want to remove this record?</v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="confirmationDialog = false">Cancel</v-btn>
-            <v-btn color="red darken-1" text @click="remove">Remove</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
     </v-container>
+
+    <!-- Confirmation Dialog -->
+    <v-dialog v-model="confirmationDialog" max-width="290">
+      <v-card>
+        <v-card-title class="headline">Confirm</v-card-title>
+        <v-card-text>Are you sure you want to remove this record?</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="confirmationDialog = false">Cancel</v-btn>
+          <v-btn color="red darken-1" text @click="remove">Remove</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -58,7 +66,7 @@ import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 
 export default {
-  name: 'ResultPageWithAgGrid',
+  name: 'RemoveFromDatabaseWithAgGrid',
   components: {
     AgGridVue,
   },
@@ -71,7 +79,7 @@ export default {
         { headerName: 'Handle Name', field: 'handle_name' },
         { headerName: 'Email', field: 'email' },
         { headerName: 'Followers', field: 'followers' },
-        { headerName: 'Is Blocked', field: 'is_blocked' ,valueFormatter: params => params.value ? 'Yes' : 'No'},
+        { headerName: 'Is Blocked', field: 'is_blocked', valueFormatter: params => params.value === 1 ? 'Yes' : 'No' }
       ],
       rowData: [],
       selectedItem: null,
@@ -90,7 +98,7 @@ export default {
     async search() {
       this.loading = true;
       try {
-        const response = await axios.get('http://localhost:8081/api/total/singleSearch', {
+        const response = await axios.get('http://localhost:8081/api/collaborated/singleSearch', {
           params: {
             handleName: this.handleName || null,
             email: this.email || null,
@@ -123,7 +131,7 @@ export default {
 
       try {
         const id = this.selectedItem.id;
-        await axios.delete(`http://localhost:8081/api/total/delete/${id}`);
+        await axios.delete(`http://localhost:8081/api/black_list/delete/${id}`);
         alert('Record removed successfully');
         this.search(); // Re-run the search to refresh the results after deletion
       } catch (error) {

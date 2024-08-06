@@ -33,6 +33,7 @@ import CDGrid from "@/CollaboratedDB/CDGrid.vue";
 
 import BLAdd from "@/BlackListDB/BLAdd.vue";
 import BLGrid from "@/BlackListDB/BLGrid.vue";
+import BLRemove from "@/BlackListDB/BLRemove.vue";
 
 import MDFind from "@/ManagementDB/MDFind.vue";
 import MDAdd from "@/ManagementDB/MDAdd.vue";
@@ -40,6 +41,7 @@ import MDGrid from "@/ManagementDB/MDGrid.vue";
 
 import CDFindResult from "@/Results/CDFindResult.vue";
 import TDFindResult from "@/Results/TDFindResult.vue";
+// import TDRemoveResult from "@/Results/TDRemoveResult.vue";
 
 import TPGrid from "@/TotalProjectDB/TPGrid.vue";
 
@@ -150,6 +152,11 @@ const routes = [
     name: 'TDSelect',
     component: TDSelect
   },
+  // {
+  //   path: 'td-remove-result',
+  //   name: 'TDRemoveResult',
+  //   component: TDRemoveResult
+  // },
   {
     path: '/cd-add',
     name: 'CDAdd',
@@ -184,6 +191,11 @@ const routes = [
     path: '/bl-grid',
     name: 'BLGrid',
     component: BLGrid
+  },
+  {
+    path: '/bl-remove',
+    name: 'BLRemove',
+    component: BLRemove
   },
   {
     path: '/md-find',

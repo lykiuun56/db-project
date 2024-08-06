@@ -17,13 +17,8 @@
     <v-row>
       <v-col cols="3">
         <h4>Followers:</h4>
-        <v-select
-            v-model="followerOption"
-            :items="followerOptions"
-            label="Followers"
-            dense
-        ></v-select>
-        <v-text-field v-model="followerNumber" label="Number" dense></v-text-field>
+        <v-text-field v-model="minFollowers" label="Min Followers" dense></v-text-field>
+        <v-text-field v-model="maxFollowers" label="Max Followers" dense></v-text-field>
       </v-col>
       <v-col cols="3">
         <h4>Blocked:</h4>
@@ -45,24 +40,21 @@
     <v-row>
       <v-col cols="12">
         <h3 class="text-center">Search Results</h3>
-        <v-simple-table class="full-width">
-          <template v-slot:default>
-            <thead>
-            <tr>
-              <th class="col-25">Handle Name</th>
-              <th class="col-25">Email</th>
-              <th class="col-25">Is Blocked</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="item in items" :key="item.handle_name">
-              <td class="col-25">{{ item.handle_name }}</td>
-              <td class="col-25">{{ item.email }}</td>
-              <td class="col-25">{{ item.is_blocked === 1 ? 'Yes' : 'No' }}</td>
-            </tr>
-            </tbody>
+        <v-data-table
+            :headers="headers"
+            :items="items"
+            item-key="handle_name"
+            class="elevation-1"
+            show-select
+            v-model:selected="selectedItems"
+            hide-default-footer
+            dense
+        >
+          <template v-slot:[`item.is_blocked`]="{ item }">
+            <span>{{ item.is_blocked === 1 ? 'Yes' : 'No' }}</span>
           </template>
-        </v-simple-table>
+        </v-data-table>
+        <v-btn color="primary" @click="exportSelectedRows">Export Selected Rows</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -70,21 +62,27 @@
 
 <script>
 import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 export default {
   data() {
     return {
       handleName: '',
       email: '',
-      followerOption: null,
-      followerNumber: '',
+      minFollowers: '',
+      maxFollowers: '',
       selectedIs_blocked: null,
-      followerOptions: ['Less than', 'More than'],
       Is_blockedOptions: [
-        { text: 'Yes', value: 1 },
-        { text: 'No', value: 0 }
+        {text: 'Yes', value: 1},
+        {text: 'No', value: 0}
       ],
       items: [],
+      selectedItems: [],  // This will hold the selected rows
+      headers: [
+        { text: 'Handle Name', value: 'handle_name', align: 'start' },
+        { text: 'Email', value: 'email' },
+        { text: 'Is Blocked', value: 'is_blocked' }
+      ],
     };
   },
   methods: {
@@ -98,7 +96,7 @@ export default {
         if (this.handleName) params.handleName = this.handleName;
         if (this.email) params.email = this.email;
 
-        const response = await axios.get('http://localhost:8081/api/total/singleSearch', { params });
+        const response = await axios.get('http://localhost:8081/api/total/singleSearch', {params});
         this.items = response.data;
       } catch (error) {
         console.error(error);
@@ -106,19 +104,23 @@ export default {
       }
     },
     async advancedSearch() {
-      if (!this.followerOption && this.selectedIs_blocked === null) {
+      if ((!this.minFollowers || !this.maxFollowers) && this.selectedIs_blocked === null) {
         alert('Please enter at least one advanced search criteria.');
         return;
       }
       try {
         const searchCriteriaList = [];
 
-        if (this.followerOption && this.followerNumber) {
-          const operation = this.followerOption === 'Less than' ? '<' : '>';
-          searchCriteriaList.push({ key: 'followers', operation, value: this.followerNumber });
+        if (this.minFollowers && this.maxFollowers) {
+          searchCriteriaList.push({
+            key: 'followers',
+            operation: 'BETWEEN',
+            value: `${this.minFollowers}`,
+            secondValue: `${this.maxFollowers}`,
+          });
         }
         if (this.selectedIs_blocked !== null) {
-          searchCriteriaList.push({ key: 'is_blocked', operation: '=', value: this.selectedIs_blocked });
+          searchCriteriaList.push({key: 'is_blocked', operation: '=', value: this.selectedIs_blocked});
         }
 
         const response = await axios.post('http://localhost:8081/api/total/search', searchCriteriaList);
@@ -128,6 +130,17 @@ export default {
         alert('Advanced search failed');
       }
     },
+    exportSelectedRows() {
+      // Convert selected items to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(this.selectedItems);
+
+      // Create a new workbook and append the worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Rows");
+
+      // Generate Excel file and trigger a download
+      XLSX.writeFile(workbook, "selected_rows.xlsx");
+    }
   },
 };
 </script>

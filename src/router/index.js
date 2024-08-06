@@ -9,6 +9,7 @@ import CollaboratedDatabase from "@/views/CollaboratedDatabase.vue";
 import BlackList from "@/views/BlackList.vue";
 import ManagementEmail from "@/views/ManagementEmail.vue";
 import RemoveDuplicate from "@/views/RemoveDuplicate.vue";
+import TotalProject from "@/views/TotalProject.vue";
 
 import TiktokHome from '@/TiktokService/Tiktokhome.vue'
 import TiktokHash from '@/TiktokService/TiktokHash.vue'
@@ -20,6 +21,9 @@ import TDAdd from "@/TotalDB/TDAdd.vue";
 import TDChange from "@/TotalDB/TDChange.vue";
 import TDFind from "@/TotalDB/TDFind.vue";
 import TDRemove from "@/TotalDB/TDRemove.vue";
+import TDGrid from "@/TotalDB/TDGrid.vue";
+import TDSelect from "@/TotalDB/TDSelect.vue";
+
 
 import CDAdd from '@/CollaboratedDB/CDAdd.vue';
 import CDFind from '@/CollaboratedDB/CDFind.vue';
@@ -33,7 +37,11 @@ import BLGrid from "@/BlackListDB/BLGrid.vue";
 import MDFind from "@/ManagementDB/MDFind.vue";
 import MDAdd from "@/ManagementDB/MDAdd.vue";
 import MDGrid from "@/ManagementDB/MDGrid.vue";
-import TDGrid from "@/TotalDB/TDGrid.vue";
+
+import CDFindResult from "@/Results/CDFindResult.vue";
+import TDFindResult from "@/Results/TDFindResult.vue";
+
+import TPGrid from "@/TotalProjectDB/TPGrid.vue";
 
 
 const routes = [
@@ -88,6 +96,11 @@ const routes = [
     component: RemoveDuplicate
   },
   {
+    path:'/total-project',
+    name: 'TotalProject',
+    component: TotalProject
+  },
+  {
     path: '/tiktok-home',
     name: 'TiktokHome',
     component: TiktokHome
@@ -131,6 +144,11 @@ const routes = [
     path: '/td-grid',
     name: 'TDGrid',
     component: TDGrid
+  },
+  {
+    path: '/td-select',
+    name: 'TDSelect',
+    component: TDSelect
   },
   {
     path: '/cd-add',
@@ -182,6 +200,22 @@ const routes = [
     name: 'MDGrid',
     component: MDGrid
   },
+  {
+    path: '/cd-find-result',
+    name: 'CDFindResult',
+    component: CDFindResult
+  },
+  {
+    path: '/td-find-result',
+    name: 'TDFindResult',
+    component: TDFindResult
+  },
+  {
+    path: '/tp-grid',
+    name: 'TPGrid',
+    component: TPGrid
+  },
+
 
 ];
 

@@ -35,35 +35,10 @@
         <v-btn color="primary" @click="advancedSearch">Advanced Search</v-btn>
       </v-col>
     </v-row>
-
-    <!-- Search Results -->
-    <v-row>
-      <v-col cols="12">
-        <h3 class="text-center">Search Results</h3>
-        <v-data-table
-            :headers="headers"
-            :items="items"
-            item-key="handle_name"
-            class="elevation-1"
-            show-select
-            v-model:selected="selectedItems"
-            hide-default-footer
-            dense
-        >
-          <template v-slot:[`item.is_blocked`]="{ item }">
-            <span>{{ item.is_blocked === 1 ? 'Yes' : 'No' }}</span>
-          </template>
-        </v-data-table>
-        <v-btn color="primary" @click="exportSelectedRows">Export Selected Rows</v-btn>
-      </v-col>
-    </v-row>
   </v-container>
 </template>
 
 <script>
-import axios from 'axios';
-import * as XLSX from 'xlsx';
-
 export default {
   data() {
     return {
@@ -73,75 +48,28 @@ export default {
       maxFollowers: '',
       selectedIs_blocked: null,
       Is_blockedOptions: [
-        {text: 'Yes', value: 1},
-        {text: 'No', value: 0}
-      ],
-      items: [],
-      selectedItems: [],  // This will hold the selected rows
-      headers: [
-        { text: 'Handle Name', value: 'handle_name', align: 'start' },
-        { text: 'Email', value: 'email' },
-        { text: 'Is Blocked', value: 'is_blocked' }
+        { text: 'Yes', value: 1 },
+        { text: 'No', value: 0 }
       ],
     };
   },
   methods: {
-    async simpleSearch() {
-      if (!this.handleName && !this.email) {
-        alert('Please enter either Handle Name or Email for search.');
-        return;
-      }
-      try {
-        const params = {};
-        if (this.handleName) params.handleName = this.handleName;
-        if (this.email) params.email = this.email;
-
-        const response = await axios.get('http://localhost:8081/api/total/singleSearch', {params});
-        this.items = response.data;
-      } catch (error) {
-        console.error(error);
-        alert('Search failed');
-      }
+    simpleSearch() {
+      this.$router.push({ name: 'TDFindResult', query: { handleName: this.handleName, email: this.email } });
     },
-    async advancedSearch() {
-      if ((!this.minFollowers || !this.maxFollowers) && this.selectedIs_blocked === null) {
-        alert('Please enter at least one advanced search criteria.');
-        return;
-      }
-      try {
-        const searchCriteriaList = [];
-
-        if (this.minFollowers && this.maxFollowers) {
-          searchCriteriaList.push({
-            key: 'followers',
-            operation: 'BETWEEN',
-            value: `${this.minFollowers}`,
-            secondValue: `${this.maxFollowers}`,
-          });
+    advancedSearch() {
+      this.$router.push({
+        name: 'TDFindResult',
+        query: {
+          handleName: this.handleName,
+          email: this.email,
+          minFollowers: this.minFollowers,
+          maxFollowers: this.maxFollowers,
+          selectedIs_blocked: this.selectedIs_blocked,
         }
-        if (this.selectedIs_blocked !== null) {
-          searchCriteriaList.push({key: 'is_blocked', operation: '=', value: this.selectedIs_blocked});
-        }
-
-        const response = await axios.post('http://localhost:8081/api/total/search', searchCriteriaList);
-        this.items = response.data;
-      } catch (error) {
-        console.error(error);
-        alert('Advanced search failed');
-      }
-    },
-    exportSelectedRows() {
-      // Convert selected items to a worksheet
-      const worksheet = XLSX.utils.json_to_sheet(this.selectedItems);
-
-      // Create a new workbook and append the worksheet
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Rows");
-
-      // Generate Excel file and trigger a download
-      XLSX.writeFile(workbook, "selected_rows.xlsx");
+      });
     }
-  },
+  }
 };
 </script>
 

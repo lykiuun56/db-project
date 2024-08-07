@@ -53,7 +53,11 @@ export default {
       results: [],
       searchPerformed: false,
       columnDefs: [
-        { headerName: 'Email', field: 'email', sortable: true, filter: true,checkboxSelection: true },
+        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true },
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
+        { headerName: 'Email', field: 'email', sortable: true, filter: true },
+        { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
+        { headerName: 'Is Blocked', field: 'is_blocked', sortable: true, filter: true, valueFormatter: params => (params.value ? 'Yes' : 'No') }
       ],
       defaultColDef: {
         sortable: true,

@@ -75,11 +75,30 @@ export default {
       handleName: '',
       email: '',
       columnDefs: [
-        { headerName: 'ID', field: 'id' },
-        { headerName: 'Handle Name', field: 'handle_name' },
-        { headerName: 'Email', field: 'email' },
-        { headerName: 'Followers', field: 'followers' },
-        { headerName: 'Is Blocked', field: 'is_blocked', valueFormatter: params => params.value ? 'Yes' : 'No' }
+        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, width: 150 },
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, minWidth: 150 },
+        { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, minWidth: 200 },  // Ensure field name matches the backend response
+        { headerName: 'Followers', field: 'followers', sortable: true, filter: true, minWidth: 150 },
+        { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true, minWidth: 150 },
+        { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true, minWidth: 200 },
+        { headerName: 'Email', field: 'email', sortable: true, filter: true, minWidth: 200 },
+        { headerName: 'Phone', field: 'phone', sortable: true, filter: true, width: 150 },
+        { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true, width: 150 },
+        { headerName: 'Notes', field: 'notes', sortable: true, filter: true, minWidth: 150 },  // Ensure field name is correct (e.g., lowercase 'n' if that's how it's stored)
+        { headerName: 'POC', field: 'poc', sortable: true, filter: true, minWidth: 150 },
+        { headerName: 'State', field: 'state', sortable: true, filter: true, width: 100 },
+        { headerName: 'Categories', field: 'categories', sortable: true, filter: true, minWidth: 150 },
+        {
+          headerName: 'Is Blocked',
+          field: 'is_blocked',
+          editable: true,
+          cellEditor: 'agSelectCellEditor',
+          cellEditorParams: {
+            values: [true, false],
+          },
+          valueFormatter: params => (params.value ? 'Yes' : 'No'),  // Formatting the boolean value for better readability
+          width: 100,
+        }
       ],
       rowData: [],
       selectedItem: null,

@@ -115,7 +115,7 @@
     <v-row justify="center" class="mb-3">
       <v-col cols="12" md="4">
         <v-text-field
-            v-model="collaborated_time"
+            v-model="collaborated_times"
             label="Collaborated Time"
             outlined
             dense
@@ -175,7 +175,7 @@ export default {
       full_address: '',
       email: '',
       phone: '',
-      collaborated_time: '',
+      collaborated_times: '',
       notes: '',
       selectedFile: null,
     };
@@ -202,7 +202,7 @@ export default {
           full_address: this.full_address || null,
           email: this.email || null,
           phone: this.phone || null,
-          collaborated_time: this.collaborated_time || null,
+          collaborated_times: this.collaborated_times || null,
           notes: this.notes || null,
         };
 
@@ -256,7 +256,7 @@ export default {
       this.full_address = '';
       this.email = '';
       this.phone = '';
-      this.collaborated_time = '';
+      this.collaborated_times = '';
       this.selectedFile = null;
     }
   },

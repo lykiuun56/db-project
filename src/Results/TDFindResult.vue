@@ -1,16 +1,13 @@
 <template>
-  <div class="ag-theme-alpine" style="height: 500px; width: 100%;">
+  <div class="ag-theme-alpine" style="width: 100%;">
     <ag-grid-vue
         class="ag-theme-alpine"
         style="width: 100%; height: 600px;"
-
         :columnDefs="columnDefs"
         :rowData="rowData"
         :rowSelection="'multiple'"
         :animateRows="true"
         @grid-ready="onGridReady"
-        :domLayout="'autoHeight'"
-
         :defaultColDef="defaultColDef"
         :pagination="true"
         :paginationPageSize="10"
@@ -34,11 +31,11 @@ export default {
   data() {
     return {
       columnDefs: [
-        { headerName: 'ID', field: 'id',sortable: true, filter: true, checkboxSelection: true },
+        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true },
         { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
         { headerName: 'Email', field: 'email', sortable: true, filter: true },
         { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
-        { headerName: 'Is Blocked', field: 'is_blocked', sortable: true, filter: true }
+        { headerName: 'Is Blocked', field: 'is_blocked', sortable: true, filter: true, valueFormatter: params => (params.value ? 'Yes' : 'No') }
       ],
       defaultColDef: {
         flex: 1,
@@ -62,21 +59,21 @@ export default {
       const searchCriteriaList = [];
 
       if (query.handleName) {
-        searchCriteriaList.push({ key: 'handle_name', operation: ':', value: query.handleName });
+        searchCriteriaList.push({key: 'handle_name', operation: ':', value: query.handleName});
       }
       if (query.email) {
-        searchCriteriaList.push({ key: 'email', operation: ':', value: query.email });
+        searchCriteriaList.push({key: 'email', operation: ':', value: query.email});
       }
       if (query.minFollowers && query.maxFollowers) {
         searchCriteriaList.push({
           key: 'followers',
           operation: 'BETWEEN',
-          value: `${query.minFollowers}`,
-          secondValue: `${query.maxFollowers}`,
+          value: query.minFollowers,
+          secondValue: query.maxFollowers,
         });
       }
-      if (query.selectedIs_blocked !== null) {
-        searchCriteriaList.push({ key: 'is_blocked', operation: ':', value: `${query.selectedIs_blocked}`});
+      if (query.is_blocked !== undefined && query.is_blocked !== null) {
+        searchCriteriaList.push({key: 'is_blocked', operation: ':', value: query.is_blocked});
       }
 
       axios.post('http://localhost:8081/api/total/search', searchCriteriaList)
@@ -104,6 +101,6 @@ export default {
 <style scoped>
 .ag-theme-alpine {
   width: 100%;
-  height: 500px; /* Set a fixed height or adjust as needed */
+  height: 600px; /* Set a fixed height or adjust as needed */
 }
 </style>

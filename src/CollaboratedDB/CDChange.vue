@@ -40,36 +40,37 @@ export default {
   },
   data() {
     return {
-      handleName: '',  // This is used for the search input
+      handleName: '',
       email: '',
-      rowData: [], // Data to be displayed in the grid
+      rowData: [],
       columnDefs: [
-        {headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true},
-        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
-        {headerName: 'Tiktok_Url', field: 'tiktok_Url', sortable: true, filter: true, flex: 1.5},
-        {headerName: 'Followers', field: 'followers', sortable: true, filter: true, flex: 1.5},
-        {headerName: 'Full Name', field: 'full_name', sortable: true, filter: true, flex: 1.5},
-        {headerName: 'Full Address', field: 'full_address', sortable: true, filter: true},
-        {headerName: 'Email', field: 'email', sortable: true, filter: true},
-        {headerName: 'Phone', field: 'phone', sortable: true, filter: true, flex: 1.5},
-        {headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true, flex: 1.5},
-        {headerName: 'Notes', field: 'Notes', sortable: true, filter: true, flex: 1.5},
-        {headerName: 'POC', field: 'poc', sortable: true, filter: true, flex: 1.5},
-        {headerName: 'State', field: 'state', sortable: true, filter: true},
-        {headerName: 'Categories', field: 'categories', sortable: true, filter: true},
+        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, width: 80 },
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, minWidth: 150 },
+        { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, minWidth: 200 },  // Ensure field name matches the backend response
+        { headerName: 'Followers', field: 'followers', sortable: true, filter: true, width: 100 },
+        { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true, minWidth: 150 },
+        { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true, minWidth: 200 },
+        { headerName: 'Email', field: 'email', sortable: true, filter: true, minWidth: 200 },
+        { headerName: 'Phone', field: 'phone', sortable: true, filter: true, width: 150 },
+        { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true, width: 150 },
+        { headerName: 'Notes', field: 'notes', sortable: true, filter: true, minWidth: 150 },  // Ensure field name is correct (e.g., lowercase 'n' if that's how it's stored)
+        { headerName: 'POC', field: 'poc', sortable: true, filter: true, minWidth: 150 },
+        { headerName: 'State', field: 'state', sortable: true, filter: true, width: 100 },
+        { headerName: 'Categories', field: 'categories', sortable: true, filter: true, minWidth: 150 },
         {
-          headerName: "Is Blocked",
-          field: "is_blocked",
+          headerName: 'Is Blocked',
+          field: 'is_blocked',
           editable: true,
-          cellEditor: "agSelectCellEditor",
+          cellEditor: 'agSelectCellEditor',
           cellEditorParams: {
             values: [true, false],
           },
-          valueFormatter: params => (params.value ? 'Yes' : 'No'), // For better readability
+          valueFormatter: params => (params.value ? 'Yes' : 'No'),  // Formatting the boolean value for better readability
+          width: 100,
         }
       ],
       defaultColDef: {
-        editable: true, // Make all columns editable by default
+        editable: false, // You can set editable to true if you want all fields to be editable by default
         sortable: true,
         filter: true,
         resizable: true,

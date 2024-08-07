@@ -105,18 +105,18 @@ export default {
           value: query.minFollowers,
           secondValue: query.maxFollowers,
         });
-      } else if (query.minFollowers) {
+      } else if (query.minFollowers !== null) {
         // Only min followers is provided
         searchCriteriaList.push({
           key: 'followers',
-          operation: '>=',
+          operation: '>',
           value: query.minFollowers,
         });
-      } else if (query.maxFollowers) {
+      } else if (query.maxFollowers !== null) {
         // Only max followers is provided
         searchCriteriaList.push({
           key: 'followers',
-          operation: '<=',
+          operation: '<',
           value: query.maxFollowers,
         });
       }

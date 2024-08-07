@@ -36,14 +36,20 @@ export default {
   data() {
     return {
       columnDefs: [
-        { headerName: 'ID', field: 'id', sortable: true, filter: true, width: 70 },
-        { headerName: 'Handle Name', field: 'handle_name',sortable: true, filter: true, flex: 2},
-        { headerName: 'TikTok URL', field: 'tiktok_url', sortable: true, filter: true, flex: 2 },
-        { headerName: 'Categories', field: 'categories', sortable: true, filter: true, flex: 1 },
-        { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'State', field: 'state', sortable: true, filter: true, flex: 1 },
-        { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true, flex: 2 },
-        { headerName: 'Phone', field: 'phone', sortable: true, filter: true, flex: 1.5 },
+        {headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true},
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        {headerName: 'Tiktok_Url', field: 'tiktok_Url', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Followers', field: 'followers', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Full Name', field: 'full_name', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Full Address', field: 'full_address', sortable: true, filter: true},
+        {headerName: 'Email', field: 'email', sortable: true, filter: true},
+        {headerName: 'Phone', field: 'phone', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Is Blocked', field: 'is_blocked', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Collaborated Time', field: 'collaborated_time', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Notes', field: 'Notes', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'POC', field: 'poc', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'State', field: 'state', sortable: true, filter: true},
+        {headerName: 'Categories', field: 'categories', sortable: true, filter: true}
       ],
       rowData: null,
       gridOptions: {

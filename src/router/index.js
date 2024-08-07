@@ -10,6 +10,7 @@ import BlackList from "@/views/BlackList.vue";
 import ManagementEmail from "@/views/ManagementEmail.vue";
 import RemoveDuplicate from "@/views/RemoveDuplicate.vue";
 import TotalProject from "@/views/TotalProject.vue";
+import CollaboratedProject from "@/views/CollaboratedProject.vue";
 
 import TiktokHome from '@/TiktokService/Tiktokhome.vue'
 import TiktokHash from '@/TiktokService/TiktokHash.vue'
@@ -41,9 +42,14 @@ import MDGrid from "@/ManagementDB/MDGrid.vue";
 
 import CDFindResult from "@/Results/CDFindResult.vue";
 import TDFindResult from "@/Results/TDFindResult.vue";
-// import TDRemoveResult from "@/Results/TDRemoveResult.vue";
 
+import TPSearchResult from "@/Results/TPSearchResult.vue";
 import TPGrid from "@/TotalProjectDB/TPGrid.vue";
+import TPSearch from "@/TotalProjectDB/TPSearch.vue";
+
+import CPGrid from "@/CollaboratedProject/CPGrid.vue";
+import CPSearch from "@/CollaboratedProject/CPSearch.vue";
+import CPSearchResult from "@/Results/CPSearchResult.vue";
 
 
 const routes = [
@@ -101,6 +107,11 @@ const routes = [
     path:'/total-project',
     name: 'TotalProject',
     component: TotalProject
+  },
+  {
+    path: '/collaborated-project',
+    name: 'CollaboratedProject',
+    component: CollaboratedProject
   },
   {
     path: '/tiktok-home',
@@ -223,9 +234,34 @@ const routes = [
     component: TDFindResult
   },
   {
+    path: '/tp-search-result',
+    name: 'TPSearchResult',
+    component: TPSearchResult
+  },
+  {
     path: '/tp-grid',
     name: 'TPGrid',
     component: TPGrid
+  },
+  {
+    path: '/tp-search',
+    name: 'TPSearch',
+    component: TPSearch
+  },
+  {
+    path: '/cp-grid',
+    name: 'CPGrid',
+    component: CPGrid
+  },
+  {
+    path: '/cp-search',
+    name: 'CPSearch',
+    component: CPSearch
+  },
+  {
+    path: '/cp-search-result',
+    name: 'CPSearchResult',
+    component: CPSearchResult
   },
 
 

@@ -3,19 +3,18 @@
     <ag-grid-vue
         class="ag-theme-alpine"
         style="width: 100%; height: 600px;"
-
         :columnDefs="columnDefs"
         :rowData="rowData"
         :rowSelection="'multiple'"
         :animateRows="true"
         @grid-ready="onGridReady"
         :domLayout="'autoHeight'"
-
         :defaultColDef="defaultColDef"
         :pagination="true"
         :paginationPageSize="10"
         ref="grid"
     ></ag-grid-vue>
+    <v-btn color="primary" @click="selectAllRows">Select All Rows</v-btn>
     <v-btn color="primary" @click="exportSelectedRows">Export Selected Rows</v-btn>
   </div>
 </template>
@@ -34,18 +33,17 @@ export default {
   data() {
     return {
       columnDefs: [
-        { headerName: 'ID', field: 'id',sortable: true, filter: true, checkboxSelection: true },
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
-        { headerName: 'Email', field: 'email', sortable: true, filter: true },
-        { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
-        { headerName: 'Is Blocked', field: 'is_blocked', sortable: true, filter: true }
+        { headerName: 'Handle Name', field: 'handleName', sortable: true, filter: true },
+        { headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'Anker', field: 'anker', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'TXYZ', field: 'txyz', sortable: true, filter: true, flex: 1.5 },
       ],
       defaultColDef: {
         flex: 1,
         minWidth: 150,
-        resizable: true
+        resizable: true,
       },
-      rowData: []
+      rowData: [],
     };
   },
   mounted() {
@@ -58,35 +56,23 @@ export default {
     fetchData() {
       const query = this.$route.query;
 
-      // Construct the search criteria list as an array
-      const searchCriteriaList = [];
-
-      if (query.handleName) {
-        searchCriteriaList.push({ key: 'handle_name', operation: ':', value: query.handleName });
-      }
-      if (query.email) {
-        searchCriteriaList.push({ key: 'email', operation: ':', value: query.email });
-      }
-      if (query.minFollowers && query.maxFollowers) {
-        searchCriteriaList.push({
-          key: 'followers',
-          operation: 'BETWEEN',
-          value: `${query.minFollowers}`,
-          secondValue: `${query.maxFollowers}`,
-        });
-      }
-      if (query.selectedIs_blocked !== null) {
-        searchCriteriaList.push({ key: 'is_blocked', operation: ':', value: `${query.selectedIs_blocked}`});
-      }
-
-      axios.post('http://localhost:8081/api/total/search', searchCriteriaList)
+      // Make the GET request to singleSearch endpoint with the required parameters
+      axios.get('http://localhost:8081/api/collaborated_projects/singleSearch', {
+        params: {
+          handleName: query.handleName || '',
+          email: query.email || '',
+        },
+      })
           .then(response => {
-            console.log('API Response:', response.data);
+            console.log('API Response:', response.data); // Log the API response
             this.rowData = response.data;
           })
           .catch(error => {
             console.error('Error fetching data:', error);
           });
+    },
+    selectAllRows() {
+      this.gridApi.selectAll();
     },
     exportSelectedRows() {
       const selectedNodes = this.gridApi.getSelectedNodes();
@@ -104,6 +90,6 @@ export default {
 <style scoped>
 .ag-theme-alpine {
   width: 100%;
-  height: 500px; /* Set a fixed height or adjust as needed */
+  height: 500px;
 }
 </style>

@@ -79,7 +79,7 @@ export default {
         { headerName: 'Handle Name', field: 'handle_name' },
         { headerName: 'Email', field: 'email' },
         { headerName: 'Followers', field: 'followers' },
-        { headerName: 'Is Blocked', field: 'is_blocked', valueFormatter: params => params.value === 1 ? 'Yes' : 'No' }
+        { headerName: 'Is Blocked', field: 'is_blocked', valueFormatter: params => params.value ? 'Yes' : 'No' }
       ],
       rowData: [],
       selectedItem: null,

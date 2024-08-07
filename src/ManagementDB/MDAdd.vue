@@ -7,12 +7,12 @@
     </v-row>
     <v-row justify="center">
       <v-col cols="12" md="5">
-        <v-file-input v-model="selectedFile" label="选择文件" outlined></v-file-input>
+        <v-text-field v-model="emailEnding" label="Enter Email Domain" outlined></v-text-field>
       </v-col>
     </v-row>
     <v-row justify="center">
       <v-col cols="12" class="text-center">
-        <v-btn color="primary" @click="submit">提交</v-btn>
+        <v-btn color="primary" @click="submit">Submit</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -25,30 +25,32 @@ export default {
   name: 'ManagementEmail',
   data() {
     return {
-      selectedFile: null,
+      emailEnding: '',
     };
   },
   methods: {
     async submit() {
-      if (!this.selectedFile) {
-        alert('Please select a file to upload.');
+      if (!this.emailEnding) {
+        alert('Please enter an email domain.');
         return;
       }
 
-      const formData = new FormData();
-      formData.append('file', this.selectedFile);
+      const managementEmail = {
+        emailEnding: this.emailEnding,
+        // Add any other fields required by your backend
+      };
 
       try {
-        await axios.post('http://localhost:8081/api/management/add', formData, {
+        await axios.post('http://localhost:8081/api/management/add', managementEmail, {
           headers: {
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'application/json'
           }
         });
-        alert('File uploaded successfully');
-        this.selectedFile = null;
+        alert('Email domain added successfully');
+        this.emailEnding = '';
       } catch (error) {
         console.error(error);
-        alert('Failed to upload file.');
+        alert('Failed to add email domain.');
       }
     }
   }

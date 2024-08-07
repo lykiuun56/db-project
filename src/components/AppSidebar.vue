@@ -35,6 +35,9 @@
         <v-list-item @click="$router.push('/total-project')">
           <v-btn text block>Total Project</v-btn>
         </v-list-item>
+        <v-list-item @click="$router.push('/collaborated-project')">
+          <v-btn text block>Collaborated Project</v-btn>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
   </v-app>

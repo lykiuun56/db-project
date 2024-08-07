@@ -47,8 +47,11 @@ export default {
       email: '',
       minFollowers: '',
       maxFollowers: '',
-      selectedIs_blocked: [],
-      Is_blockedOptions: ['1','0'],
+      selectedIs_blocked: null,  // Set to null or Boolean
+      Is_blockedOptions: [
+        { text: 'Yes', value: true },
+        { text: 'No', value: false },
+      ],
     };
   },
 

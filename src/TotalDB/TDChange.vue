@@ -117,7 +117,7 @@ export default {
   methods: {
     async search() {
       try {
-        const response = await axios.get('http://localhost:8081/api/total/search', {
+        const response = await axios.get('http://localhost:8081/api/total/singleSearch', {
           params: {
             handleName: this.handleName,
             email: this.email,

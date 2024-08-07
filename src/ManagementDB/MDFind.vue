@@ -12,30 +12,54 @@
       <button @click="findMatchingEmails">Search</button>
     </div>
 
-    <div class="results" v-if="results.length">
-      <h2>Matching Emails</h2>
-      <ul>
-        <li v-for="(result, index) in results" :key="index">
-          {{ result.full_name }} - {{ result.email }}
-        </li>
-      </ul>
+    <div v-if="searchPerformed && results.length === 0">
+      <p>No matching emails found.</p>
     </div>
 
-    <div v-if="results.length === 0 && searchPerformed">
-      <p>No matching emails found.</p>
+    <div v-if="results.length" class="results">
+      <h2>Matching Emails</h2>
+      <div class="ag-theme-alpine" style="height: 400px; width: 100%;">
+        <ag-grid-vue
+            :columnDefs="columnDefs"
+            :rowData="results"
+            :defaultColDef="defaultColDef"
+            :rowSelection="'multiple'"
+            :pagination="true"
+            :paginationPageSize="10"
+            :animateRows="true"
+            class="ag-theme-alpine"
+            @grid-ready="onGridReady"
+            ref="grid"
+        ></ag-grid-vue>
+      </div>
     </div>
   </div>
 </template>
+
 <script>
+import { AgGridVue } from 'ag-grid-vue3';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 import axios from 'axios';
 
 export default {
   name: 'MDfind',
+  components: {
+    AgGridVue,
+  },
   data() {
     return {
       emailEnding: '',
       results: [],
       searchPerformed: false,
+      columnDefs: [
+        { headerName: 'Email', field: 'email', sortable: true, filter: true,checkboxSelection: true },
+      ],
+      defaultColDef: {
+        sortable: true,
+        filter: true,
+        resizable: true,
+      },
     };
   },
   methods: {
@@ -53,9 +77,14 @@ export default {
         console.error('Error finding matching emails:', error);
       }
     },
+    onGridReady(params) {
+      this.gridApi = params.api;
+      this.gridColumnApi = params.columnApi;
+    },
   },
 };
 </script>
+
 <style scoped>
 .mdfind-container {
   max-width: 600px;
@@ -97,18 +126,7 @@ h1 {
   background-color: #0056b3;
 }
 
-.results h2 {
+.results {
   margin-top: 20px;
-}
-
-.results ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.results li {
-  padding: 10px;
-  background-color: #fff;
-  border-bottom: 1px solid #ddd;
 }
 </style>

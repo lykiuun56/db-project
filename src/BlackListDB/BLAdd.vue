@@ -45,7 +45,7 @@ export default {
       };
 
       try {
-        await axios.post('http://localhost:8081/api/black_list/add', blackListData);
+        await axios.post('http://localhost:8081/api/black_list/addManual', blackListData);
         alert('Added to black list successfully');
         this.handleName = '';
         this.email = '';

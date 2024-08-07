@@ -98,11 +98,26 @@ export default {
         searchCriteriaList.push({key: 'state', operation: ':', value: query.state});
       }
       if (query.minFollowers && query.maxFollowers) {
+        // Both min and max followers are provided
         searchCriteriaList.push({
           key: 'followers',
           operation: 'BETWEEN',
-          value: `${query.minFollowers}`,
-          secondValue: `${query.maxFollowers}`,
+          value: query.minFollowers,
+          secondValue: query.maxFollowers,
+        });
+      } else if (query.minFollowers) {
+        // Only min followers is provided
+        searchCriteriaList.push({
+          key: 'followers',
+          operation: '>=',
+          value: query.minFollowers,
+        });
+      } else if (query.maxFollowers) {
+        // Only max followers is provided
+        searchCriteriaList.push({
+          key: 'followers',
+          operation: '<=',
+          value: query.maxFollowers,
         });
       }
       if (query.selectedCategories) {

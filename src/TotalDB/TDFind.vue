@@ -23,13 +23,12 @@
       <v-col cols="3">
         <h4>Blocked:</h4>
         <v-select
-            v-if="Is_blockedOptions.length > 0"
-            v-model="selectedIs_blocked"
-            :items="Is_blockedOptions"
-            item-text="text"
-            item-value="value"
-            label="Is Blocked"
-            dense
+            v-model="selectedIsBlocked"
+            :items="isBlockedOptions"
+        item-text="text"
+        item-value="value"
+        label="Is Blocked"
+        dense
         ></v-select>
       </v-col>
       <v-col cols="3" class="text-center">
@@ -47,8 +46,8 @@ export default {
       email: '',
       minFollowers: '',
       maxFollowers: '',
-      selectedIs_blocked: null,  // Set to null or Boolean
-      Is_blockedOptions: [
+      selectedIsBlocked: null,  // Ensure this is initialized
+      isBlockedOptions: [       // Declare options correctly
         { text: 'Yes', value: true },
         { text: 'No', value: false },
       ],
@@ -56,10 +55,27 @@ export default {
   },
 
   methods: {
+    validateInputs() {
+      const min = this.minFollowers ? Number(this.minFollowers) : null;
+      const max = this.maxFollowers ? Number(this.maxFollowers) : null;
+
+      if ((min !== null && isNaN(min)) || (max !== null && isNaN(max))) {
+        this.$notify({ type: 'error', text: 'Min and Max Followers must be numbers' });
+        return false;
+      }
+
+      return true;
+    },
+
     simpleSearch() {
       this.$router.push({ name: 'TDFindResult', query: { handleName: this.handleName, email: this.email } });
     },
+
     advancedSearch() {
+      if (!this.validateInputs()) {
+        return;
+      }
+
       this.$router.push({
         name: 'TDFindResult',
         query: {
@@ -67,21 +83,10 @@ export default {
           email: this.email,
           minFollowers: this.minFollowers,
           maxFollowers: this.maxFollowers,
-          is_blocked: this.selectedIs_blocked,
-        }
+          is_blocked: this.selectedIsBlocked,
+        },
       });
     }
-  }
+  },
 };
 </script>
-
-<style scoped>
-.full-width {
-  width: 100%;
-}
-
-.col-25 {
-  width: 25%;
-  text-align: center;
-}
-</style>

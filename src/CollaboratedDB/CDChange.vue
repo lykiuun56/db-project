@@ -1,5 +1,6 @@
 <template>
   <v-container fluid>
+    <!-- Search Section -->
     <v-row>
       <v-col cols="4">
         <v-text-field v-model="handleName" label="Handle Name" dense></v-text-field>
@@ -12,158 +13,105 @@
       </v-col>
     </v-row>
 
-    <v-row>
+    <!-- AG Grid Section -->
+    <v-row v-if="rowData.length">
       <v-col cols="12">
-        <h3 class="text-center">Search Result</h3>
-        <v-simple-table class="full-width">
-          <template v-slot:default>
-            <thead>
-            <tr>
-              <th class="col-25">Handle Name</th>
-              <th class="col-25">Email</th>
-              <th class="col-25">Followers</th>
-              <th class="col-25">GMV</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(item, index) in items" :key="index">
-              <td class="col-25">{{ item.handleName }}</td>
-              <td class="col-25">{{ item.email }}</td>
-              <td class="col-25">{{ item.followers }}</td>
-              <td class="col-25">{{ item.gmv }}</td>
-            </tr>
-            </tbody>
-          </template>
-        </v-simple-table>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="12" class="text-center">
-        <h3>Index (Which one you want to change)</h3>
-        <v-select
-            v-model="selectedOption"
-            :items="options"
-            label="Select Option"
-            dense
-        ></v-select>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="2">
-        <v-text-field v-model="newHandleName" label="Handle Name" dense></v-text-field>
-      </v-col>
-      <v-col cols="2">
-        <v-text-field v-model="newEmail" label="Email" dense></v-text-field>
-      </v-col>
-      <v-col cols="2">
-        <v-text-field v-model="followers" label="Followers" dense></v-text-field>
-      </v-col>
-      <v-col cols="2">
-        <v-text-field v-model="gmv" label="GMV" dense></v-text-field>
-      </v-col>
-      <v-col cols="2">
-        <v-text-field v-model="name" label="Name" dense></v-text-field>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="12" class="text-center">
-        <v-select
-            v-model="selectedCategories"
-            :items="categoriesOptions"
-            label="Add or Remove Categories"
-            multiple
-            dense
-        ></v-select>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="8" class="text-center">
-        <v-btn color="primary" @click="submit">Submit</v-btn>
+        <ag-grid-vue
+            class="ag-theme-alpine"
+            style="width: 100%; height: 400px;"
+            :rowData="rowData"
+            :columnDefs="columnDefs"
+            :defaultColDef="defaultColDef"
+            @cellValueChanged="onCellValueChanged"
+            :frameworkComponents="frameworkComponents"
+        ></ag-grid-vue>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
+import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 
 export default {
+  components: {
+    AgGridVue
+  },
   data() {
     return {
-      handleName: '',
+      handleName: '',  // This is used for the search input
       email: '',
-      newHandleName: '',
-      newEmail: '',
-      followers: '',
-      gmv: '',
-      name: '',
-      selectedCategories: [],
-      selectedOption: null,
-      options: ['选项1', '选项2', '选项3', '选项4'],
-      categoriesOptions: ['选项1', '选项2', '选项3', '选项4'],
-      items: [], // List to hold the search results
+      rowData: [], // Data to be displayed in the grid
+      columnDefs: [
+        {headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true},
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        {headerName: 'Tiktok_Url', field: 'tiktok_Url', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Followers', field: 'followers', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Full Name', field: 'full_name', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Full Address', field: 'full_address', sortable: true, filter: true},
+        {headerName: 'Email', field: 'email', sortable: true, filter: true},
+        {headerName: 'Phone', field: 'phone', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Notes', field: 'Notes', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'POC', field: 'poc', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'State', field: 'state', sortable: true, filter: true},
+        {headerName: 'Categories', field: 'categories', sortable: true, filter: true},
+        {
+          headerName: "Is Blocked",
+          field: "is_blocked",
+          editable: true,
+          cellEditor: "agSelectCellEditor",
+          cellEditorParams: {
+            values: [true, false],
+          },
+          valueFormatter: params => (params.value ? 'Yes' : 'No'), // For better readability
+        }
+      ],
+      defaultColDef: {
+        editable: true, // Make all columns editable by default
+        sortable: true,
+        filter: true,
+        resizable: true,
+      },
+      frameworkComponents: {}
     };
   },
   methods: {
     async search() {
+      this.loading = true;
       try {
         const response = await axios.get('http://localhost:8081/api/collaborated/singleSearch', {
           params: {
-            handleName: this.handleName,
-            email: this.email,
+            handleName: this.handleName || null,
+            email: this.email || null,
           },
         });
-        // Assuming response.data is an array of objects
-        this.items = response.data;
+        this.rowData = response.data;
       } catch (error) {
         console.error(error);
         alert('Search failed');
+      } finally {
+        this.loading = false;
       }
     },
-    async submit() {
+    async onCellValueChanged(event) {
+      const updatedData = event.data;
       try {
-        const data = {
-          handleName: this.newHandleName,
-          email: this.newEmail,
-          followers: this.followers,
-          gmv: this.gmv,
-          name: this.name,
-          categories: this.selectedCategories,
-        };
-        const response = await axios.put(`http://localhost:8081/api/collaborated/update/${this.selectedOption}`, data);
-        if (response.status === 200) {
-          alert('Submit successful');
-          this.clearForm();
-        }
+        await axios.put(`http://localhost:8081/api/collaborated/update/${updatedData.id}`, updatedData);
+        alert('Update successful');
       } catch (error) {
-        console.error(error);
-        alert('Submit failed');
+        console.error('Error updating data:', error);
+        alert('Update failed');
       }
-    },
-    clearForm() {
-      this.newHandleName = '';
-      this.newEmail = '';
-      this.followers = '';
-      this.gmv = '';
-      this.name = '';
-      this.selectedCategories = [];
-      this.selectedOption = null;
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style scoped>
-.full-width {
+.ag-theme-alpine {
+  height: 100%;
   width: 100%;
-}
-
-.col-25 {
-  width: 25%;
-  text-align: center;
 }
 </style>

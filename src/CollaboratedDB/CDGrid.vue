@@ -45,7 +45,7 @@ export default {
         {headerName: 'Email', field: 'email', sortable: true, filter: true},
         {headerName: 'Phone', field: 'phone', sortable: true, filter: true, flex: 1.5},
         {headerName: 'Is Blocked', field: 'is_blocked', sortable: true, filter: true, flex: 1.5},
-        {headerName: 'Collaborated Time', field: 'collaborated_time', sortable: true, filter: true, flex: 1.5},
+        {headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true, flex: 1.5},
         {headerName: 'Notes', field: 'Notes', sortable: true, filter: true, flex: 1.5},
         {headerName: 'POC', field: 'poc', sortable: true, filter: true, flex: 1.5},
         {headerName: 'State', field: 'state', sortable: true, filter: true},

@@ -68,15 +68,19 @@ export default {
       const minFollowers = this.minFollowers !== '' ? Number(this.minFollowers) : null;
       const maxFollowers = this.maxFollowers !== '' ? Number(this.maxFollowers) : null;
 
+      const query = {
+        handleName: this.handleName,
+        email: this.email,
+        minFollowers,
+        maxFollowers,
+      }
+      if (this.selectedIs_blocked !== null) {
+        query.is_Blocked = this.selectedIs_blocked;
+      }
+
       this.$router.push({
         name: 'TDFindResult',
-        query: {
-          handleName: this.handleName,
-          email: this.email,
-          minFollowers,
-          maxFollowers,
-          is_Blocked: this.selectedIs_blocked,
-        },
+        query
       }); 
     },
   },

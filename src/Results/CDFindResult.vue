@@ -127,7 +127,7 @@ export default {
         });
       }
 
-      axios.post('http://localhost:8081/api/collaborated/search', searchCriteriaList)
+      axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/api/collaborated/search', searchCriteriaList)
           .then(response => {
             console.log('API Response:', response.data); // Log the API response
             this.rowData = response.data;

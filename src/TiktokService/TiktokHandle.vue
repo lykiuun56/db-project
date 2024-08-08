@@ -46,7 +46,7 @@
         formData.append('file', this.selectedFile);
 
         try {
-          const response = await axios.post('http://localhost:8081/tiktok/', formData, {
+          const response = await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/tiktok/searchHandleName', formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             },

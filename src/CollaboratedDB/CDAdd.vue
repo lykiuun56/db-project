@@ -229,7 +229,7 @@ export default {
           formData.append('file', this.selectedFile);
         }
 
-        const response = await axios.post('http://localhost:8081/api/collaborated/addByFile', formData, {
+        const response = await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/api/collaborated/addByFile', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

@@ -57,7 +57,7 @@ export default {
       const query = this.$route.query;
 
       // Make the GET request to singleSearch endpoint with the required parameters
-      axios.get('http://localhost:8081/api/total_projects/singleSearch', {
+      axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total_projects/singleSearch', {
         params: {
           email: query.email,
         },

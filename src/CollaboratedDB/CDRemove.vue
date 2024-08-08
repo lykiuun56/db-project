@@ -117,7 +117,7 @@ export default {
     async search() {
       this.loading = true;
       try {
-        const response = await axios.get('http://localhost:8081/api/collaborated/singleSearch', {
+        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/collaborated/singleSearch', {
           params: {
             handleName: this.handleName || null,
             email: this.email || null,
@@ -153,7 +153,7 @@ export default {
 
       try {
         const id = this.selectedItem.id;
-        await axios.delete(`http://localhost:8081/api/collaborated/delete/${id}`);
+        await axios.delete(`http://creator-tools.us-east-1.elasticbeanstalk.com/api/collaborated/delete/${id}`);
         alert('Record removed successfully');
         this.selectedItem = null; // Reset selection after removal
         this.search(); // Re-run the search to refresh the results after deletion

@@ -97,7 +97,7 @@ export default {
     async search() {
       this.loading = true;
       try {
-        const response = await axios.get('http://localhost:8081/api/total/singleSearch', {
+        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/singleSearch', {
           params: {
             handleName: this.handleName || null,
             email: this.email || null,
@@ -132,7 +132,7 @@ export default {
 
       try {
         const id = this.selectedItem.id;
-        await axios.delete(`http://localhost:8081/api/total/delete/${id}`);
+        await axios.delete(`http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/delete/${id}`);
         alert('Record removed successfully');
         this.selectedItem = null; // Reset selection after removal
         this.search(); // Re-run the search to refresh the results after deletion

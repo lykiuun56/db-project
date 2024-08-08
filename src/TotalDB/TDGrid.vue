@@ -63,7 +63,7 @@ export default {
   methods: {
     async onGridReady(params) {
       try {
-        const response = await axios.get('http://localhost:8081/api/total/all');
+        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/all');
         this.rowData = response.data;
         console.log(response.data)
         params.api.sizeColumnsToFit();  // Ensure columns fit the grid width

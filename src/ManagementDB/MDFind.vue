@@ -70,7 +70,7 @@ export default {
     async findMatchingEmails() {
       this.searchPerformed = false;
       try {
-        const response = await axios.get(`http://localhost:8081/api/management/findAllMatching/{emailEnding}`, {
+        const response = await axios.get(`http://creator-tools.us-east-1.elasticbeanstalk.com/api/management/findAllMatching/{emailEnding}`, {
           params: {
             emailEnding: this.emailEnding,
           },

@@ -104,7 +104,7 @@ export default {
           email: this.email,
           followers: this.followers,
         };
-        const response = await axios.post('http://localhost:8081/api/total/add', data);
+        const response = await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/add', data);
 
         if (response.status === 200) {
           alert('手动提交成功');
@@ -122,7 +122,7 @@ export default {
           formData.append('file', this.selectedFile);
         }
 
-        const response = await axios.post('http://localhost:8081/api/total/addByFile', formData, {
+        const response = await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/addByFile', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

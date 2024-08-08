@@ -43,7 +43,7 @@ import { AgGridVue } from 'ag-grid-vue3';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import axios from 'axios';
-import * as XLSX from 'xlsx';
+import qs from 'qs'; // Import qs for parameter serialization
 
 export default {
   name: 'ManagementEmail',
@@ -62,7 +62,6 @@ export default {
         { headerName: 'Followers', field: 'followers' },
         { headerName: 'Notes', field: 'notes' },
         { headerName: 'Is_Blocked', field: 'is_blocked'}
-        // Add more fields as needed
       ],
       defaultColDef: {
         sortable: true,
@@ -81,7 +80,7 @@ export default {
         return;
       }
 
-      axios.get('http://localhost:8081/api/total/select', {
+      axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/select', {
         params: {
           projectName: this.projectName,
           userCount: this.userCount,
@@ -99,10 +98,37 @@ export default {
       const selectedNodes = this.gridApi.getSelectedNodes();
       const selectedData = selectedNodes.map(node => node.data);
 
-      const worksheet = XLSX.utils.json_to_sheet(selectedData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Selected Rows');
-      XLSX.writeFile(workbook, 'selected_rows.xlsx');
+      if (selectedData.length === 0) {
+        alert('No rows selected.');
+        return;
+      }
+
+      const userIds = selectedData.map(user => user.id); // Extract the IDs of selected rows
+
+      axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/export', {
+        params: {
+          projectName: this.projectName,
+          userIds: userIds, // Send user IDs as an array
+        },
+        paramsSerializer: params => {
+          return qs.stringify(params, { arrayFormat: 'repeat' }); // Serialize array parameters correctly
+        },
+        responseType: 'blob', // Important: Set the response type to blob for file download
+      })
+          .then(response => {
+            // Create a blob from the response and download it
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `selected_users_${this.projectName}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove(); // Cleanup
+          })
+          .catch(error => {
+            console.error('Error exporting selected users:', error);
+            alert('Failed to export selected users');
+          });
     }
   }
 };

@@ -137,7 +137,7 @@ export default {
 
       try {
         const id = this.selectedItem.id;
-        await axios.delete(`http://localhost:8081/api/black_list/delete/${id}`);
+        await axios.delete(`http://creator-tools.us-east-1.elasticbeanstalk.com/api/black_list/delete/${id}`);
         alert('Record removed successfully');
         this.search(); // Re-run the search to refresh the results after deletion
       } catch (error) {

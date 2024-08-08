@@ -41,7 +41,7 @@ export default {
       };
 
       try {
-        await axios.post('http://localhost:8081/api/management/add', managementEmail, {
+        await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/management/add', managementEmail, {
           headers: {
             'Content-Type': 'application/json'
           }

@@ -55,7 +55,7 @@ export default {
       formData.append('black_list', this.blackListFile);
 
       try {
-        const response = await axios.post('/remove-duplicates', formData, {
+        const response = await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/remove-duplicates', formData, {
           responseType: 'blob',
           headers: {
             'Content-Type': 'multipart/form-data',

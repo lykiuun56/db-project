@@ -43,7 +43,7 @@ import { AgGridVue } from 'ag-grid-vue3';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import axios from 'axios';
-import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 export default {
   name: 'ManagementEmail',
@@ -61,7 +61,14 @@ export default {
         { headerName: 'Email', field: 'email' },
         { headerName: 'Followers', field: 'followers' },
         { headerName: 'Notes', field: 'notes' },
-        { headerName: 'Is_Blocked', field: 'is_blocked'}
+        {
+          headerName: 'Is Blocked',
+          field: 'is_Blocked',
+          sortable: true,
+          filter: true,
+          flex: 2,
+          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
+        },
         // Add more fields as needed
       ],
       defaultColDef: {
@@ -97,12 +104,30 @@ export default {
     },
     exportSelectedRows() {
       const selectedNodes = this.gridApi.getSelectedNodes();
-      const selectedData = selectedNodes.map(node => node.data);
+      const selectedIds = selectedNodes.map(node => node.data.id);
 
-      const worksheet = XLSX.utils.json_to_sheet(selectedData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Selected Rows');
-      XLSX.writeFile(workbook, 'selected_rows.xlsx');
+      if (selectedIds.length === 0) {
+        alert('Please select at least one user to export.');
+        return;
+      }
+
+      axios({
+        method: 'GET',
+        url: 'http://localhost:8081/export',
+        responseType: 'blob', // Ensure the response is treated as a file
+        params: {
+          projectName: this.projectName,
+          userIds: selectedIds,
+        }
+      })
+          .then(response => {
+            const fileName = `${this.projectName}_selected_users_export.xlsx`;
+            FileSaver.saveAs(new Blob([response.data]), fileName);
+          })
+          .catch(error => {
+            console.error('Error exporting users:', error);
+            alert('Failed to export selected users');
+          });
     }
   }
 };

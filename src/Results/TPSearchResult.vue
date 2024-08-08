@@ -59,8 +59,7 @@ export default {
       // Make the GET request to singleSearch endpoint with the required parameters
       axios.get('http://localhost:8081/api/total_projects/singleSearch', {
         params: {
-          handleName: query.handleName || '',
-          email: query.email || '',
+          email: query.email,
         },
       })
           .then(response => {

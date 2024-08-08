@@ -37,10 +37,17 @@ export default {
     return {
       columnDefs: [
         { headerName: 'ID', field: 'id', sortable: true, filter: true, width: 70 },
-        { headerName: 'Handle Name', field: 'handle_name',sortable: true, filter: true, flex: 2},
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, flex: 2 },
         { headerName: 'Followers', field: 'followers', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1 },
-        { headerName: 'Is_Blocked', field: 'is_blocked', sortable: true, filter: true, flex: 2 },
+        {
+          headerName: 'Is Blocked',
+          field: 'is_Blocked',
+          sortable: true,
+          filter: true,
+          flex: 2,
+          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
+        },
       ],
       rowData: null,
       gridOptions: {
@@ -58,6 +65,7 @@ export default {
       try {
         const response = await axios.get('http://localhost:8081/api/total/all');
         this.rowData = response.data;
+        console.log(response.data)
         params.api.sizeColumnsToFit();  // Ensure columns fit the grid width
       } catch (error) {
         console.error('Error fetching data:', error);

@@ -22,15 +22,10 @@
       </v-col>
       <v-col cols="3">
         <h4>Blocked:</h4>
-        <v-select
-            v-if="Is_blockedOptions.length > 0"
-            v-model="selectedIs_blocked"
-            :items="Is_blockedOptions"
-            item-text="text"
-            item-value="value"
-            label="Is Blocked"
-            dense
-        ></v-select>
+        <v-radio-group v-model="selectedIs_blocked" dense>
+          <v-radio label="Yes" :value="true"></v-radio>
+          <v-radio label="No" :value="false"></v-radio>
+        </v-radio-group>
       </v-col>
       <v-col cols="3" class="text-center">
         <v-btn color="primary" @click="advancedSearch">Advanced Search</v-btn>
@@ -47,14 +42,9 @@ export default {
       email: '',
       minFollowers: '',
       maxFollowers: '',
-      selectedIs_blocked: null,  // Set to null or Boolean
-      Is_blockedOptions: [
-        { text: 'Yes', value: true },
-        { text: 'No', value: false },
-      ],
+      selectedIs_blocked: null, // True for "Yes", false for "No"
     };
   },
-
   methods: {
     simpleSearch() {
       this.$router.push({ name: 'TDFindResult', query: { handleName: this.handleName, email: this.email } });
@@ -67,7 +57,7 @@ export default {
           email: this.email,
           minFollowers: this.minFollowers,
           maxFollowers: this.maxFollowers,
-          is_blocked: this.selectedIs_blocked,
+          is_Blocked: this.selectedIs_blocked,
         }
       });
     }

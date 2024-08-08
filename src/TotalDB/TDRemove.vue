@@ -71,7 +71,14 @@ export default {
         { headerName: 'Handle Name', field: 'handle_name' },
         { headerName: 'Email', field: 'email' },
         { headerName: 'Followers', field: 'followers' },
-        { headerName: 'Is Blocked', field: 'is_blocked' ,valueFormatter: params => params.value ? 'Yes' : 'No'},
+        {
+          headerName: 'Is Blocked',
+          field: 'is_Blocked',
+          sortable: true,
+          filter: true,
+          flex: 2,
+          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
+        },
       ],
       rowData: [],
       selectedItem: null,

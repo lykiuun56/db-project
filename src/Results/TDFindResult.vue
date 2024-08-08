@@ -35,12 +35,20 @@ export default {
         { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
         { headerName: 'Email', field: 'email', sortable: true, filter: true },
         { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
-        { headerName: 'Is Blocked', field: 'is_blocked', sortable: true, filter: true, valueFormatter: params => (params.value ? 'Yes' : 'No') }
+        {
+          headerName: 'Is Blocked',
+          field: 'is_Blocked',
+          sortable: true,
+          filter: true,
+          flex: 2,
+          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
+        },
       ],
       defaultColDef: {
-        flex: 1,
-        minWidth: 150,
-        resizable: true
+        editable: true, // Make all columns editable by default
+        sortable: true,
+        filter: true,
+        resizable: true,
       },
       rowData: []
     };
@@ -87,8 +95,13 @@ export default {
           value: query.maxFollowers,
         });
       }
-      if (query.is_blocked !== undefined && query.is_blocked !== null) {
-        searchCriteriaList.push({key: 'is_blocked', operation: ':', value: query.is_blocked});
+      if (query.is_Blocked !== undefined) {
+        // Convert to boolean before sending
+        searchCriteriaList.push({
+          key: 'is_blocked',
+          operation: ':',
+          value: query.is_Blocked === 'true' || query.is_Blocked === true,
+        });
       }
 
       axios.post('http://localhost:8081/api/total/search', searchCriteriaList)

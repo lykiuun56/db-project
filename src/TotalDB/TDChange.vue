@@ -49,15 +49,13 @@ export default {
         { headerName: "Followers", field: "followers", editable: true },
         { headerName: "Email", field: "email", editable: true },
         {
-          headerName: "Is Blocked",
-          field: "is_blocked",
-          editable: true,
-          cellEditor: "agSelectCellEditor",
-          cellEditorParams: {
-            values: [true, false],
-          },
-          valueFormatter: params => (params.value ? 'Yes' : 'No'), // For better readability
-        }
+          headerName: 'Is Blocked',
+          field: 'is_Blocked',
+          sortable: true,
+          filter: true,
+          flex: 2,
+          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
+        },
       ],
       defaultColDef: {
         editable: true, // Make all columns editable by default

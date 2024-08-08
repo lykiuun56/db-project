@@ -40,7 +40,13 @@ export default {
         {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, flex: 2},
         {headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 2},
         {headerName: 'Followers', field: 'followers', sortable: true, filter: true, flex: 1},
-        {headerName: 'Is Blocked', field: 'is_blocked', sortable: true, filter: true, flex: 1.5},
+        {
+          headerName: 'Is Blocked',
+          field: 'is_Blocked',
+          editable: true,
+          cellRenderer: params => (params.value ? 'Yes' : 'No'), // Renders 'Yes' or 'No' based on the boolean value
+          width: 100,
+        }
       ],
       rowData: null,
       gridOptions: {

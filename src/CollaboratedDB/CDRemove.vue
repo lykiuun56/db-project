@@ -90,7 +90,7 @@ export default {
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true, minWidth: 150 },
         {
           headerName: 'Is Blocked',
-          field: 'is_blocked',
+          field: 'is_Blocked',
           editable: true,
           cellEditor: 'agSelectCellEditor',
           cellEditorParams: {

@@ -55,13 +55,9 @@ export default {
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true, minWidth: 150 },
         {
           headerName: 'Is Blocked',
-          field: 'is_blocked',
+          field: 'is_Blocked',
           editable: true,
-          cellEditor: 'agSelectCellEditor',
-          cellEditorParams: {
-            values: [true, false],
-          },
-          valueFormatter: params => (params.value ? 'Yes' : 'No'),  // Formatting the boolean value for better readability
+          cellRenderer: params => (params.value ? 'Yes' : 'No'), // Renders 'Yes' or 'No' based on the boolean value
           width: 100,
         }
       ],

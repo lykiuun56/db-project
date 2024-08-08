@@ -67,10 +67,10 @@ export default {
       handleName: '',
       email: '',
       columnDefs: [
-        { headerName: 'ID', field: 'id' },
-        { headerName: 'Handle Name', field: 'handle_name' },
-        { headerName: 'Email', field: 'email' },
-        { headerName: 'Followers', field: 'followers' },
+        {headerName: 'ID', field: 'id'},
+        {headerName: 'Handle Name', field: 'handle_name'},
+        {headerName: 'Email', field: 'email'},
+        {headerName: 'Followers', field: 'followers'},
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
@@ -104,6 +104,7 @@ export default {
           },
         });
         this.rowData = response.data;
+        this.selectedItem = null; // Reset selection after new search
       } catch (error) {
         console.error(error);
         alert('Search failed');
@@ -156,9 +157,11 @@ export default {
 .text-center {
   text-align: center;
 }
+
 .mb-5 {
   margin-bottom: 10px;
 }
+
 .ag-theme-alpine {
   width: 100%;
 }

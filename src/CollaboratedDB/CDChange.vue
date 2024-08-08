@@ -59,13 +59,9 @@ export default {
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true, minWidth: 150 },
         {
           headerName: 'Is Blocked',
-          field: 'is_blocked',
+          field: 'is_Blocked',
           editable: true,
-          cellEditor: 'agSelectCellEditor',
-          cellEditorParams: {
-            values: [true, false],
-          },
-          valueFormatter: params => (params.value ? 'Yes' : 'No'),  // Formatting the boolean value for better readability
+          cellRenderer: params => (params.value ? 'Yes' : 'No'), // Renders 'Yes' or 'No' based on the boolean value
           width: 100,
         }
       ],
@@ -110,9 +106,38 @@ export default {
 };
 </script>
 
-<style scoped>
-.ag-theme-alpine {
-  height: 100%;
+<style>
+@import "~ag-grid-community/styles/ag-grid.css";
+@import "~ag-grid-community/styles/ag-theme-alpine.css";
+
+.custom-grid {
   width: 100%;
+  height: auto;
+  max-height: 600px; /* Cap the height for scrollability */
+  border: 1px solid #e0e0e0;
+  font-size: 14px; /* Adjust font size for better readability */
+}
+
+.ag-theme-alpine .ag-header {
+  font-weight: bold;
+  background-color: #f5f5f5; /* Light gray background for headers */
+}
+
+.ag-theme-alpine .ag-row {
+  border-bottom: 1px solid #e0e0e0; /* Light gray border between rows */
+}
+
+.ag-theme-alpine .ag-row-hover {
+  background-color: #f0f8ff; /* Light blue background on hover */
+}
+
+.ag-theme-alpine .ag-cell {
+  padding: 8px;
+}
+
+.ag-theme-alpine .ag-paging-panel {
+  background-color: #f5f5f5;
+  padding: 8px;
+  border-top: 1px solid #e0e0e0;
 }
 </style>

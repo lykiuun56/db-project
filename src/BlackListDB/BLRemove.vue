@@ -26,13 +26,13 @@
           <p v-else>No results found</p>
           <div v-if="rowData.length" class="ag-theme-alpine" style="height: 400px;">
             <ag-grid-vue
-                class="ag-theme-alpine"
-                :columnDefs="columnDefs"
-                :rowData="rowData"
-                rowSelection="single"
-                @rowSelected="onRowSelected"
-                @firstDataRendered="onFirstDataRendered"
-                :defaultColDef="defaultColDef"
+              class="ag-theme-alpine"
+              :columnDefs="columnDefs"
+              :rowData="rowData"
+              rowSelection="single"
+              @selectionChanged="onSelectionChanged"
+              @firstDataRendered="onFirstDataRendered"
+              :defaultColDef="defaultColDef"
             ></ag-grid-vue>
           </div>
         </v-col>
@@ -79,7 +79,11 @@ export default {
         { headerName: 'Handle Name', field: 'handle_name' },
         { headerName: 'Email', field: 'email' },
         { headerName: 'Followers', field: 'followers' },
-        { headerName: 'Is Blocked', field: 'is_blocked', valueFormatter: params => params.value ? 'Yes' : 'No' }
+        {
+          headerName: 'Is Blocked',
+          field: 'is_blocked',
+          valueFormatter: (params) => (params.value ? 'Yes' : 'No'),
+        },
       ],
       rowData: [],
       selectedItem: null,
@@ -112,8 +116,10 @@ export default {
         this.loading = false;
       }
     },
-    onRowSelected(event) {
-      this.selectedItem = event.node.isSelected() ? event.node.data : null;
+    onSelectionChanged(event) {
+      const selectedNodes = event.api.getSelectedNodes();
+      this.selectedItem = selectedNodes.length > 0 ? selectedNodes[0].data : null;
+      console.log('Selected Item:', this.selectedItem); 
     },
     confirmRemove() {
       if (!this.selectedItem) {

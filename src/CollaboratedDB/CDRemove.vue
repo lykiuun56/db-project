@@ -26,13 +26,13 @@
           <p v-else>No results found</p>
           <div v-if="rowData.length" class="ag-theme-alpine" style="height: 400px;">
             <ag-grid-vue
-                class="ag-theme-alpine"
-                :columnDefs="columnDefs"
-                :rowData="rowData"
-                rowSelection="single"
-                @rowSelected="onRowSelected"
-                @firstDataRendered="onFirstDataRendered"
-                :defaultColDef="defaultColDef"
+              class="ag-theme-alpine"
+              :columnDefs="columnDefs"
+              :rowData="rowData"
+              rowSelection="single"
+              @selectionChanged="onSelectionChanged"
+              @firstDataRendered="onFirstDataRendered"
+              :defaultColDef="defaultColDef"
             ></ag-grid-vue>
           </div>
         </v-col>
@@ -77,14 +77,14 @@ export default {
       columnDefs: [
         { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, width: 150 },
         { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, minWidth: 150 },
-        { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, minWidth: 200 },  // Ensure field name matches the backend response
+        { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, minWidth: 200 },
         { headerName: 'Followers', field: 'followers', sortable: true, filter: true, minWidth: 150 },
         { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true, minWidth: 150 },
         { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true, minWidth: 200 },
         { headerName: 'Email', field: 'email', sortable: true, filter: true, minWidth: 200 },
         { headerName: 'Phone', field: 'phone', sortable: true, filter: true, width: 150 },
         { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true, width: 150 },
-        { headerName: 'Notes', field: 'notes', sortable: true, filter: true, minWidth: 150 },  // Ensure field name is correct (e.g., lowercase 'n' if that's how it's stored)
+        { headerName: 'Notes', field: 'notes', sortable: true, filter: true, minWidth: 150 },
         { headerName: 'POC', field: 'poc', sortable: true, filter: true, minWidth: 150 },
         { headerName: 'State', field: 'state', sortable: true, filter: true, width: 100 },
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true, minWidth: 150 },
@@ -96,7 +96,7 @@ export default {
           cellEditorParams: {
             values: [true, false],
           },
-          valueFormatter: params => (params.value ? 'Yes' : 'No'),  // Formatting the boolean value for better readability
+          valueFormatter: params => (params.value ? 'Yes' : 'No'),
           width: 100,
         }
       ],
@@ -131,8 +131,11 @@ export default {
         this.loading = false;
       }
     },
-    onRowSelected(event) {
-      this.selectedItem = event.node.isSelected() ? event.node.data : null;
+    onSelectionChanged(event) {
+      // Get selected row data
+      const selectedRows = event.api.getSelectedRows();
+      this.selectedItem = selectedRows.length > 0 ? selectedRows[0] : null;
+      console.log('Selected Item:', this.selectedItem); 
     },
     confirmRemove() {
       if (!this.selectedItem) {
@@ -152,6 +155,7 @@ export default {
         const id = this.selectedItem.id;
         await axios.delete(`http://localhost:8081/api/collaborated/delete/${id}`);
         alert('Record removed successfully');
+        this.selectedItem = null; // Reset selection after removal
         this.search(); // Re-run the search to refresh the results after deletion
       } catch (error) {
         console.error(error);

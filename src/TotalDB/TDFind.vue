@@ -17,8 +17,8 @@
     <v-row>
       <v-col cols="3">
         <h4>Followers:</h4>
-        <v-text-field v-model="minFollowers" label="Min Followers" dense></v-text-field>
-        <v-text-field v-model="maxFollowers" label="Max Followers" dense></v-text-field>
+        <v-text-field v-model="minFollowers" label="Min Followers" dense type="number"></v-text-field>
+        <v-text-field v-model="maxFollowers" label="Max Followers" dense type="number"></v-text-field>
       </v-col>
       <v-col cols="3">
         <h4>Blocked:</h4>
@@ -42,26 +42,44 @@ export default {
       email: '',
       minFollowers: '',
       maxFollowers: '',
-      selectedIs_blocked: null, // True for "Yes", false for "No"
+      selectedIs_blocked: null, 
     };
   },
   methods: {
     simpleSearch() {
-      this.$router.push({ name: 'TDFindResult', query: { handleName: this.handleName, email: this.email } });
-    },
-    advancedSearch() {
+      console.log('Simple Search', this.handleName, this.email);
       this.$router.push({
         name: 'TDFindResult',
         query: {
           handleName: this.handleName,
           email: this.email,
-          minFollowers: this.minFollowers,
-          maxFollowers: this.maxFollowers,
-          is_Blocked: this.selectedIs_blocked,
-        }
+        },
       });
-    }
-  }
+    },
+    advancedSearch() {
+      console.log('Advanced Search', {
+        handleName: this.handleName,
+        email: this.email,
+        minFollowers: this.minFollowers,
+        maxFollowers: this.maxFollowers,
+        is_Blocked: this.selectedIs_blocked,
+      });
+
+      const minFollowers = this.minFollowers !== '' ? Number(this.minFollowers) : null;
+      const maxFollowers = this.maxFollowers !== '' ? Number(this.maxFollowers) : null;
+
+      this.$router.push({
+        name: 'TDFindResult',
+        query: {
+          handleName: this.handleName,
+          email: this.email,
+          minFollowers,
+          maxFollowers,
+          is_Blocked: this.selectedIs_blocked,
+        },
+      }); 
+    },
+  },
 };
 </script>
 

@@ -21,13 +21,13 @@
           <p v-else>No results found</p>
           <div v-if="rowData.length" class="ag-theme-alpine" style="height: 400px;">
             <ag-grid-vue
-                class="ag-theme-alpine"
-                :columnDefs="columnDefs"
-                :rowData="rowData"
-                rowSelection="single"
-                @rowSelected="onRowSelected"
-                @firstDataRendered="onFirstDataRendered"
-                :defaultColDef="defaultColDef"
+              class="ag-theme-alpine"
+              :columnDefs="columnDefs"
+              :rowData="rowData"
+              rowSelection="single"
+              @rowSelected="onRowSelected"
+              @firstDataRendered="onFirstDataRendered"
+              :defaultColDef="defaultColDef"
             ></ag-grid-vue>
           </div>
         </v-col>
@@ -77,7 +77,7 @@ export default {
           sortable: true,
           filter: true,
           flex: 2,
-          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
+          cellRenderer: (params) => (params.value ? 'Yes' : 'No'), // Correctly handling boolean values
         },
       ],
       rowData: [],
@@ -112,7 +112,9 @@ export default {
       }
     },
     onRowSelected(event) {
-      this.selectedItem = event.node.isSelected() ? event.node.data : null;
+      // Handle row selection event and update selectedItem
+      this.selectedItem = event.api.getSelectedNodes().map(node => node.data)[0] || null;
+      console.log(this.selectedItem); // Output the currently selected item
     },
     confirmRemove() {
       if (!this.selectedItem) {
@@ -132,6 +134,7 @@ export default {
         const id = this.selectedItem.id;
         await axios.delete(`http://localhost:8081/api/total/delete/${id}`);
         alert('Record removed successfully');
+        this.selectedItem = null; // Reset selection after removal
         this.search(); // Re-run the search to refresh the results after deletion
       } catch (error) {
         console.error(error);

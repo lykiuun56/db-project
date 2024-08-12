@@ -27,6 +27,7 @@ import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { apiBaseUrl } from '@/config';
 
 export default {
   name: 'CollaboratedDatabaseGrid',

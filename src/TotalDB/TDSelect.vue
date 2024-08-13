@@ -44,6 +44,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import axios from 'axios';
 import qs from 'qs'; // Import qs for parameter serialization
+import { apiBaseUrl } from '@/config';
 
 export default {
   name: 'ManagementEmail',
@@ -80,7 +81,7 @@ export default {
         return;
       }
 
-      axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/select', {
+      axios.get(`${apiBaseUrl}/api/total/select`, {
         params: {
           projectName: this.projectName,
           userCount: this.userCount,
@@ -105,7 +106,7 @@ export default {
 
       const userIds = selectedData.map(user => user.id); // Extract the IDs of selected rows
 
-      axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/export', {
+      axios.get(`${apiBaseUrl}/api/total/export`, {
         params: {
           projectName: this.projectName,
           userIds: userIds, // Send user IDs as an array

@@ -158,6 +158,7 @@
 </template>
 
 <script>
+import { apiBaseUrl } from '@/config';
 import axios from 'axios';
 
 export default {
@@ -207,7 +208,7 @@ export default {
         };
 
         // Add to CollaboratedDatabase with Project Name and POC
-        const response = await axios.post(`http://localhost:8081/api/collaborated/add/${projectName}/${poc}`, data);
+        const response = await axios.post(`${apiBaseUrl}/api/collaborated/add/${projectName}/${poc}`, data);
 
         if (response.status === 200) {
           alert('Successfully added to Collaborated Database');
@@ -229,7 +230,7 @@ export default {
           formData.append('file', this.selectedFile);
         }
 
-        const response = await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/api/collaborated/addByFile', formData, {
+        const response = await axios.post(`${apiBaseUrl}/api/collaborated/addByFile`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },

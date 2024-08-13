@@ -54,6 +54,7 @@
 </template>
 
 <script>
+import { apiBaseUrl } from '@/config';
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 
@@ -97,7 +98,7 @@ export default {
     async search() {
       this.loading = true;
       try {
-        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/singleSearch', {
+        const response = await axios.get(`${apiBaseUrl}/api/total/singleSearch`, {
           params: {
             handleName: this.handleName || null,
             email: this.email || null,

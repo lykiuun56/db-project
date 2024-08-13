@@ -23,6 +23,7 @@
 </template>
 
 <script>
+import { apiBaseUrl } from '@/config';
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 
@@ -53,7 +54,7 @@ export default {
   methods: {
     async onGridReady(params) {
       try {
-        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com//total_projects/all');
+        const response = await axios.get(`${apiBaseUrl}/total_projects/all`);
         this.rowData = response.data;
         params.api.sizeColumnsToFit();  // Ensure columns fit the grid width
       } catch (error) {

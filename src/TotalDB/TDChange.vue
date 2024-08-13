@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import { apiBaseUrl } from '@/config';
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 
@@ -70,7 +71,7 @@ export default {
     async search() {
       this.loading = true;
       try {
-        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/singleSearch', {
+        const response = await axios.get(`${apiBaseUrl}/api/total/singleSearch`, {
           params: {
             handleName: this.handleName || null,
             email: this.email || null,
@@ -87,7 +88,7 @@ export default {
     async onCellValueChanged(event) {
       const updatedData = event.data;
       try {
-        await axios.put(`http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/update/${updatedData.id}`, updatedData);
+        await axios.put(`${apiBaseUrl}/api/total/update/${updatedData.id}`, updatedData);
         alert('Update successful');
       } catch (error) {
         console.error('Error updating data:', error);

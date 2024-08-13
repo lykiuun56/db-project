@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import { apiBaseUrl } from '@/config';
 import axios from 'axios';
 import fileDownload from 'js-file-download';
 
@@ -55,7 +56,7 @@ export default {
       formData.append('black_list', this.blackListFile);
 
       try {
-        const response = await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/remove-duplicates', formData, {
+        const response = await axios.post(`${apiBaseUrl}/remove-duplicates`, formData, {
           responseType: 'blob',
           headers: {
             'Content-Type': 'multipart/form-data',

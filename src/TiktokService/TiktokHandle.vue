@@ -25,7 +25,8 @@
 </template>
   
   <script>
-  import axios from "axios";
+  import { apiBaseUrl } from "@/config";
+import axios from "axios";
 
   export default {
     name: 'TiktokHandle',
@@ -46,7 +47,7 @@
         formData.append('file', this.selectedFile);
 
         try {
-          const response = await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/tiktok/searchHandleName', formData, {
+          const response = await axios.post(`${apiBaseUrl}/tiktok/searchHandleName`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             },

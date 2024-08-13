@@ -23,6 +23,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { apiBaseUrl } from '@/config';
 
 export default {
   components: {
@@ -104,7 +105,7 @@ export default {
         });
       }
 
-      axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/search', searchCriteriaList)
+      axios.post(`${apiBaseUrl}/api/total/search`, searchCriteriaList)
           .then(response => {
             console.log('API Response:', response.data);
             this.rowData = response.data;

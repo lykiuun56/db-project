@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { apiBaseUrl } from '@/config';
 import axios from 'axios';
 
 export default {
@@ -45,7 +46,7 @@ export default {
       };
 
       try {
-        await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com//api/black_list/addManual', blackListData);
+        await axios.post(`${apiBaseUrl}/api/black_list/addManual`, blackListData);
         alert('Added to black list successfully');
         this.handleName = '';
         this.email = '';

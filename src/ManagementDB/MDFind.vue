@@ -41,6 +41,7 @@ import { AgGridVue } from 'ag-grid-vue3';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import axios from 'axios';
+import { apiBaseUrl } from '@/config';
 
 export default {
   name: 'MDfind',
@@ -70,7 +71,7 @@ export default {
     async findMatchingEmails() {
       this.searchPerformed = false;
       try {
-        const response = await axios.get(`http://creator-tools.us-east-1.elasticbeanstalk.com/api/management/findAllMatching/{emailEnding}`, {
+        const response = await axios.get(`${apiBaseUrl}/api/management/findAllMatching/{emailEnding}`, {
           params: {
             emailEnding: this.emailEnding,
           },

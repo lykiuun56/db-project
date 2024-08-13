@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { apiBaseUrl } from '@/config';
 import axios from 'axios';
 
 export default {
@@ -41,7 +42,7 @@ export default {
       };
 
       try {
-        await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/management/add', managementEmail, {
+        await axios.post(`${apiBaseUrl}/management/add`, managementEmail, {
           headers: {
             'Content-Type': 'application/json'
           }

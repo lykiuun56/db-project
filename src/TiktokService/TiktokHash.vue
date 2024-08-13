@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import { apiBaseUrl } from '@/config';
 import axios from 'axios';
 
 export default {
@@ -46,7 +47,7 @@ export default {
       formData.append('file', this.selectedFile);
 
       try {
-        const response = await axios.post('http://creator-tools.us-east-1.elasticbeanstalk.com/tiktok/searchCreatorsByHashtag', formData, {
+        const response = await axios.post(`${apiBaseUrl}/tiktok/searchCreatorsByHashtag`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           },

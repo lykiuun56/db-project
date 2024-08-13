@@ -40,22 +40,42 @@ export default {
   },
   data() {
     return {
-      handleName: '',  // This is used for the search input
+      handleName: '',  // Search input for handle name
       email: '',
       rowData: [], // Data to be displayed in the grid
       columnDefs: [
         { headerName: "ID", field: "id", editable: false }, // Non-editable
-        { headerName: "Handle Name", field: "handle_name", editable: true }, // Matches the database field
+        { headerName: "Handle Name", field: "handle_name", editable: true }, // Editable
         { headerName: "Followers", field: "followers", editable: true },
         { headerName: "Email", field: "email", editable: true },
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
-          sortable: true,
-          filter: true,
-          flex: 2,
-          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
-        },
+          editable: false, // No direct editing
+          cellRenderer: (params) => {
+            return `<span class="toggle-cell">${params.value ? 'Yes' : 'No'}</span>`;
+          },
+          cellStyle: { cursor: 'pointer', textAlign: 'center' },
+          onCellClicked: (params) => {
+            // Toggle the value when the cell is clicked
+            const newValue = !params.value;
+            params.node.setDataValue(params.colDef.field, newValue);
+
+            // Force cell refresh to ensure the new value is correctly displayed
+            params.api.refreshCells({ rowNodes: [params.node], force: true });
+
+            // Manually trigger the onCellValueChanged event to handle the backend update
+            params.api.dispatchEvent({
+              type: 'cellValueChanged',
+              node: params.node,
+              data: params.node.data,
+              column: params.column,
+              colDef: params.colDef,
+              newValue: newValue,
+              oldValue: params.value
+            });
+          }
+        }
       ],
       defaultColDef: {
         editable: true, // Make all columns editable by default
@@ -70,7 +90,7 @@ export default {
     async search() {
       this.loading = true;
       try {
-        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/singleSearch', {
+        const response = await axios.get('http://localhost:8081/api/total/singleSearch', {
           params: {
             handleName: this.handleName || null,
             email: this.email || null,
@@ -87,7 +107,7 @@ export default {
     async onCellValueChanged(event) {
       const updatedData = event.data;
       try {
-        await axios.put(`http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/update/${updatedData.id}`, updatedData);
+        await axios.put(`http://localhost:8081/api/total/update/${updatedData.id}`, updatedData);
         alert('Update successful');
       } catch (error) {
         console.error('Error updating data:', error);
@@ -102,5 +122,18 @@ export default {
 .ag-theme-alpine {
   height: 100%;
   width: 100%;
+}
+
+.toggle-cell {
+  cursor: pointer;
+  padding: 5px;
+  user-select: none;
+  background-color: #e0f7fa;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-cell:hover {
+  background-color: #b2ebf2;
 }
 </style>

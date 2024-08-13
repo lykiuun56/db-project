@@ -56,12 +56,19 @@ export default {
       userCount: 0,
       rowData: [],
       columnDefs: [
-        { headerName: 'ID', field: 'id', checkboxSelection: true },
-        { headerName: 'HandleName', field: 'handle_name' },
-        { headerName: 'Email', field: 'email' },
-        { headerName: 'Followers', field: 'followers' },
-        { headerName: 'Notes', field: 'notes' },
-        { headerName: 'Is_Blocked', field: 'is_blocked'}
+        {headerName: 'ID', field: 'id', checkboxSelection: true},
+        {headerName: 'HandleName', field: 'handle_name'},
+        {headerName: 'Email', field: 'email'},
+        {headerName: 'Followers', field: 'followers'},
+        {headerName: 'Notes', field: 'notes'},
+        {
+          headerName: 'Is Blocked',
+          field: 'is_Blocked',
+          sortable: true,
+          filter: true,
+          flex: 2,
+          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
+        },
       ],
       defaultColDef: {
         sortable: true,
@@ -80,7 +87,7 @@ export default {
         return;
       }
 
-      axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/select', {
+      axios.get('http://localhost:8081/api/total/select', {
         params: {
           projectName: this.projectName,
           userCount: this.userCount,
@@ -105,13 +112,13 @@ export default {
 
       const userIds = selectedData.map(user => user.id); // Extract the IDs of selected rows
 
-      axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total/export', {
+      axios.get('http://localhost:8081/api/total/export', {
         params: {
           projectName: this.projectName,
           userIds: userIds, // Send user IDs as an array
         },
         paramsSerializer: params => {
-          return qs.stringify(params, { arrayFormat: 'repeat' }); // Serialize array parameters correctly
+          return qs.stringify(params, {arrayFormat: 'repeat'}); // Serialize array parameters correctly
         },
         responseType: 'blob', // Important: Set the response type to blob for file download
       })

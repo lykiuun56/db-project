@@ -62,7 +62,14 @@ export default {
         { headerName: 'Email', field: 'email' },
         { headerName: 'Followers', field: 'followers' },
         { headerName: 'Notes', field: 'notes' },
-        { headerName: 'Is_Blocked', field: 'is_blocked'}
+        {
+          headerName: 'Is Blocked',
+          field: 'is_Blocked',
+          sortable: true,
+          filter: true,
+          flex: 2,
+          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
+        },
       ],
       defaultColDef: {
         sortable: true,

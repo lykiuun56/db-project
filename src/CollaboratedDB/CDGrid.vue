@@ -3,105 +3,161 @@
     <v-row>
       <v-col cols="12">
         <h1>Collaborated Database</h1>
-        <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn> <!-- Button to trigger export -->
+        <!-- <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn> -->
+        <v-btn color="primary" @click="exportAllToExcel">Export All to Excel</v-btn>
+        <v-btn color="secondary" @click="exportSelectedToExcel">Export Selected to Excel</v-btn>
+        <v-btn color="error" @click="deleteSelected">Delete Selected</v-btn>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
-            class="ag-theme-alpine"
-            style="width: 100%; height: 600px;"
-            :columnDefs="columnDefs"
-            :rowData="rowData"
-            :gridOptions="gridOptions"
-            @grid-ready="onGridReady"
-            :domLayout="'autoHeight'"
+          ref="agGrid"
+          class="ag-theme-alpine"
+          style="width: 100%; height: 600px;"
+          :columnDefs="columnDefs"
+          :rowData="rowData"
+          :gridOptions="gridOptions"
+          @grid-ready="onGridReady"
+          :domLayout="'autoHeight'"
+          @row-double-clicked="onRowDoubleClicked"
         ></ag-grid-vue>
       </v-col>
     </v-row>
+
+    <edit-pop-out
+      v-model="isEditDialogVisible"
+      :rowData="selectedRow"
+      @save="onSaveEdit"
+      @close="isEditDialogVisible = false"
+    />
   </v-container>
 </template>
 
 <script>
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
-import * as XLSX from 'xlsx';
-import * as FileSaver from 'file-saver';
+import EditPopOut from '@/components/EditPopOut.vue';
 import { apiBaseUrl } from '@/config';
+import { exportToExcel } from '@/utils/exportUtils';
+import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 
 export default {
   name: 'CollaboratedDatabaseGrid',
   components: {
     AgGridVue,
+    EditPopOut
   },
   data() {
     return {
-      columnDefs: [
-        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, minWidth: 100 },
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, minWidth: 150 },
-        { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, minWidth: 200 },  // Ensure field name matches the backend response
-        { headerName: 'Followers', field: 'followers', sortable: true, filter: true, width: 100 },
-        { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true, minWidth: 150 },
-        { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true, minWidth: 200 },
-        { headerName: 'Email', field: 'email', sortable: true, filter: true, minWidth: 200 },
-        { headerName: 'Phone', field: 'phone', sortable: true, filter: true, width: 150 },
-        { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true, width: 150 },
-        { headerName: 'Notes', field: 'notes', sortable: true, filter: true, minWidth: 150 },  // Ensure field name is correct (e.g., lowercase 'n' if that's how it's stored)
-        { headerName: 'POC', field: 'poc', sortable: true, filter: true, minWidth: 150 },
-        { headerName: 'State', field: 'state', sortable: true, filter: true, width: 100 },
-        { headerName: 'Categories', field: 'categories', sortable: true, filter: true, minWidth: 150 },
+      columnDefs: this.getColumnDefs(),
+      rowData: null,
+      gridOptions: this.getGridOptions(),
+      selectedRow: null,
+      isEditDialogVisible: false,
+    };
+  },
+  methods: {
+    getColumnDefs() {
+      return [
+        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true},
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
+        { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, width: 300 },
+        { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
+        { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true },
+        { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true },
+        { headerName: 'Email', field: 'email', sortable: true, filter: true },
+        { headerName: 'Phone', field: 'phone', sortable: true, filter: true },
+        { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true },
+        { headerName: 'Notes', field: 'notes', sortable: true, filter: true },
+        { headerName: 'POC', field: 'poc', sortable: true, filter: true },
+        { headerName: 'State', field: 'state', sortable: true, filter: true },
+        { headerName: 'Categories', field: 'categories', sortable: true, filter: true },
         {
           headerName: 'Is Blocked',
           field: 'is_blocked',
           editable: true,
           cellEditor: 'agSelectCellEditor',
-          cellEditorParams: {
-            values: [true, false],
-          },
-          valueFormatter: params => (params.value ? 'Yes' : 'No'),  // Formatting the boolean value for better readability
+          cellEditorParams: { values: [true, false] },
+          valueFormatter: params => (params.value ? 'Yes' : 'No'),
           width: 100,
         }
-      ],
-
-      rowData: null,
-      gridOptions: {
+      ];
+    },
+    getGridOptions() {
+      return {
         pagination: true,
         paginationPageSize: 10,
-        defaultColDef: {
-          resizable: true,
-        },
+        defaultColDef: { resizable: true },
         autoHeight: true,
-      },
-    };
-  },
-  methods: {
+        rowSelection: 'multiple',
+      };
+    },
     async onGridReady(params) {
+      this.gridApi = params.api;
+      this.gridColumnApi = params.columnApi;
+
       try {
-        // const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/collaborated/all');
-        const response = await axios.get(`${apiBaseUrl}/api/collaborated/all`)
+        const response = await axios.get(`${apiBaseUrl}/api/collaborated/all`);
         this.rowData = response.data;
-        params.api.sizeColumnsToFit();  // Ensure columns fit the grid width
+
+        this.gridApi.setDomLayout('autoHeight');
+        this.autoSizeColumns();
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     },
-    exportToExcel() {
-      if (!this.rowData || this.rowData.length === 0) {
-        alert("No data available to export!");
-        return;
+    autoSizeColumns() {
+      const allColumnIds = this.gridColumnApi.getAllColumns()
+        .filter(column => column.getColId() !== 'tiktok_url')
+        .map(column => column.getColId());
+
+      this.gridColumnApi.autoSizeColumns(allColumnIds, true);
+    },
+    onRowDoubleClicked(event) {
+      this.selectedRow = event.data;
+      this.isEditDialogVisible = true;
+    },
+    async onSaveEdit(updatedData) {
+      try {
+        await axios.put(`${apiBaseUrl}/api/collaborated/update/${updatedData.id}`, updatedData);
+        this.refreshGridData();
+      } catch (error) {
+        console.error('Error updating data:', error);
+      } finally {
+        this.isEditDialogVisible = false;
       }
-
-      const worksheet = XLSX.utils.json_to_sheet(this.rowData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Collaborated Database");
-
-      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-      this.saveAsExcelFile(excelBuffer, "collaborated_database");
     },
-    saveAsExcelFile(buffer, fileName) {
-      const data = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-      FileSaver.saveAs(data, `${fileName}_export_${new Date().getTime()}.xlsx`);
+    async refreshGridData() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/collaborated/all`);
+        this.rowData = response.data;
+      } catch (error) {
+        console.error('Error refreshing data:', error);
+      }
     },
+    exportAllToExcel() {
+      exportToExcel(this.rowData, "collaborated_database_all");
+    },
+    exportSelectedToExcel() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const selectedData = selectedNodes.map(node => node.data);
+      exportToExcel(selectedData, "collaborated_database_selected");
+    },
+
+    async deleteSelected() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const selectedData = selectedNodes.map(node => node.data);
+
+      for (const data of selectedData) {
+        const success = await deleteRecord(apiBaseUrl + '/api/collaborated', data.id);
+        if (success) {
+          removeRecordFromGrid(this.gridApi, 'id', data.id);
+
+          await this.refreshGridData();
+        }
+      }
+    }
   },
 };
 </script>

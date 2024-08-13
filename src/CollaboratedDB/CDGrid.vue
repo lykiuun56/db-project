@@ -152,7 +152,13 @@ export default {
     },
 
     async deleteSelected() {
-      const selectedNodes = this.gridApi.getSelectedNodes();
+      const selectedNodes = [];
+      this.gridApi.forEachNodeAfterFilterAndSort((node) => {
+        if (node.isSelected()) {
+          selectedNodes.push(node);
+        }
+      });
+
       const selectedData = selectedNodes.map(node => node.data);
 
       for (const data of selectedData) {

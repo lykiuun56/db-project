@@ -27,6 +27,7 @@ import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { apiBaseUrl } from '@/config';
 
 export default {
   name: 'CollaboratedDatabaseGrid',
@@ -76,7 +77,8 @@ export default {
   methods: {
     async onGridReady(params) {
       try {
-        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/collaborated/all');
+        // const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/collaborated/all');
+        const response = await axios.get(`${apiBaseUrl}/api/collaborated/all`)
         this.rowData = response.data;
         params.api.sizeColumnsToFit();  // Ensure columns fit the grid width
       } catch (error) {

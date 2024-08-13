@@ -102,7 +102,7 @@ export default {
     async search() {
       this.loading = true;
       try {
-        const response = await axios.get('http://localhost:8081/api/collaborated/singleSearch', {
+        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/collaborated/singleSearch', {
           params: {
             handleName: this.handleName || null,
             email: this.email || null,

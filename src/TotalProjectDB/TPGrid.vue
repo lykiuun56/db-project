@@ -53,7 +53,7 @@ export default {
   methods: {
     async onGridReady(params) {
       try {
-        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com//total_projects/all');
+        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/total_projects/all');
         this.rowData = response.data;
         params.api.sizeColumnsToFit();  // Ensure columns fit the grid width
       } catch (error) {
@@ -61,6 +61,9 @@ export default {
       }
     },
     dateFormatter(params) {
+      if (!params.value) {
+        return ''; // Return empty string if the date value is null or undefined
+      }
       const date = new Date(params.value);
       if (!isNaN(date.getTime())) {
         // Customize the date format as needed

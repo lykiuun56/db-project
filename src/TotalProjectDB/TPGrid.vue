@@ -54,7 +54,7 @@ export default {
   methods: {
     async onGridReady(params) {
       try {
-        const response = await axios.get(`${apiBaseUrl}/total_projects/all`);
+        const response = await axios.get(`${apiBaseUrl}/api/total_projects/all`);
         this.rowData = response.data;
         params.api.sizeColumnsToFit();  // Ensure columns fit the grid width
       } catch (error) {
@@ -81,7 +81,7 @@ export default {
 
         const projectName = 'YourProjectName'; // Replace with actual project name or make it dynamic
 
-        const response = await axios.get('http://creator-tools.us-east-1.elasticbeanstalk.com/api/export', {
+        const response = await axios.get(`${apiBaseUrl}/api/export`, {
           params: {
             projectName: projectName,
             userIds: selectedIds

@@ -137,7 +137,13 @@ export default {
       }
     },
     exportAllToExcel() {
-      exportToExcel(this.rowData, "collaborated_database_all");
+      // exportToExcel(this.rowData, "collaborated_database_all");
+      const allDisplayedData = [];
+      this.gridApi.forEachNodeAfterFilterAndSort((node) => {
+        allDisplayedData.push(node.data);
+      });
+
+      exportToExcel(allDisplayedData, "collaborated_database_filtered");
     },
     exportSelectedToExcel() {
       const selectedNodes = this.gridApi.getSelectedNodes();

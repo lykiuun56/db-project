@@ -42,7 +42,7 @@ export default {
       };
 
       try {
-        await axios.post(`${apiBaseUrl}/management/add`, managementEmail, {
+        await axios.post(`${apiBaseUrl}/api/management/add`, managementEmail, {
           headers: {
             'Content-Type': 'application/json'
           }

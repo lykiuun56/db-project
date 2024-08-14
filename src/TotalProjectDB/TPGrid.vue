@@ -62,12 +62,25 @@ export default {
       }
     },
     dateFormatter(params) {
-      const date = new Date(params.value);
+      const value = params.value;
+
+      // Check if the value is null, undefined, or an empty string
+      if (value == null || value === '') {
+        return ''; // Return an empty string if the value is null or undefined
+      }
+
+      const date = new Date(value);
+
+      // Check if the date is valid
       if (!isNaN(date.getTime())) {
         // Customize the date format as needed
-        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
       } else {
-        return ''; // or some other placeholder
+        return ''; // Return an empty string for invalid dates
       }
     },
     async exportToExcel() {

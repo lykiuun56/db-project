@@ -1,24 +1,30 @@
 <template>
   <div class="mdfind-container">
-    <h1>Find Matching Emails</h1>
-    <div class="search-form">
-      <label for="emailEnding">Email Ending:</label>
-      <input
-          v-model="emailEnding"
-          type="text"
-          id="emailEnding"
-          placeholder="Enter email ending (e.g., @gmail.com)"
-      />
-      <button @click="findMatchingEmails">Search</button>
+    <div class="sidebar">
+      <h1>Find Matching Emails</h1>
+      <div class="search-form">
+        <label for="emailEnding">Email Ending:</label>
+        <input
+            v-model="emailEnding"
+            type="text"
+            id="emailEnding"
+            placeholder="Enter email ending (e.g., @gmail.com)"
+        />
+        <button @click="findMatchingEmails">Search</button>
+      </div>
+
+      <div v-if="searchPerformed && results.length === 0">
+        <p>No matching emails found.</p>
+      </div>
+
+      <div v-if="results.length" class="export-buttons">
+        <v-btn color="primary" @click="exportAllToExcel">Export All to Excel</v-btn>
+        <v-btn color="secondary" @click="exportSelectedToExcel">Export Selected to Excel</v-btn>
+      </div>
     </div>
 
-    <div v-if="searchPerformed && results.length === 0">
-      <p>No matching emails found.</p>
-    </div>
-
-    <div v-if="results.length" class="results">
-      <h2>Matching Emails</h2>
-      <div class="ag-theme-alpine" style="height: 400px; width: 100%;">
+    <div class="main-content">
+      <div v-if="results.length" class="grid-container ag-theme-alpine">
         <ag-grid-vue
             :columnDefs="columnDefs"
             :rowData="results"
@@ -32,6 +38,10 @@
             ref="grid"
         ></ag-grid-vue>
       </div>
+
+      <div v-if="searchPerformed && error" class="error">
+        <p>{{ error }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -42,6 +52,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 import axios from 'axios';
 import { apiBaseUrl } from '@/config';
+import { exportToExcel } from '@/utils/exportUtils';
 
 export default {
   name: 'MDfind',
@@ -53,12 +64,17 @@ export default {
       emailEnding: '',
       results: [],
       searchPerformed: false,
+      error: null,
       columnDefs: [
         { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true },
         { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
         { headerName: 'Email', field: 'email', sortable: true, filter: true },
         { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
-        { headerName: 'Is Blocked', field: 'is_blocked', sortable: true, filter: true, valueFormatter: params => (params.value ? 'Yes' : 'No') }
+        { headerName: 'Is Blocked',
+          field: 'is_Blocked',
+          sortable: true,
+          filter: true,
+          cellRenderer: (params) => params.value ? 'Yes' : 'No'},
       ],
       defaultColDef: {
         sortable: true,
@@ -69,7 +85,8 @@ export default {
   },
   methods: {
     async findMatchingEmails() {
-      this.searchPerformed = false;
+      this.searchPerformed = true;
+      this.error = null;  // Reset error state
       try {
         const response = await axios.get(`${apiBaseUrl}/api/management/findAllMatching/{emailEnding}`, {
           params: {
@@ -77,8 +94,8 @@ export default {
           },
         });
         this.results = response.data;
-        this.searchPerformed = true;
       } catch (error) {
+        this.error = 'Error finding matching emails. Please try again later.';
         console.error('Error finding matching emails:', error);
       }
     },
@@ -86,23 +103,52 @@ export default {
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi;
     },
+    exportAllToExcel() {
+      const allDisplayedData = [];
+      this.gridApi.forEachNodeAfterFilterAndSort((node) => {
+        allDisplayedData.push(node.data);
+      });
+
+      exportToExcel(allDisplayedData, "management_email_filtered");
+    },
+    exportSelectedToExcel() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const selectedData = selectedNodes.map(node => node.data);
+      exportToExcel(selectedData, "management_email_selected");
+    },
   },
 };
 </script>
 
 <style scoped>
-.mdfind-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f7f7f7;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+html, body, #app {
+  height: 100%;
+  margin: 0;
 }
 
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
+.mdfind-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f7f7f7;
+  box-sizing: border-box;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background-color: #ffffff;
+  width: 300px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden;
 }
 
 .search-form {
@@ -131,7 +177,21 @@ h1 {
   background-color: #0056b3;
 }
 
-.results {
+.export-buttons {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.grid-container {
+  flex: 1;
+  overflow: auto;
+}
+
+.error {
+  color: red;
+  text-align: center;
   margin-top: 20px;
 }
 </style>

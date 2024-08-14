@@ -58,16 +58,15 @@ export default {
   methods: {
     getColumnDefs() {
       return [
-        {headerName: 'ID', field: 'id', sortable: true, filter: true, width: 70},
-        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, flex: 2},
-        {headerName: 'Followers', field: 'followers', sortable: true, filter: true, flex: 1.5},
-        {headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1},
+        {headerName: 'ID', field: 'id', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        {headerName: 'Followers', field: 'followers', sortable: true, filter: true},
+        {headerName: 'Email', field: 'email', sortable: true, filter: true},
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
           sortable: true,
           filter: true,
-          flex: 2,
           cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
         },
       ];

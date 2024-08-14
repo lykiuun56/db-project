@@ -42,7 +42,7 @@ export default {
     return {
       columnDefs: [
         { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, width: 80 },
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, minWidth: 150 },
+        { headerName: 'HandleName', field: 'handle_name', sortable: true, filter: true, minWidth: 150 },
         { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, minWidth: 200 },  // Ensure field name matches the backend response
         { headerName: 'Followers', field: 'followers', sortable: true, filter: true, width: 100 },
         { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true, minWidth: 150 },

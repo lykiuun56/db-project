@@ -58,10 +58,10 @@ export default {
       const query = this.$route.query;
 
       // Make the GET request to singleSearch endpoint with the required parameters
-      axios.get(`${apiBaseUrl}/collaborated_projects/singleSearch`, {
+      axios.get(`${apiBaseUrl}/api/collaborated_projects/singleSearch`, {
         params: {
-          handleName: query.handleName,
-          email: query.email,
+          handleName: query.handleName||null,
+          email: query.email||null,
         },
       })
           .then(response => {

@@ -35,6 +35,7 @@ export default {
     return {
       columnDefs: [
         { headerName: 'Email', field: 'email', sortable: true, filter: true, width: 200 },
+        { headerName: 'Handle Name', field: 'handleName', sortable: true, filter: true },
         { headerName: 'Anker', field: 'anker', sortable: true, filter: true, flex: 1.5, valueFormatter: this.dateFormatter },
         { headerName: 'ProjectB', field: 'projectB', sortable: true, filter: true, flex: 1.5, valueFormatter: this.dateFormatter },
         { headerName: 'ProjectC', field: 'projectC', sortable: true, filter: true, flex: 1.5, valueFormatter: this.dateFormatter },
@@ -60,7 +61,8 @@ export default {
       // Make the GET request to singleSearch endpoint with the required parameters
       axios.get(`${apiBaseUrl}/api/total_projects/singleSearch`, {
         params: {
-          email: query.email,
+          handleName: query.handleName||null,
+          email: query.email||null,
         },
       })
           .then(response => {

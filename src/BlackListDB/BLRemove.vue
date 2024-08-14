@@ -19,22 +19,32 @@
         </v-col>
       </v-row>
 
+      <!-- Error Display -->
+      <v-row v-if="errorMessage" justify="center" class="mb-3">
+        <v-col cols="8" class="text-center">
+          <v-alert type="error">{{ errorMessage }}</v-alert>
+        </v-col>
+      </v-row>
+
       <!-- ag-Grid for displaying search results -->
       <v-row class="mb-5" justify="center">
         <v-col cols="8" md="10">
           <h2 v-if="rowData.length">Search Result</h2>
-          <p v-else>No results found</p>
-          <div v-if="rowData.length" class="ag-theme-alpine" style="height: 400px;">
+          <div v-if="loading" class="loading-indicator text-center">
+            <v-progress-circular indeterminate></v-progress-circular>
+          </div>
+          <div v-else-if="rowData.length" class="ag-theme-alpine" style="height: 400px;">
             <ag-grid-vue
-              class="ag-theme-alpine"
-              :columnDefs="columnDefs"
-              :rowData="rowData"
-              rowSelection="single"
-              @selectionChanged="onSelectionChanged"
-              @firstDataRendered="onFirstDataRendered"
-              :defaultColDef="defaultColDef"
+                class="ag-theme-alpine"
+                :columnDefs="columnDefs"
+                :rowData="rowData"
+                rowSelection="single"
+                @selectionChanged="onSelectionChanged"
+                @firstDataRendered="onFirstDataRendered"
+                :defaultColDef="defaultColDef"
             ></ag-grid-vue>
           </div>
+          <p v-else>No results found</p>
         </v-col>
       </v-row>
 
@@ -97,11 +107,13 @@ export default {
         filter: true,
         resizable: true,
       },
+      errorMessage: '', // Add this data property
     };
   },
   methods: {
     async search() {
       this.loading = true;
+      this.errorMessage = ''; // Reset error message
       try {
         const response = await axios.get(`${apiBaseUrl}/api/collaborated/singleSearch`, {
           params: {
@@ -112,7 +124,7 @@ export default {
         this.rowData = response.data;
       } catch (error) {
         console.error(error);
-        alert('Search failed');
+        this.errorMessage = 'Search failed. Please try again.'; // Set error message
       } finally {
         this.loading = false;
       }
@@ -120,7 +132,7 @@ export default {
     onSelectionChanged(event) {
       const selectedNodes = event.api.getSelectedNodes();
       this.selectedItem = selectedNodes.length > 0 ? selectedNodes[0].data : null;
-      console.log('Selected Item:', this.selectedItem); 
+      console.log('Selected Item:', this.selectedItem);
     },
     confirmRemove() {
       if (!this.selectedItem) {
@@ -143,7 +155,7 @@ export default {
         this.search(); // Re-run the search to refresh the results after deletion
       } catch (error) {
         console.error(error);
-        alert('Remove failed');
+        this.errorMessage = 'Remove failed. Please try again.';
       }
     },
     reset() {
@@ -164,10 +176,19 @@ export default {
 .text-center {
   text-align: center;
 }
+
 .mb-5 {
   margin-bottom: 10px;
 }
+
 .ag-theme-alpine {
   width: 100%;
+}
+
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 </style>

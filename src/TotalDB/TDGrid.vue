@@ -3,12 +3,15 @@
     <v-row>
       <v-col cols="12">
         <h1>Total Database</h1>
-        <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn> <!-- Button to trigger export -->
+        <v-btn color="primary" @click="exportAllToExcel">Export All to Excel</v-btn>
+        <v-btn color="secondary" @click="exportSelectedToExcel">Export Selected to Excel</v-btn>
+        <v-btn color="error" @click="deleteSelected">Delete Selected</v-btn>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
+            ref="agGrid"
             class="ag-theme-alpine"
             style="width: 100%; height: 600px;"
             :columnDefs="columnDefs"
@@ -16,81 +19,142 @@
             :gridOptions="gridOptions"
             @grid-ready="onGridReady"
             :domLayout="'autoHeight'"
+            @row-double-clicked="onRowDoubleClicked"
         ></ag-grid-vue>
       </v-col>
     </v-row>
+    <edit-pop-out
+        v-model="isEditDialogVisible"
+        :rowData="selectedRow"
+        @save="onSaveEdit"
+        @close="isEditDialogVisible = false"
+    />
   </v-container>
 </template>
 
 <script>
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
-import * as XLSX from 'xlsx';
-import * as FileSaver from 'file-saver';
+import EditPopOut from '@/components/EditPopOut.vue';
 import { apiBaseUrl } from '@/config';
+import { exportToExcel } from '@/utils/exportUtils';
+import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 
 export default {
   name: 'TotalDatabaseGrid',
   components: {
+    EditPopOut,
     AgGridVue,
   },
   data() {
     return {
-      columnDefs: [
-        { headerName: 'ID', field: 'id', sortable: true, filter: true, width: 70 },
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, flex: 2 },
-        { headerName: 'Followers', field: 'followers', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1 },
+      columnDefs: this.getColumnDefs(),
+      rowData: null,
+      gridOptions: this.getGridOptions(),
+      selectedRow: null,
+      isEditDialogVisible: false,
+    };
+  },
+  methods: {
+    getColumnDefs() {
+      return [
+        {headerName: 'ID', field: 'id', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        {headerName: 'Followers', field: 'followers', sortable: true, filter: true},
+        {headerName: 'Email', field: 'email', sortable: true, filter: true},
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
           sortable: true,
           filter: true,
-          flex: 2,
           cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
         },
-      ],
-      rowData: null,
-      gridOptions: {
+      ];
+
+    },
+    getGridOptions() {
+      return {
         pagination: true,
         paginationPageSize: 10,
-        defaultColDef: {
-          resizable: true,
-        },
+        defaultColDef: {resizable: true},
         autoHeight: true,
+        rowSelection: 'multiple',
+      };
+    },
+      async onGridReady(params) {
+        this.gridApi = params.api;
+        this.gridColumnApi = params.columnApi;
+        try {
+          const response = await axios.get(`${apiBaseUrl}/api/total/all`);
+          this.rowData = response.data;
+          this.gridApi.setDomLayout('autoHeight');
+          this.autoSizeColumns();
+          console.log(response.data)
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
       },
-    };
-  },
-  methods: {
-    async onGridReady(params) {
-      try {
-        const response = await axios.get(`${apiBaseUrl}/api/total/all`);
-        this.rowData = response.data;
-        console.log(response.data)
-        params.api.sizeColumnsToFit();  // Ensure columns fit the grid width
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      autoSizeColumns() {
+        const allColumnIds = this.gridColumnApi.getAllColumns()
+            .map(column => column.getColId());
+        this.gridColumnApi.autoSizeColumns(allColumnIds, true);
+      },
+      onRowDoubleClicked(event) {
+        this.selectedRow = event.data;
+        this.isEditDialogVisible = true;
+      },
+      async onSaveEdit(updatedData) {
+        try {
+          await axios.put(`${apiBaseUrl}/api/total/update/${updatedData.id}`, updatedData);
+          this.refreshGridData();
+        } catch (error) {
+          console.error('Error updating data:', error);
+        } finally {
+          this.isEditDialogVisible = false;
+        }
+      },
+      async refreshGridData() {
+        try {
+          const response = await axios.get(`${apiBaseUrl}/api/total/all`);
+          this.rowData = response.data;
+        } catch (error) {
+          console.error('Error refreshing data:', error);
+        }
+      },
+      exportAllToExcel() {
+        const allDisplayedData = [];
+        this.gridApi.forEachNodeAfterFilterAndSort((node) => {
+          allDisplayedData.push(node.data);
+        });
+
+        exportToExcel(allDisplayedData, "total_Database_filtered");
+      },
+    exportSelectedToExcel() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const selectedData = selectedNodes.map(node => node.data);
+      exportToExcel(selectedData, "total_Database_selected");
+    },
+      async deleteSelected() {
+        const selectedNodes = [];
+        this.gridApi.forEachNodeAfterFilterAndSort((node) => {
+          if (node.isSelected()) {
+            selectedNodes.push(node);
+          }
+        });
+
+        const selectedData = selectedNodes.map(node => node.data);
+
+        for (const data of selectedData) {
+          const success = await deleteRecord(apiBaseUrl + '/api/total', data.id);
+          if (success) {
+            removeRecordFromGrid(this.gridApi, 'id', data.id);
+
+            await this.refreshGridData();
+          }
+        }
       }
     },
-    exportToExcel() {
-      if (!this.rowData || this.rowData.length === 0) {
-        alert("No data available to export!");
-        return;
-      }
-
-      const worksheet = XLSX.utils.json_to_sheet(this.rowData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Total Database");
-
-      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-      this.saveAsExcelFile(excelBuffer, "collaborated_database");
-    },
-    saveAsExcelFile(buffer, fileName) {
-      const data = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-      FileSaver.saveAs(data, `${fileName}_export_${new Date().getTime()}.xlsx`);
-    },
-  },
-};
+  };
 </script>
 
 <style>

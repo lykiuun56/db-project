@@ -6,6 +6,7 @@
         <!-- <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn> -->
         <v-btn color="primary" @click="exportAllToExcel">Export All to Excel</v-btn>
         <v-btn color="secondary" @click="exportSelectedToExcel">Export Selected to Excel</v-btn>
+        <v-btn color="primary" @click="showAddForm = true">Add Entry</v-btn>
         <v-btn color="error" @click="deleteSelected">Delete Selected</v-btn>
       </v-col>
     </v-row>
@@ -31,6 +32,16 @@
       @save="onSaveEdit"
       @close="isEditDialogVisible = false"
     />
+
+    <add-pop-out
+      :visible="showAddForm"
+      :title="'Add to Collaborated Database'"
+      :fields="fields"
+      :formData="formData"
+      @close="showAddForm = false"
+      @save="submitAdd"
+    />
+    
   </v-container>
 </template>
 
@@ -38,6 +49,7 @@
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 import EditPopOut from '@/components/EditPopOut.vue';
+import AddPopOut from '@/components/AddPopOut.vue';
 import { apiBaseUrl } from '@/config';
 import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
@@ -46,10 +58,45 @@ export default {
   name: 'CollaboratedDatabaseGrid',
   components: {
     AgGridVue,
-    EditPopOut
+    EditPopOut,
+    AddPopOut
   },
   data() {
     return {
+      showAddForm: false,
+      formData: {
+        email: '',
+        handle_name: '',
+        tiktok_url: '',
+        followers: '',
+        categories: '',
+        full_name: '',
+        state: '',
+        full_address: '',
+        phone: '',
+        collaborated_times: '',
+        notes: '',
+        poc: '',
+        project_name: '',
+      },
+
+      fields: [
+        // { name: '', label: ''},
+        { name: 'project_name', label: 'Project Name', required: true},
+        { name: 'poc', label: 'POC', required: true},
+        { name: 'handle_name', label: 'Handle Name', required: true },
+        { name: 'tiktok_url', label: 'TikTok URL' },
+        { name: 'followers', label: 'Followers' },
+        { name: 'categories', label: 'Categories' },
+        { name: 'full_name', label: 'Full Name' },
+        { name: 'state', label: 'State' },
+        { name: 'full_address', label: 'Full Address' },
+        { name: 'email', label: 'Email', required: true},
+        { name: 'phone', label: 'Phone' },
+        { name: 'collaborated_times', label: 'Collaborated Times' },
+        { name: 'notes', label: 'Notes' },
+      ],
+
       columnDefs: this.getColumnDefs(),
       rowData: null,
       gridOptions: this.getGridOptions(),
@@ -169,7 +216,37 @@ export default {
           await this.refreshGridData();
         }
       }
-    }
+    },
+
+    async submitAdd(data) {
+      // Handle the form submission
+      try {
+        const requiredFields = ['project_name', 'poc', 'handle_name', 'email'];
+        for (const field of requiredFields) {
+          if (!data[field] || data[field].trim() === '') {
+            alert(`Please fill out the required field: ${field.replace('_', ' ')}`);
+            return;
+          }
+        }
+        const projectName = data.project_name;
+        const poc = data.poc;
+
+        console.log("Submitting Data:", data); // Log to check the data
+        console.log("Endpoint:", `${apiBaseUrl}/api/collaborated/add/${projectName}/${poc}`);
+
+        await axios.post(`${apiBaseUrl}/api/collaborated/add/${projectName}/${poc}`, data)
+          .then(() => {
+            this.refreshGridData();  // Refresh grid data after successful add
+            this.showAddForm = false; // Close the form
+          })
+          .catch(error => {
+            console.error('Error adding data:', error);
+            alert('Failed to add entry.'); // Notify the user in case of an error
+          });
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    },
   },
 };
 </script>

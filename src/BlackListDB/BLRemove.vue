@@ -92,8 +92,10 @@ export default {
         { headerName: 'Followers', field: 'followers' },
         {
           headerName: 'Is Blocked',
-          field: 'is_blocked',
-          valueFormatter: (params) => (params.value ? 'Yes' : 'No'),
+          field: 'is_Blocked',
+          sortable: true,
+          filter: true,
+          cellRenderer: (params) => params.value ? 'Yes' : 'No'
         },
       ],
       rowData: [],

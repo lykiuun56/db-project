@@ -20,6 +20,21 @@
                 ></v-text-field>
               </v-col>
             </v-row>
+
+            <!-- File upload input -->
+          <v-row>
+            <v-col cols="12">
+              <v-file-input
+                v-model="selectedFile"
+                label="选择文件"
+                outlined
+                dense
+                color="primary"
+                prepend-icon="mdi-file-upload"
+              ></v-file-input>
+            </v-col>
+          </v-row>
+
           </v-form>
         </v-card-text>
   
@@ -58,6 +73,7 @@
         valid: true,
         localVisible: this.visible,
         localFormData: { ...this.formData },
+        selectedFile: null,
       };
     },
     watch: {
@@ -78,13 +94,30 @@
       close() {
         this.$emit('close');
         this.localVisible = false;
+        this.resetForm();
       },
       submitForm() {
         if (this.$refs.form.validate()) {
-          this.$emit('save', { ...this.localFormData });
-          this.close();
+          if (this.selectedFile) {
+            this.submitFile();
+          } else {
+            this.$emit('save', { ...this.localFormData });
+            this.close();
+          }
         }
       },
+      submitFile() {
+        const formData = new FormData();
+        formData.append('file', this.selectedFile);
+        formData.append('formData', JSON.stringify(this.localFormData));
+        this.$emit('saveFile', formData);
+        this.close();
+      },
+      resetForm() {
+        this.selectedFile = null;
+        this.localFormData = { ...this.formData };
+      },
+
     },
   };
   </script>

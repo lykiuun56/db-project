@@ -27,6 +27,9 @@
       <v-col cols="auto">
         <v-btn color="black" class="button-spacing">Block</v-btn>
       </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" class="button-spacing" @click="downloadTemplate">Download Template</v-btn>
+      </v-col>
     </v-row>
 
     <v-row>
@@ -60,6 +63,7 @@
       :formData="formData"
       @close="showAddForm = false"
       @save="submitAdd"
+      @saveFile="submitFileAdd"
     />
     
   </v-container>
@@ -73,6 +77,7 @@ import AddPopOut from '@/components/AddPopOut.vue';
 import { apiBaseUrl } from '@/config';
 import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
+import templateFile from '@/assets/cbd_template.xlsx';
 
 export default {
   name: 'CollaboratedDatabaseGrid',
@@ -250,9 +255,6 @@ export default {
         const projectName = data.project_name;
         const poc = data.poc;
 
-        console.log("Submitting Data:", data); // Log to check the data
-        console.log("Endpoint:", `${apiBaseUrl}/api/collaborated/add/${projectName}/${poc}`);
-
         await axios.post(`${apiBaseUrl}/api/collaborated/add/${projectName}/${poc}`, data)
           .then(() => {
             this.refreshGridData();  // Refresh grid data after successful add
@@ -266,6 +268,34 @@ export default {
         console.error('Unexpected error:', error);
       }
     },
+
+    async submitFileAdd(formData) {
+      try {
+        await axios.post(`${apiBaseUrl}/api/collaborated/addByFile`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }).then(() => {
+          this.refreshGridData();  // Refresh grid data after successful file upload
+          this.showAddForm = false; // Close the form
+        }).catch(error => {
+          console.error('Error uploading file:', error);
+          alert('Failed to upload file.');
+        });
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    },
+
+    downloadTemplate() {
+      const link = document.createElement('a');
+      link.href = templateFile;
+      link.setAttribute('download', 'CollaboratedDatabaseTemplate.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+
   },
 };
 </script>

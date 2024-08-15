@@ -7,4 +7,24 @@ module.exports = {
       },
     },
   },
+  
+  configureWebpack: {
+    module: {
+      rules: [
+        {
+          test: /\.(xlsx|xls)$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: '[name].[ext]',
+                outputPath: 'assets/files/', // Optional: customize output path
+              },
+            },
+          ],
+        },
+      ],
+    },
+  },
+
 };

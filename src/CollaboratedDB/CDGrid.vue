@@ -118,7 +118,6 @@ export default {
         { name: 'full_address', label: 'Full Address' },
         { name: 'email', label: 'Email', required: true},
         { name: 'phone', label: 'Phone' },
-        { name: 'collaborated_times', label: 'Collaborated Times' },
         { name: 'notes', label: 'Notes' },
       ],
 

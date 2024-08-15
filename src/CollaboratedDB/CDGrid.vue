@@ -4,12 +4,31 @@
       <v-col cols="12">
         <h1>Collaborated Database</h1>
         <!-- <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn> -->
-        <v-btn color="primary" @click="exportAllToExcel">Export All to Excel</v-btn>
-        <v-btn color="secondary" @click="exportSelectedToExcel">Export Selected to Excel</v-btn>
-        <v-btn color="primary" @click="showAddForm = true">Add Entry</v-btn>
-        <v-btn color="error" @click="deleteSelected">Delete Selected</v-btn>
+        <!-- <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All to Excel</v-btn>
+        <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected to Excel</v-btn>
+        <v-btn color="primary" @click="showAddForm = true" class="button-spacing">Add Entry</v-btn>
+        <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete Selected</v-btn> -->
       </v-col>
     </v-row>
+
+    <v-row>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="showAddForm = true" class="button-spacing">Add</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="black" class="button-spacing">Block</v-btn>
+      </v-col>
+    </v-row>
+
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
@@ -29,6 +48,7 @@
     <edit-pop-out
       v-model="isEditDialogVisible"
       :rowData="selectedRow"
+      :nonEditableFields="['id', 'handle_name', 'email', 'collaborated_times', 'is_Blocked']"
       @save="onSaveEdit"
       @close="isEditDialogVisible = false"
     />
@@ -115,15 +135,14 @@ export default {
         { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true },
         { headerName: 'Email', field: 'email', sortable: true, filter: true },
         { headerName: 'Phone', field: 'phone', sortable: true, filter: true },
-        { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true },
+        { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true},
         { headerName: 'Notes', field: 'notes', sortable: true, filter: true },
         { headerName: 'POC', field: 'poc', sortable: true, filter: true },
         { headerName: 'State', field: 'state', sortable: true, filter: true },
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true },
         {
           headerName: 'Is Blocked',
-          field: 'is_blocked',
-          editable: true,
+          field: 'is_Blocked',
           cellEditor: 'agSelectCellEditor',
           cellEditorParams: { values: [true, false] },
           valueFormatter: params => (params.value ? 'Yes' : 'No'),

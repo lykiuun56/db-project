@@ -2,36 +2,73 @@
   <v-container class="database-preview-container">
     <v-row justify="center">
       <v-col cols="12" class="text-center">
-        <h1>BlackList Database Home</h1>
+        <h1 class = "header"> BlackList Database Home</h1>
       </v-col>
     </v-row>
     <v-row justify="center">
-      <v-col cols="12" md="3">
-        <v-btn block @click="$router.push('/bl-add')">Add To BlackList</v-btn>
+      <v-col cols="12" v-for = "(button, index) in buttons" :key ="index">
+        <v-btn
+            block
+            class = "custom-btn"
+            @click = "$router.push(button.route)"
+        >
+          {{button.label}}
+        </v-btn>
       </v-col>
-      <v-col cols="12" md="3">
-        <v-btn block @click="$router.push('/bl-grid')"> View the BlackList</v-btn>
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-btn block @click="$router.push('/bl-remove')"> Remove from BlackList</v-btn>
-      </v-col>
-
     </v-row>
   </v-container>
 </template>
 
-
 <script>
 export default {
-  name: 'BlackListDatabase'
+  name: 'BlackListDatabase',
+  data() {
+    return {
+      buttons: [
+        {label : "View the database", route: '/bl-grid'},
+        {label : "Add To Black List", route: '/bl-add'},
+        {label : "Remove From Black List", route: '/bl-remove'},
+
+      ],
+    };
+  },
 };
 </script>
 
-<style>
-.text-center {
-  text-align: center;
+<style scoped>
+  .database-preview-container {
+  padding: 24px 16px;
+  background-color : #f9f9f9;
+  border-radius : 8px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+  max-width: 600px;
+
 }
-.database-preview-container {
-  padding-top: 16px;
+  .text-center {
+    text-align: center;
+}
+
+  .header {
+    font-size :2rem;
+  margin-bottom: 24px;
+  color: #333;
+}
+  .custom-btn {
+    margin-bottom: 16px;
+  padding: 14px 20px;
+  background-color: #007bff;
+  color: white;
+  border-radius : 8px;
+  font-size: 16px;
+  text-transform: uppercase;
+  box-shadow: 0px 2px 5px  rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+}
+
+  .custom-btn:hover{
+    background-color: #0056b3;
+  transform:translateY(-2px);
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
 }
 </style>

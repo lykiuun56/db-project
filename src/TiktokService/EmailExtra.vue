@@ -7,9 +7,6 @@
     </v-row>
     <v-row justify="center">
       <v-col cols="12" md="5">
-        <v-textarea v-model="inputText" label="请输入" outlined></v-textarea>
-      </v-col>
-      <v-col cols="12" md="5">
         <v-file-input v-model="selectedFile" label="选择文件" outlined></v-file-input>
       </v-col>
     </v-row>
@@ -29,7 +26,6 @@ export default {
   name: 'EmailExtra',
   data() {
     return {
-      inputText: '',
       selectedFile: null,
     };
   },

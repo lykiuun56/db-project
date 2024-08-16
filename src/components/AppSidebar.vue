@@ -8,23 +8,23 @@
           </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
-        <v-list-item @click="$router.push('/')" style="margin-top:20vh">
-          <v-btn text block>Total Database</v-btn>
-        </v-list-item>
-        <v-list-item @click="$router.push('/total-database-home')">
+<!--        <v-list-item @click="$router.push('/')" style="margin-top:20vh">-->
+<!--          <v-btn text block>Total Database</v-btn>-->
+<!--        </v-list-item>-->
+        <v-list-item @click="$router.push('/total-database-home')" style="margin-top:20vh">
           <v-btn text block>Total Database Home</v-btn>
         </v-list-item>
         <v-list-item @click="$router.push('/collaborated-database')">
           <v-btn text block>Collaborated Database</v-btn>
         </v-list-item>
-        <v-list-item @click="$router.push('/remove-duplicate')">
-          <v-btn text block>Remove Duplicate</v-btn>
+        <v-list-item @click="$router.push('/block-someone/management-email')">
+          <v-btn text block >Management Email</v-btn>
         </v-list-item>
         <v-list-item @click="$router.push('/block-someone/black-list')">
           <v-btn text block>Black List</v-btn>
         </v-list-item>
-        <v-list-item @click="$router.push('/block-someone/management-email')">
-          <v-btn text block >Management Email</v-btn>
+        <v-list-item @click="$router.push('/remove-duplicate')">
+          <v-btn text block>Remove Duplicate</v-btn>
         </v-list-item>
         <v-list-item @click="$router.push('/tiktok-home')">
           <v-btn text block>Tik Tok Service</v-btn>

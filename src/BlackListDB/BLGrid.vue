@@ -1,33 +1,42 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12">
-        <h1>Black List Database</h1>
-        <v-btn color="primary" @click="exportAllToExcel">Export All to Excel</v-btn>
-        <v-btn color="secondary" @click="exportSelectedToExcel">Export Selected to Excel</v-btn>
-        <v-btn color="error" @click="deleteSelected">Delete Selected</v-btn>
-      </v-col>
+        <v-col cols="auto">
+          <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All</v-btn>
+        </v-col>
+        <v-col cols="auto">
+          <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected</v-btn>
+        </v-col>
+        <v-col cols="auto">
+          <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete</v-btn>
+        </v-col>
+        <v-col cols="auto">
+          <v-btn color="primary" @click="showAddForm = true" class="button-spacing">Add</v-btn>
+        </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <ag-grid-vue
-            ref="agGrid"
-            class="ag-theme-alpine"
-            style="width: 100%; height: 600px;"
-            :columnDefs="columnDefs"
-            :rowData="rowData"
-            :gridOptions="gridOptions"
-            @grid-ready="onGridReady"
-            :domLayout="'autoHeight'"
-            @row-double-clicked="onRowDoubleClicked"
-        ></ag-grid-vue>
+        <ag-grid-vue ref="agGrid" class="ag-theme-alpine" style="width: 100%; height: 600px;" :columnDefs="columnDefs"
+                     :rowData="rowData" :gridOptions="gridOptions" @grid-ready="onGridReady" :domLayout="'autoHeight'"
+                     @row-double-clicked="onRowDoubleClicked"></ag-grid-vue>
       </v-col>
     </v-row>
     <edit-pop-out
         v-model="isEditDialogVisible"
         :rowData="selectedRow"
+        :nonEditableFields="['id', 'handle_name', 'email', 'followers']"
+
         @save="onSaveEdit"
         @close="isEditDialogVisible = false"
+    />
+    <add-pop-out
+        :visible="showAddForm"
+        :title="'Add to Black List'"
+        :fields="fields"
+        :formData="formData"
+        :show-file-upload="false"
+        @close="showAddForm = false"
+        @save="submitAdd"
     />
   </v-container>
 </template>
@@ -39,15 +48,29 @@ import EditPopOut from '@/components/EditPopOut.vue';
 import { apiBaseUrl } from '@/config';
 import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
+import AddPopOut from "@/components/AddPopOut.vue";
 
 export default {
   name: 'BlackListGrid',
   components: {
+    AddPopOut,
     EditPopOut,
     AgGridVue,
   },
   data() {
     return {
+      showAddForm: false,
+
+      formData: {
+        handle_name: '',
+        email: '',
+      },
+
+      fields: [
+        { name: 'handle_name', label: 'Handle Name', required: true },
+        { name: 'email', label: 'Email', required: true},
+      ],
+
       columnDefs: this.getColumnDefs(),
       rowData: null,
       gridOptions: this.getGridOptions(),
@@ -65,9 +88,10 @@ export default {
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
-          sortable: true,
-          filter: true,
-          cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
+          cellEditor: 'agSelectCellEditor',
+          cellEditorParams: { values: [true, false] },
+          valueFormatter: params => (params.value ? 'Yes' : 'No'),
+          width: 100,
         },
       ];
 
@@ -152,7 +176,30 @@ export default {
           await this.refreshGridData();
         }
       }
-    }
+    },
+    async submitAdd(data) {
+      // Handle the form submission
+      try {
+        const requiredFields = ['handle_name', 'email'];
+        for (const field of requiredFields) {
+          if (!data[field] || data[field].trim() === '') {
+            alert(`Please fill out the required field: ${field.replace('_', ' ')}`);
+            return;
+          }
+        }
+        await axios.post(`${apiBaseUrl}/api/black_list/addManual`, data)
+            .then(() => {
+              this.refreshGridData();  // Refresh grid data after successful add
+              this.showAddForm = false; // Close the form
+            })
+            .catch(error => {
+              console.error('Error adding data:', error);
+              alert('Failed to add entry.'); // Notify the user in case of an error
+            });
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    },
   },
 };
 </script>

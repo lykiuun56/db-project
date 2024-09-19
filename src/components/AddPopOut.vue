@@ -9,7 +9,21 @@
           <v-form ref="form" v-model="valid">
             <v-row>
               <v-col cols="12" md="6" v-for="field in fields" :key="field.name">
+                <!-- Render v-select if the field type is 'select' -->
+                <v-select
+                  v-if="field.type === 'select'"
+                  v-model="localFormData[field.name]"
+                  :items="field.options"
+                  :label="field.label"
+                  :outlined="true"
+                  :dense="true"
+                  :rules="field.rules || []"
+                  :required="field.required || false"
+                ></v-select>
+
+                <!-- Render v-text-field for all other fields -->
                 <v-text-field
+                  v-else
                   v-model="localFormData[field.name]"
                   :label="field.label"
                   :outlined="true"

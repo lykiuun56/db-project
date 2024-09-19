@@ -48,6 +48,16 @@
                     readonly
                   />
                 </v-col>
+                
+                <!-- Dropdown for Categories -->
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-model="categories"
+                    :items="categoriesList"
+                    label="Categories"
+                    required
+                  />
+                </v-col>
 
                 <!-- Additional fields for POC and Project Name -->
                 <v-col cols="12" sm="6">
@@ -56,12 +66,14 @@
                     label="POC"
                   />
                 </v-col>
+
                 <v-col cols="12" sm="6">
                   <v-text-field 
                     v-model="projectName" 
                     label="Project Name"
                   />
                 </v-col>
+
               </v-row>
             </v-container>
           </v-form>
@@ -115,10 +127,11 @@ export default {
   data() {
     return {
       showAddForm: false,
-
       isCBDDialogVisible: false,
       poc: '',
       projectName: '',
+      categories: '',
+      categoriesList: [],
     
       formData: {
         handle_name: '',
@@ -140,7 +153,18 @@ export default {
       isEditDialogVisible: false,
     };
   },
+  created() {
+    this.fetchCategories();
+  },
   methods: {
+    async fetchCategories() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/collaborated_projects/partitionsList`);
+        this.categoriesList = response.data;
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    },
     getColumnDefs() {
       return [
         { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true },
@@ -355,7 +379,12 @@ export default {
     async submitCBDForm() {
       try {
         const { id } = this.selectedRow;
-        await axios.post(`${apiBaseUrl}/api/collaborated/newCollaborated/${id}/${this.poc}/${this.projectName}`);
+        await axios.post(`${apiBaseUrl}/api/collaborated/newCollaborated`, {
+          id: id,
+          poc: this.poc,
+          projectName: this.projectName,
+          categories: this.categories
+        });
         alert('Successfully written to CollaboratedDB.');
       } catch (error) {
         console.error('Error writing to CollaboratedDB:', error);

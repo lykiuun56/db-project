@@ -3,11 +3,6 @@
     <v-row>
       <v-col cols="12">
         <h1>Collaborated Database</h1>
-        <!-- <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn> -->
-        <!-- <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All to Excel</v-btn>
-        <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected to Excel</v-btn>
-        <v-btn color="primary" @click="showAddForm = true" class="button-spacing">Add Entry</v-btn>
-        <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete Selected</v-btn> -->
       </v-col>
     </v-row>
 
@@ -24,9 +19,9 @@
       <v-col cols="auto">
         <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete</v-btn>
       </v-col>
-      <v-col cols="auto">
+      <!-- <v-col cols="auto">
         <v-btn color="black" class="button-spacing">Block</v-btn>
-      </v-col>
+      </v-col> -->
       <v-col cols="auto">
         <v-btn color="primary" class="button-spacing" @click="downloadTemplate">Download Template</v-btn>
       </v-col>
@@ -51,7 +46,7 @@
     <edit-pop-out
       v-model="isEditDialogVisible"
       :rowData="selectedRow"
-      :nonEditableFields="['id', 'handle_name', 'email', 'collaborated_times', 'is_Blocked']"
+      :nonEditableFields="['id', 'handle_name', 'email', 'collaborated_times', 'categories', 'expired_date', 'is_Blocked']"
       @save="onSaveEdit"
       @close="isEditDialogVisible = false"
     />
@@ -64,7 +59,15 @@
       @close="showAddForm = false"
       @save="submitAdd"
       @saveFile="submitFileAdd"
-    />
+    >
+      <!-- Categories Dropdown -->
+      <v-select
+        v-model="formData.categories"
+        :items="categoriesList"
+        label="Categories"
+        required
+      />
+    </add-pop-out>
     
   </v-container>
 </template>
@@ -112,15 +115,17 @@ export default {
         { name: 'handle_name', label: 'Handle Name', required: true },
         { name: 'tiktok_url', label: 'TikTok URL' },
         { name: 'followers', label: 'Followers' },
-        { name: 'categories', label: 'Categories' },
+        { name: 'categories', label: 'Categories', type: 'select', options: this.categoriesList },
         { name: 'full_name', label: 'Full Name' },
         { name: 'state', label: 'State' },
         { name: 'full_address', label: 'Full Address' },
         { name: 'email', label: 'Email', required: true},
         { name: 'phone', label: 'Phone' },
         { name: 'notes', label: 'Notes' },
+        { name: 'linked', label: 'Linked'}
       ],
-
+      
+      categoriesList: [],
       columnDefs: this.getColumnDefs(),
       rowData: null,
       gridOptions: this.getGridOptions(),
@@ -128,7 +133,23 @@ export default {
       isEditDialogVisible: false,
     };
   },
+  created() {
+    this.fetchCategories();
+  },
   methods: {
+
+    // Fetch categories from the backend
+    async fetchCategories() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/collaborated_projects/partitionsList`);
+        this.categoriesList = response.data; // Populate the list of categories from the response
+        this.fields.find(field => field.name === 'categories').options = this.categoriesList; // Set options in the form
+        console.log('Categories fetched:', this.categoriesList); // Log for debugging
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    },
+    
     getColumnDefs() {
       return [
         { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true},
@@ -143,16 +164,56 @@ export default {
         { headerName: 'Notes', field: 'notes', sortable: true, filter: true },
         { headerName: 'POC', field: 'poc', sortable: true, filter: true },
         { headerName: 'State', field: 'state', sortable: true, filter: true },
-        { headerName: 'Categories', field: 'categories', sortable: true, filter: true },
+        { headerName: '最后合作种类', field: 'categories', sortable: true, filter: true },
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
-          cellEditor: 'agSelectCellEditor',
-          cellEditorParams: { values: [true, false] },
-          valueFormatter: params => (params.value ? 'Yes' : 'No'),
-          width: 100,
-        }
+          width: 150,
+          filter: true,
+          editable: false, // Make the checkbox non-editable
+          valueFormatter: params => params.value === null ? 'N/A' : (params.value ? 'Yes' : 'No'), // Handle null, true, and false
+          cellRenderer: params => {
+            const isChecked = params.value === true; // Set checked only if true
+            return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
+          }
+        },
+        {
+          headerName: 'Expired Date',
+          field: 'expired_date',
+          sortable: true,
+          filter: true,
+          valueFormatter: this.formatDateTime,  // Call the custom formatter
+        },
+        { headerName: 'Linked', 
+          field: 'linked', 
+          width: 150,
+          filter: true,
+          editable: false, // Make the checkbox non-editable
+          valueFormatter: params => params.value === null ? 'N/A' : (params.value ? 'Yes' : 'No'), // Handle null, true, and false
+          cellRenderer: params => {
+            const isChecked = params.value === true; // Set checked only if true
+            return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
+          }
+        },
       ];
+    },
+    formatDateTime(params) {
+      const dateValue = params.value;
+      if (!dateValue) return '';
+
+      // Create a new Date object from the string (ISO format)
+      const dateObj = new Date(dateValue);
+
+      // Manually format the date to 'yyyy-MM-dd HH:mm:ss'
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      const hours = String(dateObj.getHours()).padStart(2, '0');
+      const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+      const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+
+      // Return formatted date string
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
     getGridOptions() {
       return {
@@ -293,7 +354,7 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    },
+    },  
 
   },
 };

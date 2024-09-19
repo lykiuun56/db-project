@@ -37,8 +37,9 @@ export default {
       columnDefs: [
         {headerName: 'Handle Name', field: 'handleName', sortable: true, filter: true},
         { headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'Anker', field: 'anker', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'TXYZ', field: 'txyz', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'Categories', field: 'categories', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'Project Name', field: 'project_name', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'Collaborated Times', field: 'collaborated_times', sortable: true, filter: true, flex: 1.5 },
       ],
       rowData: [],
       gridOptions: {
@@ -62,15 +63,7 @@ export default {
         console.error('Error fetching data:', error);
       }
     },
-    // dateFormatter(params) {
-    //   const date = new Date(params.value);
-    //   if (!isNaN(date.getTime())) {
-    //     // Customize the date format as needed
-    //     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    //   } else {
-    //     return ''; // or some other placeholder
-    //   }
-    // },
+    
     async exportToExcel() {
       try {
         const selectedNodes = this.$refs.agGrid.gridApi.getSelectedNodes();

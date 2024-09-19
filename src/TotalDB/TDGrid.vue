@@ -99,6 +99,7 @@
       :title="'Add to Total Database'"
       :fields="fields"
       :formData="formData"
+      :show-file-upload="true"
       @close="showAddForm = false"
       @save="submitAdd"
       @saveFile="submitFileAdd"

@@ -35,7 +35,7 @@ export default {
   data() {
     return {
       columnDefs: [
-        {headerName: 'Handle Name', field: 'handleName', sortable: true, filter: true},
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
         { headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'Project Name', field: 'project_name', sortable: true, filter: true, flex: 1.5 },

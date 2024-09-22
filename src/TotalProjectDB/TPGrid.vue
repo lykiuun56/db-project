@@ -36,10 +36,11 @@ export default {
     return {
       columnDefs: [
         { headerName: 'Email', field: 'email', sortable: true, filter: true, width: 200 },
-        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
-        { headerName: 'Anker', field: 'anker', sortable: true, filter: true, flex: 1.5, valueFormatter: this.dateFormatter },
-        { headerName: 'ProjectB', field: 'projectB', sortable: true, filter: true, flex: 1.5, valueFormatter: this.dateFormatter },
-        { headerName: 'ProjectC', field: 'projectC', sortable: true, filter: true, flex: 1.5, valueFormatter: this.dateFormatter },
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        { headerName: 'Email', field: 'email', sortable: true, filter: true},
+        { headerName: 'Categories', field: 'categories', sortable: true, filter: true},
+        { headerName: 'Project Name', field: 'project_name', sortable: true, filter: true},
+        { headerName: 'Sending Date', field: 'sending_date', sortable: true, filter: true, valueFormatter: this.dateFormatter },
       ],
       rowData: null,
       gridOptions: {

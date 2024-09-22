@@ -313,9 +313,15 @@ export default {
           }
         }
         const projectName = data.project_name;
-        const poc = data.poc;
+        // const poc = data.poc;
+        const payload = {
+          data: data,
+          projectName: projectName,
+          // poc: poc
+        };
 
-        await axios.post(`${apiBaseUrl}/api/collaborated/add/${projectName}/${poc}`, data)
+        // await axios.post(`${apiBaseUrl}/api/collaborated/add/${projectName}/${poc}`, data)
+        await axios.post(`${apiBaseUrl}/api/collaborated/add`, payload)
           .then(() => {
             this.refreshGridData();  // Refresh grid data after successful add
             this.showAddForm = false; // Close the form

@@ -22,6 +22,9 @@
       <v-col cols="auto">
         <v-btn color="success" @click="showCBDForm" class="button-spacing">Write To CBD</v-btn>
       </v-col>
+      <v-col cols="auto">
+        <v-btn color="success" @click="showMailchimpForm" class="button-spacing">Send Mailchimp Email</v-btn>
+      </v-col>
     </v-row>
 
     <v-row>
@@ -31,6 +34,46 @@
           @row-double-clicked="onRowDoubleClicked"></ag-grid-vue>
       </v-col>
     </v-row>
+
+    <!-- Mailchimp Dialog -->
+    <v-dialog v-model="isMailchimpDialogVisible" max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Send Email via Mailchimp</span>
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="mailchimpForm">
+            <v-container>
+              <v-row>
+                <!-- Dropdown for Categories -->
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-model="mailchimpCategories"
+                    :items="categoriesList"
+                    label="Categories"
+                    required
+                  />
+                </v-col>
+
+                <!-- Input for Project Name -->
+                <v-col cols="12" sm="6">
+                  <v-text-field 
+                    v-model="mailchimpProjectName" 
+                    label="Project Name"
+                  />
+                </v-col>
+
+              </v-row>
+            </v-container>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeMailchimpForm">Cancel</v-btn>
+          <v-btn color="green darken-1" text @click="submitMailchimpForm">Send Email</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <v-dialog v-model="isCBDDialogVisible" max-width="600px">
       <v-card>
@@ -48,6 +91,16 @@
                     readonly
                   />
                 </v-col>
+                
+                <!-- Dropdown for Categories -->
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-model="categories"
+                    :items="categoriesList"
+                    label="Categories"
+                    required
+                  />
+                </v-col>
 
                 <!-- Additional fields for POC and Project Name -->
                 <v-col cols="12" sm="6">
@@ -56,12 +109,14 @@
                     label="POC"
                   />
                 </v-col>
+
                 <v-col cols="12" sm="6">
                   <v-text-field 
                     v-model="projectName" 
                     label="Project Name"
                   />
                 </v-col>
+
               </v-row>
             </v-container>
           </v-form>
@@ -87,6 +142,7 @@
       :title="'Add to Total Database'"
       :fields="fields"
       :formData="formData"
+      :show-file-upload="true"
       @close="showAddForm = false"
       @save="submitAdd"
       @saveFile="submitFileAdd"
@@ -115,10 +171,14 @@ export default {
   data() {
     return {
       showAddForm: false,
-
       isCBDDialogVisible: false,
       poc: '',
       projectName: '',
+      categories: '',
+      isMailchimpDialogVisible: false,
+      mailchimpCategories: '',
+      mailchimpProjectName: '',
+      categoriesList: [],
     
       formData: {
         handle_name: '',
@@ -140,7 +200,54 @@ export default {
       isEditDialogVisible: false,
     };
   },
+  created() {
+    this.fetchCategories();
+  },
   methods: {
+    async fetchCategories() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/collaborated_projects/partitionsList`);
+        this.categoriesList = response.data;
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    },
+    showMailchimpForm() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      if (selectedNodes.length === 1) {
+        this.selectedRow = selectedNodes[0].data;
+        this.isMailchimpDialogVisible = true;
+      } else if (selectedNodes.length > 1) {
+        alert('Please select only one row to send an email.');
+      } else {
+        alert('Please select a row first.');
+      }
+    },
+    closeMailchimpForm() {
+      this.isMailchimpDialogVisible = false;
+    },
+
+    async submitMailchimpForm() {
+      if (!this.mailchimpCategories || !this.mailchimpProjectName) {
+        alert('Please fill out both Categories and Project Name.');
+        return;
+      }
+      try {
+        const { id } = this.selectedRow;
+        await axios.post(`${apiBaseUrl}/api/total/sendMailchimpEmail`, {
+          totalDatabaseId: id,
+          categories: this.mailchimpCategories,
+          projectName: this.mailchimpProjectName,
+        });
+
+        alert('Email successfully sent.');
+        this.closeMailchimpForm();
+      } catch (error) {
+        console.error('Error sending email:', error);
+        alert('Failed to send email.');
+      }
+    },
+
     getColumnDefs() {
       return [
         { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true },
@@ -355,7 +462,12 @@ export default {
     async submitCBDForm() {
       try {
         const { id } = this.selectedRow;
-        await axios.post(`${apiBaseUrl}/api/collaborated/newCollaborated/${id}/${this.poc}/${this.projectName}`);
+        await axios.post(`${apiBaseUrl}/api/collaborated/newCollaborated`, {
+          id: id,
+          poc: this.poc,
+          projectName: this.projectName,
+          categories: this.categories
+        });
         alert('Successfully written to CollaboratedDB.');
       } catch (error) {
         console.error('Error writing to CollaboratedDB:', error);

@@ -3,9 +3,13 @@ import App from './App.vue';
 import vuetify from './plugins/vuetify';
 import router from './router';
 import './assets/global.css';
+import store from './utils/store';
 
 
 const app = createApp(App);
+
+
+app.use(store); // Use the Vuex store
 
 app.use(router);
 app.use(vuetify);

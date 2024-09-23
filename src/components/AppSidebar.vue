@@ -8,10 +8,7 @@
           </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
-<!--        <v-list-item @click="$router.push('/')" style="margin-top:20vh">-->
-<!--          <v-btn text block>Total Database</v-btn>-->
-<!--        </v-list-item>-->
-        <v-list-item @click="$router.push('/total-database-home')" style="margin-top:20vh">
+        <v-list-item @click="$router.push('/total-database-home')">
           <v-btn text block>Total Database Home</v-btn>
         </v-list-item>
         <v-list-item @click="$router.push('/collaborated-database')">

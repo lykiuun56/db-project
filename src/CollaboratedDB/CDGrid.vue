@@ -210,7 +210,7 @@ export default {
         {
           headerName: 'Add to Wishlist',
           field: 'wishlist',
-          width: 100,
+          width: 150,
           cellRenderer: this.wishlistRenderer,
           cellRendererParams: {
             addToWishlist: this.addToWishlist,
@@ -249,68 +249,40 @@ export default {
         };
     },
     wishlistRenderer(params) {
-
-      const wishlistId = params.context.wishlistId; // Assume wishlistId is passed in context
-      const creatorId = params.data.id;
-
-      // Check if the creator is in the wishlist
-      axios.get(`${apiBaseUrl}/api/wishlists/${wishlistId}/contains/${creatorId}`)
-          .then(response => {
-            const isInWishlist = response.data;
-            const icon = isInWishlist ? '❤️' : '🤍';
-
             // Create button element with heart icon
             const button = document.createElement('button');
-            button.innerHTML = icon;
-            button.style.background = 'none';
+            button.innerHTML = 'Add to Wishlist';
+            button.style.background = '#FFCDD2';
             button.style.border = 'none';
             button.style.cursor = 'pointer';
-            button.style.fontSize = '20px';
+            button.style.padding = '5px 10px';
+            button.style.borderRadius = '5px';
 
             button.addEventListener('click', () => {
-              params.context.toggleWishlist(params.data);
-              params.refreshCells(); // Refresh the cell to update the UI
+              params.context.addToWishlist(params.data);
             });
-
-            params.eGridCell.innerHTML = ''; // Clear existing content
-            params.eGridCell.appendChild(button); // Add button to cell
-          })
-          .catch(error => {
-            console.error('Error checking wishlist status:', error);
-          });
-
-      return null; // Return null initially while the request is processed
+            return button; // Return null initially while the request is processed
     },
     // Toggle Wishlist
-    async toggleWishlist(rowData) {
-      const creatorId = rowData.id;
-      const wishlistId = this.wishlistId; // Assume wishlistId is available in the component
-      const isInWishlist = await axios.get(`${apiBaseUrl}/api/wishlists/${wishlistId}/contains/${creatorId}`)
-          .then(response => response.data)
-          .catch(error => {
-            console.error('Error checking wishlist status:', error);
-            return false; // Assume not in wishlist if there's an error
-          });
+    async addToWishlist(rowData) {
+      if(!this.getUserId) {
+        alert(('User ID is not available.'));
+        return;
+      }
+      const creatorIds = rowData.id;
 
       try {
-        if (isInWishlist) {
-          // Remove from wishlist
-          await axios.delete(`${apiBaseUrl}/api/wishlists/${wishlistId}/creators/${creatorId}`);
-          alert('Removed from wishlist!');
-        } else {
-          // Add to wishlist
-          await axios.post(`${apiBaseUrl}/api/wishlists/add-creators`, null, {
-            params: {
-              userId: this.getUserId,
-              creatorIds: creatorId
-            }
-          });
-          alert('Added to wishlist!');
-        }
-        this.refreshWishlist(); // Refresh local wishlist state
-      } catch (error) {
-        console.error('Error toggling wishlist', error);
-        alert('Failed to update wishlist.');
+        await axios.post (`${apiBaseUrl}/api/wishlists/add-creators`, null, {
+          params: {
+            userId : this.getUserId,
+            creatorIds: creatorIds,
+
+          },
+        });
+        alert('Successfully added to wishlist!');
+      }catch (error) {
+        console.error('Error adding to wishlist',error );
+        alert('Failed to add to wishlist.')
       }
     },
 

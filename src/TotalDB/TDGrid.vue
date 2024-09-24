@@ -63,6 +63,25 @@
                   />
                 </v-col>
 
+                <v-col cols="12" sm="6">
+                  <v-text-field 
+                    v-model="mailchimpPOC" 
+                    label="POC"
+                  />
+                </v-col>
+
+                <!-- Template Dropdown -->
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-model="selectedTemplate"
+                    :items="mailchimpTemplates"
+                    label="Select Template"
+                    item-text="name"
+                    item-value="id"
+                    required
+                  />
+                </v-col>
+
               </v-row>
             </v-container>
           </v-form>
@@ -116,7 +135,6 @@
                     label="Project Name"
                   />
                 </v-col>
-
               </v-row>
             </v-container>
           </v-form>
@@ -178,7 +196,10 @@ export default {
       isMailchimpDialogVisible: false,
       mailchimpCategories: '',
       mailchimpProjectName: '',
+      mailchimpPOC: '',
+      selectedTemplate: null,
       categoriesList: [],
+      mailchimpTemplates: [],
     
       formData: {
         handle_name: '',
@@ -202,6 +223,7 @@ export default {
   },
   created() {
     this.fetchCategories();
+    this.fetchMailchimpTemplates();
   },
   methods: {
     async fetchCategories() {
@@ -210,6 +232,15 @@ export default {
         this.categoriesList = response.data;
       } catch (error) {
         console.error('Error fetching categories:', error);
+      }
+    },
+    async fetchMailchimpTemplates() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/total/templates`);
+        console.log(response.data);
+        this.mailchimpTemplates = response.data.templates;  // Store the templates data
+      } catch (error) {
+        console.error('Error fetching Mailchimp templates:', error);
       }
     },
     showMailchimpForm() {
@@ -228,8 +259,8 @@ export default {
     },
 
     async submitMailchimpForm() {
-      if (!this.mailchimpCategories || !this.mailchimpProjectName) {
-        alert('Please fill out both Categories and Project Name.');
+      if (!this.mailchimpCategories || !this.mailchimpProjectName || !this.mailchimpPOC) {
+        alert('Please fill out both Categories and Project Name and POC.');
         return;
       }
       try {
@@ -238,6 +269,8 @@ export default {
           totalDatabaseId: id,
           categories: this.mailchimpCategories,
           projectName: this.mailchimpProjectName,
+          poc: this.mailchimpPOC,
+          templateId: this.selectedTemplate
         });
 
         alert('Email successfully sent.');

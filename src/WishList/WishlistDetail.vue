@@ -97,19 +97,19 @@ export default {
         is_Blocked: false
       },
       fields: [
+        { name: 'project_name', label: 'Project Name', required: true},
+        { name: 'poc', label: 'POC', required: true},
         { name: 'handle_name', label: 'Handle Name', required: true },
-        { name: 'followers', label: 'Followers', required: true },
-        { name: 'email', label: 'Email', required: true },
         { name: 'tiktok_url', label: 'TikTok URL' },
-        { name: 'categories', label: 'Categories' },
+        { name: 'followers', label: 'Followers' },
+        { name: 'categories', label: 'Categories', type: 'select', options: this.categoriesList },
         { name: 'full_name', label: 'Full Name' },
         { name: 'state', label: 'State' },
         { name: 'full_address', label: 'Full Address' },
+        { name: 'email', label: 'Email', required: true},
         { name: 'phone', label: 'Phone' },
-        { name: 'collaborated_times', label: 'Collaborated Times' },
-        { name: 'poc', label: 'POC' },
         { name: 'notes', label: 'Notes' },
-        { name: 'is_Blocked', label: 'Is Blocked', type: 'checkbox' }
+        { name: 'linked', label: 'Linked'}
       ],
       columnDefs: this.getColumnDefs(),
       rowData: null, // This will hold the creator data
@@ -124,30 +124,49 @@ export default {
   methods: {
     getColumnDefs() {
       return [
-        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true },
+        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true},
         { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
+        { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, width: 300 },
         { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
-        { headerName: 'Email', field: 'email', sortable: true, filter: true },
-        { headerName: 'TikTok URL', field: 'tiktok_url', sortable: true, filter: true, width: 300 },
-        { headerName: 'Categories', field: 'categories', sortable: true, filter: true },
         { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true },
-        { headerName: 'State', field: 'state', sortable: true, filter: true },
         { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true },
+        { headerName: 'Email', field: 'email', sortable: true, filter: true },
         { headerName: 'Phone', field: 'phone', sortable: true, filter: true },
-        { headerName: 'Collaborated Times', field: 'collaborated_times', sortable: true, filter: true },
-        { headerName: 'POC', field: 'poc', sortable: true, filter: true },
+        { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true},
         { headerName: 'Notes', field: 'notes', sortable: true, filter: true },
+        { headerName: 'POC', field: 'poc', sortable: true, filter: true },
+        { headerName: 'State', field: 'state', sortable: true, filter: true },
+        { headerName: '最后合作种类', field: 'categories', sortable: true, filter: true },
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
+          width: 150,
+          filter: true,
+          editable: false, // Make the checkbox non-editable
+          valueFormatter: params => params.value === null ? 'N/A' : (params.value ? 'Yes' : 'No'), // Handle null, true, and false
+          cellRenderer: params => {
+            const isChecked = params.value === true; // Set checked only if true
+            return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
+          }
+        },
+        {
+          headerName: 'Expired Date',
+          field: 'expired_date',
           sortable: true,
           filter: true,
-          valueFormatter: params => params.value ? 'Yes' : 'No',
+          valueFormatter: this.formatDateTime,  // Call the custom formatter
+        },
+        { headerName: 'Linked',
+          field: 'linked',
+          width: 150,
+          filter: true,
+          editable: false, // Make the checkbox non-editable
+          valueFormatter: params => params.value === null ? 'N/A' : (params.value ? 'Yes' : 'No'), // Handle null, true, and false
           cellRenderer: params => {
-            const isChecked = params.value === true;
-            return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`;
+            const isChecked = params.value === true; // Set checked only if true
+            return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
           }
-        }
+        },
       ];
     },
     getGridOptions() {

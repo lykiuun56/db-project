@@ -28,6 +28,15 @@
         class="input-field"
     ></v-text-field>
     <v-text-field
+        v-model="poc"
+        label="Poc"
+        type="poc"
+        :rules="[v => !!v || 'Poc is required']"
+        required
+        class="input-field"
+    ></v-text-field>
+
+    <v-text-field
         v-if="isSignup"
         v-model="confirmPassword"
         label="Confirm Password"
@@ -65,6 +74,7 @@ export default {
     return {
       username: '',
       password: '',
+      poc: '',
       error: null,
       valid: false,
       isSignup: false,
@@ -103,6 +113,7 @@ export default {
         if (response.data.success) {
           const userId = response.data.userId;
           console.log('User ID in Login:', response.data.userId);
+          console.log('User Poc in Login:', response.data.poc);
 
           await this.setUserId(userId); // Commit userId to Vuex store
           this.$emit('login-success'); // Emit event on successful login
@@ -121,6 +132,7 @@ export default {
           username: this.username,
           email: this.email,
           password: this.password,
+          poc:this.poc,
         });
 
         if (response.data.success) {
@@ -129,6 +141,7 @@ export default {
           this.username = '';
           this.password = '';
           this.confirmPassword = '';
+          this.poc = '';
         } else {
           this.error = response.data.message || 'Signup failed';
         }

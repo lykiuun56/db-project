@@ -82,7 +82,13 @@ export default {
       this.$router.push(path);
       this.dropdownVisible = false; // Close dropdown after navigation
     },
-
+    loadWishlist() {
+      // Placeholder method, replace with actual data fetch logic
+      return [
+        {id: 1, name: 'Wishlist Item 1'},
+        {id: 2, name: 'Wishlist Item 2'}
+      ];
+    }
   }
 };
 </script>
@@ -91,21 +97,26 @@ export default {
 .v-main .v-container {
   padding-top: 16px;
 }
+
 .v-avatar {
   background-color: #42A5F5;
   color: white;
   font-weight: bold;
 }
+
 .v-app-bar {
   padding: 0 16px;
 }
+
 .ml-3 {
   margin-left: 16px;
 }
+
 .search-icon {
   width: 24px;
   height: 24px;
 }
+
 .fill-height {
   height: 100%;
 }

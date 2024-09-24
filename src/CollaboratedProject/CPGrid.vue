@@ -35,11 +35,11 @@ export default {
   data() {
     return {
       columnDefs: [
-        {headerName: 'Id', field: 'id', sortable: true, filer: true},
+        // {headerName: 'Id', field: 'id', sortable: true, filer: true},
         { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
         { headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'Brand Name', field: 'brand_name', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'Project Name', field: 'project_name', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'collaborated Times', field:'collaborated_times', sortable: true, filter: true, flex:1.5 }
       ],
       rowData: [],

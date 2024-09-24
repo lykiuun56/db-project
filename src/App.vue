@@ -36,7 +36,7 @@
     <!-- Wishlist Summary Bar (additional bar) -->
     <v-app-bar app color="primary" dense v-if="isLoggedIn && wishlist.length">
       <v-toolbar-title>
-        Wishlist: {{ wishlist.length }} items
+        Wishlist
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="navigateTo('/view-wishlist')">

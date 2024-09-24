@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create an Axios instance with default configurations
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:8080', // Base URL for your backend API
+    baseURL: 'http://localhost:5000', // Base URL for your backend API
     withCredentials: true, // Send cookies with each request
     headers: {
         'Content-Type': 'application/json', // Default content type for requests

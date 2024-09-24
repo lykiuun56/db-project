@@ -94,6 +94,10 @@ export default {
         const response = await axios.post(`${apiBaseUrl}/api/login`, {
           username: this.username,
           password: this.password,
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
         });
 
         if (response.data.success) {
@@ -107,7 +111,8 @@ export default {
           this.error = response.data.error || 'Invalid username or password';
         }
       } catch (error) {
-        this.error = 'An error occurred. Please try again.';
+        console.error('Login error:', error); // Log the error details
+        this.error = error.response?.data?.error || 'An error occurred. Please try again.';
       }
     },
     async signup() {

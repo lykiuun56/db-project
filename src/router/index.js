@@ -299,10 +299,11 @@ const routes = [
         component: ViewWishlist
       },
       {
-        path: '/wishlist-detail',
-        name: '/WishlistDetail',
-        component: WishlistDetail
-      }
+        path: '/wishlist/:wishlistId',
+        name: 'WishlistDetail',
+        component: WishlistDetail,
+        props: true // This allows route params to be passed as props
+      },
 
     ]
   },

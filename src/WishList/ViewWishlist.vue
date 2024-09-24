@@ -21,7 +21,6 @@
           >
             <v-list-item-content>
               <v-list-item-title>Wishlist: {{ wishlist.name }}</v-list-item-title>
-              <v-list-item-subtitle>{{ wishlist.items.length }} items</v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -88,8 +87,8 @@ export default {
       }
     },
     viewWishlist(wishlistId) {
-      // Navigate to the WishlistDetail component with the selected wishlistId
-      this.$router.push({name: 'WishlistDetail', params: {wishlistId}});
+      console.log('Navigating to WishlistDetail with ID:', wishlistId);
+      this.$router.push({ name: 'WishlistDetail', params: { wishlistId: Number(wishlistId) } });
     }
   }
 };

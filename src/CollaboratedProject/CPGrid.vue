@@ -3,8 +3,15 @@
     <v-row>
       <v-col cols="12">
         <h1>Collaborated Project</h1>
-        <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn> <!-- Button to trigger export -->
       </v-col>
+      <v-row>
+        <v-col cols="auto">
+          <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All</v-btn>
+        </v-col>
+        <v-col cols="auto">
+          <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected</v-btn>
+        </v-col>
+    </v-row>
     </v-row>
     <v-row>
       <v-col cols="12">
@@ -16,6 +23,8 @@
             :gridOptions="gridOptions"
             @grid-ready="onGridReady"
             :domLayout="'autoHeight'"
+            rowSelection="multiple"
+
         ></ag-grid-vue>
       </v-col>
     </v-row>
@@ -26,6 +35,8 @@
 import { apiBaseUrl } from '@/config';
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
+import { exportToExcel } from '@/utils/exportUtils';
+
 
 export default {
   name: 'CollaboratedProjectGrid',
@@ -35,11 +46,11 @@ export default {
   data() {
     return {
       columnDefs: [
-        {headerName: 'Id', field: 'id', sortable: true, filer: true},
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        // {headerName: 'Id', field: 'id', sortable: true, filer: true},
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true,checkboxSelection: true, headerCheckboxSelection: true},
         { headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'Brand Name', field: 'brand_name', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'Project Name', field: 'project_name', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'collaborated Times', field:'collaborated_times', sortable: true, filter: true, flex:1.5 }
       ],
       rowData: [],
@@ -50,13 +61,19 @@ export default {
           resizable: true,
         },
         autoHeight: true,
+
       },
+      selectedRow: null,
+
     };
   },
   methods: {
     async onGridReady(params) {
+      this.gridApi = params.api;
+      this.gridColumnApi = params.columnApi;
       try {
         const response = await axios.get(`${apiBaseUrl}/api/collaborated_projects/all`);
+
         this.rowData = response.data;
         console.log(response.data);
         params.api.sizeColumnsToFit();  // Ensure columns fit the grid width
@@ -73,38 +90,19 @@ export default {
     //     return ''; // or some other placeholder
     //   }
     // },
-    async exportToExcel() {
-      try {
-        const selectedNodes = this.$refs.agGrid.gridApi.getSelectedNodes();
-        const selectedIds = selectedNodes.map(node => node.data.id); // Assuming 'id' is your unique identifier
-        if (selectedIds.length === 0) {
-          alert('Please select at least one row to export.');
-          return;
-        }
+    exportAllToExcel() {
+      const allDisplayedData = [];
+      this.gridApi.forEachNodeAfterFilterAndSort((node) => {
+        allDisplayedData.push(node.data);
+      });
 
-        const projectName = 'YourProjectName'; // Replace with actual project name or make it dynamic
-
-        const response = await axios.get(`${apiBaseUrl}/api/export`, {
-          params: {
-            projectName: projectName,
-            userIds: selectedIds
-          },
-          responseType: 'blob' // Important: so that the browser can interpret the response as a file
-        });
-
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'exported_users.xlsx'); // or any file name you prefer
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-      } catch (error) {
-        console.error('Error exporting data:', error);
-        alert('Failed to export data.');
-      }
-    }
+      exportToExcel(allDisplayedData, "collaborated_project_filtered");
+    },
+    exportSelectedToExcel() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const selectedData = selectedNodes.map(node => node.data);
+      exportToExcel(selectedData, "collaborated_project_selected");
+    },
   }
 };
 </script>

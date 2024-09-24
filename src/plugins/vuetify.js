@@ -12,3 +12,6 @@ export default createVuetify({
     defaultSet: 'mdi', // Ensure 'mdi' is used if using Material Design Icons
   },
 });
+
+export class VIcon {
+}

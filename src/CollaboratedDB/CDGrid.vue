@@ -38,6 +38,7 @@
           :gridOptions="gridOptions"
           @grid-ready="onGridReady"
           :domLayout="'autoHeight'"
+          rowSelection="multiple"
           @row-double-clicked="onRowDoubleClicked"
         ></ag-grid-vue>
       </v-col>
@@ -81,13 +82,15 @@ import { apiBaseUrl } from '@/config';
 import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 import templateFile from '@/assets/cbd_template.xlsx';
+import { mapGetters} from "vuex";
 
 export default {
   name: 'CollaboratedDatabaseGrid',
   components: {
     AgGridVue,
     EditPopOut,
-    AddPopOut
+    AddPopOut,
+
   },
   data() {
     return {
@@ -131,10 +134,14 @@ export default {
       gridOptions: this.getGridOptions(),
       selectedRow: null,
       isEditDialogVisible: false,
+      selectedRows: [],
     };
   },
   created() {
     this.fetchCategories();
+  },
+  computed: {
+    ...mapGetters(['getUserId']), // Map the getter from Vuex to get the userId
   },
   methods: {
 
@@ -149,6 +156,11 @@ export default {
         console.error('Error fetching categories:', error);
       }
     },
+    // async fetchWishlist() {
+    //   try {
+    //     const response = await axios.get(`${apiBaseUrl}/api/wishlists/`)
+    //   }
+    // }
     
     getColumnDefs() {
       return [
@@ -195,6 +207,15 @@ export default {
             return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
           }
         },
+        {
+          headerName: 'Add to Wishlist',
+          field: 'wishlist',
+          width: 150,
+          cellRenderer: this.wishlistRenderer,
+          cellRendererParams: {
+            addToWishlist: this.addToWishlist,
+          }
+        }
       ];
     },
     formatDateTime(params) {
@@ -222,8 +243,49 @@ export default {
         defaultColDef: { resizable: true },
         autoHeight: true,
         rowSelection: 'multiple',
-      };
+        context: {
+          addToWishlist:this.addToWishlist,
+          },
+        };
     },
+    wishlistRenderer(params) {
+            // Create button element with heart icon
+            const button = document.createElement('button');
+            button.innerHTML = 'Add to Wishlist';
+            button.style.background = '#FFCDD2';
+            button.style.border = 'none';
+            button.style.cursor = 'pointer';
+            button.style.padding = '5px 10px';
+            button.style.borderRadius = '5px';
+
+            button.addEventListener('click', () => {
+              params.context.addToWishlist(params.data);
+            });
+            return button; // Return null initially while the request is processed
+    },
+    // Toggle Wishlist
+    async addToWishlist(rowData) {
+      if(!this.getUserId) {
+        alert(('User ID is not available.'));
+        return;
+      }
+      const creatorIds = rowData.id;
+
+      try {
+        await axios.post (`${apiBaseUrl}/api/wishlists/add-creators`, null, {
+          params: {
+            userId : this.getUserId,
+            creatorIds: creatorIds,
+
+          },
+        });
+        alert('Successfully added to wishlist!');
+      }catch (error) {
+        console.error('Error adding to wishlist',error );
+        alert('Failed to add to wishlist.')
+      }
+    },
+
     async onGridReady(params) {
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi;
@@ -360,8 +422,7 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    },  
-
+    },
   },
 };
 </script>
@@ -375,3 +436,10 @@ export default {
   height: 400px;
 }
 </style>
+
+
+
+
+
+
+

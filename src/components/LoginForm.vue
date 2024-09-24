@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/axios';
 import { apiBaseUrl } from '@/config';
 import { mapActions } from 'vuex';
 
@@ -107,13 +107,15 @@ export default {
         }, {
           headers: {
             'Content-Type': 'application/json',
-          }
+          },
+          withCredentials: true, // Include cookies in the request
         });
 
         if (response.data.success) {
           const userId = response.data.userId;
           console.log('User ID in Login:', response.data.userId);
           console.log('User Poc in Login:', response.data.poc);
+          console.log('User wishlistId in login:',response.data.wishlistId);
 
           await this.setUserId(userId); // Commit userId to Vuex store
           this.$emit('login-success'); // Emit event on successful login

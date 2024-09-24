@@ -1,18 +1,21 @@
 <template>
   <v-container fluid>
     <v-row>
-        <v-col cols="auto">
-          <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All</v-btn>
-        </v-col>
-        <v-col cols="auto">
-          <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected</v-btn>
-        </v-col>
-        <v-col cols="auto">
-          <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete</v-btn>
-        </v-col>
-        <v-col cols="auto">
-          <v-btn color="primary" @click="showAddForm = true" class="button-spacing">Add</v-btn>
-        </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="showAddForm = true" class="button-spacing">Add</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" class="button-spacing" @click="downloadTemplate">Download Template</v-btn>
+      </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
@@ -24,8 +27,6 @@
     <edit-pop-out
         v-model="isEditDialogVisible"
         :rowData="selectedRow"
-        :nonEditableFields="['id', 'handle_name', 'email', 'followers']"
-
         @save="onSaveEdit"
         @close="isEditDialogVisible = false"
     />
@@ -34,9 +35,9 @@
         :title="'Add to Black List'"
         :fields="fields"
         :formData="formData"
-        :show-file-upload="false"
         @close="showAddForm = false"
         @save="submitAdd"
+        @saveFile="submitFileAdd"
     />
   </v-container>
 </template>
@@ -49,6 +50,7 @@ import { apiBaseUrl } from '@/config';
 import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 import AddPopOut from "@/components/AddPopOut.vue";
+import templateFile from "@/assets/td_template.xlsx";
 
 export default {
   name: 'BlackListGrid',
@@ -59,17 +61,20 @@ export default {
   },
   data() {
     return {
+
       showAddForm: false,
 
       formData: {
         handle_name: '',
+        followers: '',
         email: '',
       },
-
       fields: [
         { name: 'handle_name', label: 'Handle Name', required: true },
         { name: 'email', label: 'Email', required: true},
       ],
+
+
 
       columnDefs: this.getColumnDefs(),
       rowData: null,
@@ -199,6 +204,14 @@ export default {
       } catch (error) {
         console.error('Unexpected error:', error);
       }
+    },
+    downloadTemplate() {
+      const link = document.createElement('a');
+      link.href = templateFile;
+      link.setAttribute('download', 'BlackListTemplate.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
   },
 };

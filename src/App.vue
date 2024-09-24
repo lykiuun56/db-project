@@ -1,21 +1,55 @@
 <template>
   <v-app>
-    <v-navigation-drawer app permanent>
+    <!-- Navigation Drawer for Sidebar (visible if logged in) -->
+    <v-navigation-drawer app permanent v-if="isLoggedIn">
       <AppSidebar />
     </v-navigation-drawer>
-    <v-app-bar app clipped-left>
-      <v-toolbar-title>My Application</v-toolbar-title>
+
+    <!-- Main App Bar (visible if logged in) -->
+    <v-app-bar app clipped-left v-if="isLoggedIn">
+      <!-- Space between elements -->
       <v-spacer></v-spacer>
+
+      <!-- Wishlist Dropdown Menu -->
+      <v-menu offset-y :close-on-content-click="false" v-model="dropdownVisible">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn icon v-bind="attrs" v-on="on">
+            <v-icon>mdi-heart</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="navigateTo('/create-wishlist')">
+            <v-list-item-title>Create Wishlist</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="navigateTo('/view-wishlist')">
+            <v-list-item-title>View Wishlist</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
+      <!-- User Profile Button -->
       <v-btn icon>
-        <img src="@/assets/send.png" alt="Search" class="search-icon" />
+        <v-icon>mdi-account</v-icon>
       </v-btn>
-      <v-avatar size="32" class="ml-3" color="primary">
-        <span>A</span>
-      </v-avatar>
     </v-app-bar>
+
+    <!-- Wishlist Summary Bar (additional bar) -->
+    <v-app-bar app color="primary" dense v-if="isLoggedIn && wishlist.length">
+      <v-toolbar-title>
+        Wishlist
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon @click="navigateTo('/view-wishlist')">
+        <v-icon>mdi-eye</v-icon>
+      </v-btn>
+    </v-app-bar>
+
+    <!-- Main Content -->
     <v-main>
       <v-container fluid class="fill-height">
-        <router-view></router-view>
+        <!-- Login Form or Main Content Based on Authentication -->
+        <LoginForm v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
+        <router-view v-else></router-view>
       </v-container>
     </v-main>
   </v-app>
@@ -23,17 +57,43 @@
 
 <script>
 import AppSidebar from '@/components/AppSidebar.vue';
+import LoginForm from '@/components/LoginForm.vue';
 
 export default {
   name: 'App',
   components: {
-    AppSidebar
+    AppSidebar,
+    LoginForm
+  },
+  data() {
+    return {
+      isLoggedIn: false,
+      dropdownVisible: false,
+      wishlist: [] // Array to hold wishlist items
+    };
+  },
+  methods: {
+    handleLoginSuccess() {
+      this.isLoggedIn = true;
+      // Load wishlist items on login success (replace with actual data fetch)
+      this.wishlist = this.loadWishlist();
+    },
+    navigateTo(path) {
+      this.$router.push(path);
+      this.dropdownVisible = false; // Close dropdown after navigation
+    },
+    loadWishlist() {
+      // Placeholder method, replace with actual data fetch logic
+      return [
+        { id: 1, name: 'Wishlist Item 1' },
+        { id: 2, name: 'Wishlist Item 2' }
+      ];
+    }
   }
 };
 </script>
 
 <style>
-/* 添加一些全局样式 */
 .v-main .v-container {
   padding-top: 16px;
 }

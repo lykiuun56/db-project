@@ -171,7 +171,7 @@
 
 <script>
 import { AgGridVue } from 'ag-grid-vue3';
-import axios from 'axios';
+import axios from '@/axios';
 import EditPopOut from '@/components/EditPopOut.vue';
 import { apiBaseUrl } from '@/config';
 import { exportToExcel } from '@/utils/exportUtils';
@@ -314,7 +314,7 @@ export default {
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi;
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/total/all`);
+        const response = await axios.get(`${apiBaseUrl}/api/total/all`,{withCredentials: true});
         this.rowData = response.data;
         setTimeout(() => {
           if (this.gridColumnApi) {

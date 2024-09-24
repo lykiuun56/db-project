@@ -82,13 +82,7 @@ export default {
       this.$router.push(path);
       this.dropdownVisible = false; // Close dropdown after navigation
     },
-    loadWishlist() {
-      // Placeholder method, replace with actual data fetch logic
-      return [
-        { id: 1, name: 'Wishlist Item 1' },
-        { id: 2, name: 'Wishlist Item 2' }
-      ];
-    }
+
   }
 };
 </script>

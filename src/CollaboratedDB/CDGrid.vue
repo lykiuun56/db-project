@@ -38,6 +38,7 @@
           :gridOptions="gridOptions"
           @grid-ready="onGridReady"
           :domLayout="'autoHeight'"
+          rowSelection="multiple"
           @row-double-clicked="onRowDoubleClicked"
         ></ag-grid-vue>
       </v-col>
@@ -81,13 +82,15 @@ import { apiBaseUrl } from '@/config';
 import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 import templateFile from '@/assets/cbd_template.xlsx';
+import { mapGetters} from "vuex";
 
 export default {
   name: 'CollaboratedDatabaseGrid',
   components: {
     AgGridVue,
     EditPopOut,
-    AddPopOut
+    AddPopOut,
+
   },
   data() {
     return {
@@ -131,10 +134,14 @@ export default {
       gridOptions: this.getGridOptions(),
       selectedRow: null,
       isEditDialogVisible: false,
+      selectedRows: [],
     };
   },
   created() {
     this.fetchCategories();
+  },
+  computed: {
+    ...mapGetters(['getUserId']), // Map the getter from Vuex to get the userId
   },
   methods: {
 
@@ -149,6 +156,11 @@ export default {
         console.error('Error fetching categories:', error);
       }
     },
+    // async fetchWishlist() {
+    //   try {
+    //     const response = await axios.get(`${apiBaseUrl}/api/wishlists/`)
+    //   }
+    // }
     
     getColumnDefs() {
       return [
@@ -195,6 +207,15 @@ export default {
             return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
           }
         },
+        {
+          headerName: 'Add to Wishlist',
+          field: 'wishlist',
+          width: 100,
+          cellRenderer: this.wishlistRenderer,
+          cellRendererParams: {
+            addToWishlist: this.addToWishlist,
+          }
+        }
       ];
     },
     formatDateTime(params) {
@@ -222,8 +243,77 @@ export default {
         defaultColDef: { resizable: true },
         autoHeight: true,
         rowSelection: 'multiple',
-      };
+        context: {
+          addToWishlist:this.addToWishlist,
+          },
+        };
     },
+    wishlistRenderer(params) {
+
+      const wishlistId = params.context.wishlistId; // Assume wishlistId is passed in context
+      const creatorId = params.data.id;
+
+      // Check if the creator is in the wishlist
+      axios.get(`${apiBaseUrl}/api/wishlists/${wishlistId}/contains/${creatorId}`)
+          .then(response => {
+            const isInWishlist = response.data;
+            const icon = isInWishlist ? '❤️' : '🤍';
+
+            // Create button element with heart icon
+            const button = document.createElement('button');
+            button.innerHTML = icon;
+            button.style.background = 'none';
+            button.style.border = 'none';
+            button.style.cursor = 'pointer';
+            button.style.fontSize = '20px';
+
+            button.addEventListener('click', () => {
+              params.context.toggleWishlist(params.data);
+              params.refreshCells(); // Refresh the cell to update the UI
+            });
+
+            params.eGridCell.innerHTML = ''; // Clear existing content
+            params.eGridCell.appendChild(button); // Add button to cell
+          })
+          .catch(error => {
+            console.error('Error checking wishlist status:', error);
+          });
+
+      return null; // Return null initially while the request is processed
+    },
+    // Toggle Wishlist
+    async toggleWishlist(rowData) {
+      const creatorId = rowData.id;
+      const wishlistId = this.wishlistId; // Assume wishlistId is available in the component
+      const isInWishlist = await axios.get(`${apiBaseUrl}/api/wishlists/${wishlistId}/contains/${creatorId}`)
+          .then(response => response.data)
+          .catch(error => {
+            console.error('Error checking wishlist status:', error);
+            return false; // Assume not in wishlist if there's an error
+          });
+
+      try {
+        if (isInWishlist) {
+          // Remove from wishlist
+          await axios.delete(`${apiBaseUrl}/api/wishlists/${wishlistId}/creators/${creatorId}`);
+          alert('Removed from wishlist!');
+        } else {
+          // Add to wishlist
+          await axios.post(`${apiBaseUrl}/api/wishlists/add-creators`, null, {
+            params: {
+              userId: this.getUserId,
+              creatorIds: creatorId
+            }
+          });
+          alert('Added to wishlist!');
+        }
+        this.refreshWishlist(); // Refresh local wishlist state
+      } catch (error) {
+        console.error('Error toggling wishlist', error);
+        alert('Failed to update wishlist.');
+      }
+    },
+
     async onGridReady(params) {
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi;
@@ -360,8 +450,7 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    },  
-
+    },
   },
 };
 </script>
@@ -375,3 +464,10 @@ export default {
   height: 400px;
 }
 </style>
+
+
+
+
+
+
+

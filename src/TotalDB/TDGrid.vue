@@ -35,7 +35,7 @@
       </v-col>
     </v-row>
 
-    <!-- Mailchimp Dialog -->
+    <!-- Mailchimp Email Form -->
     <v-dialog v-model="isMailchimpDialogVisible" max-width="600px">
       <v-card>
         <v-card-title>
@@ -47,41 +47,50 @@
               <v-row>
                 <!-- Dropdown for Categories -->
                 <v-col cols="12" sm="6">
-                  <v-select
-                    v-model="mailchimpCategories"
-                    :items="categoriesList"
-                    label="Categories"
-                    required
-                  />
+                  <v-select v-model="mailchimpCategories" :items="categoriesList" label="Categories" required />
                 </v-col>
 
                 <!-- Input for Project Name -->
                 <v-col cols="12" sm="6">
-                  <v-text-field 
-                    v-model="mailchimpProjectName" 
-                    label="Project Name"
-                  />
+                  <v-text-field v-model="mailchimpProjectName" label="Project Name" required />
                 </v-col>
 
+                <!-- Input for POC -->
                 <v-col cols="12" sm="6">
-                  <v-text-field 
-                    v-model="mailchimpPOC" 
-                    label="POC"
-                  />
+                  <v-text-field v-model="mailchimpPOC" label="POC" required />
+                </v-col>
+
+                <!-- Input for Subject Line -->
+                <v-col cols="12" sm="6">
+                  <v-text-field v-model="mailchimpSubject" label="Subject Line" required />
                 </v-col>
 
                 <!-- Template Dropdown -->
+                <!-- Template Dropdown -->
                 <v-col cols="12" sm="6">
                   <v-select
-                    v-model="selectedTemplate"
+                    v-if="mailchimpTemplates.length > 0"
+                    v-model="selectedTemplateName"
                     :items="mailchimpTemplates"
                     label="Select Template"
-                    item-text="name"
-                    item-value="id"
                     required
                   />
                 </v-col>
+                <!-- <v-col cols="12" sm="6">
+                  <v-select
+                      v-model="selectedTemplate"
+                      :items="mailchimpTemplates"
+                      label="Select Template"
+                      item-text="name"
+                      item-value="id"
+                      required
+                    />
+                </v-col> -->
 
+                <!-- Schedule time -->
+                <v-col cols="12">
+                  <v-text-field v-model="scheduledTime" label="Schedule Time" type="datetime-local" />
+                </v-col>
               </v-row>
             </v-container>
           </v-form>
@@ -193,27 +202,25 @@ export default {
       poc: '',
       projectName: '',
       categories: '',
+      scheduledTime: '',
       isMailchimpDialogVisible: false,
       mailchimpCategories: '',
       mailchimpProjectName: '',
       mailchimpPOC: '',
-      selectedTemplate: null,
-      categoriesList: [],
-      mailchimpTemplates: [],
-    
+      mailchimpSubject: '',
+      selectedTemplateName: '',  // Store the selected template ID
+      mailchimpTemplates: [],  // Store all template options
+      categoriesList: [],  // For categories selection
       formData: {
         handle_name: '',
         followers: '',
         email: '',
       },
-
       fields: [
         { name: 'handle_name', label: 'Handle Name', required: true },
         { name: 'email', label: 'Email', required: true},
         { name: 'followers', label: 'Followers' },
       ],
-
-
       columnDefs: this.getColumnDefs(),
       rowData: null,
       gridOptions: this.getGridOptions(),
@@ -223,6 +230,9 @@ export default {
   },
   created() {
     this.fetchCategories();
+    // this.fetchMailchimpTemplates();
+  },
+  mounted() {
     this.fetchMailchimpTemplates();
   },
   methods: {
@@ -234,16 +244,27 @@ export default {
         console.error('Error fetching categories:', error);
       }
     },
+    // Fetch Mailchimp templates for dropdown
     async fetchMailchimpTemplates() {
       try {
+        // Fetch templates from the backend
         const response = await axios.get(`${apiBaseUrl}/api/total/templates`);
-        console.log(response.data);
-        this.mailchimpTemplates = response.data.templates;  // Store the templates data
+        
+        // Since only names are returned, map them directly to the dropdown
+        this.mailchimpTemplates = response.data;  // response.data is now just a list of names
       } catch (error) {
         console.error('Error fetching Mailchimp templates:', error);
       }
     },
-    showMailchimpForm() {
+     // Show Mailchimp email form dialog
+     showMailchimpForm() {
+      // Check if gridApi is available
+      if (!this.gridApi) {
+        console.error('Grid API is not available.');
+        alert('Grid is not ready yet.');
+        return;
+      }
+
       const selectedNodes = this.gridApi.getSelectedNodes();
       if (selectedNodes.length === 1) {
         this.selectedRow = selectedNodes[0].data;
@@ -258,29 +279,33 @@ export default {
       this.isMailchimpDialogVisible = false;
     },
 
+    // Submit the Mailchimp email form
     async submitMailchimpForm() {
-      if (!this.mailchimpCategories || !this.mailchimpProjectName || !this.mailchimpPOC) {
-        alert('Please fill out both Categories and Project Name and POC.');
+      if (!this.mailchimpCategories || !this.mailchimpProjectName || !this.mailchimpPOC || !this.mailchimpSubject || !this.selectedTemplateName) {
+        alert('Please fill in all the required fields.');
         return;
       }
+
       try {
-        const { id } = this.selectedRow;
+        const { id } = this.selectedRow;  // Assuming each row has an 'id' field
+
         await axios.post(`${apiBaseUrl}/api/total/sendMailchimpEmail`, {
           totalDatabaseId: id,
           categories: this.mailchimpCategories,
           projectName: this.mailchimpProjectName,
           poc: this.mailchimpPOC,
-          templateId: this.selectedTemplate
+          subject: this.mailchimpSubject,
+          templateName: this.selectedTemplateName,
+          scheduledTime: this.scheduledTime
         });
 
-        alert('Email successfully sent.');
+        alert('Email successfully scheduled.');
         this.closeMailchimpForm();
       } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('Error sending Mailchimp email:', error);
         alert('Failed to send email.');
       }
     },
-
     getColumnDefs() {
       return [
         { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true },
@@ -311,29 +336,43 @@ export default {
       };
     },
     async onGridReady(params) {
+      // Ensure APIs are set properly
       this.gridApi = params.api;
-      this.gridColumnApi = params.columnApi;
+      this.gridColumnApi = params.columnApi || this.gridApi; // Fallback to gridApi if gridColumnApi is undefined
+
+      console.log('Grid API:', this.gridApi);
+      console.log('Grid Column API:', this.gridColumnApi);
+
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/total/all`,{withCredentials: true});
+        const response = await axios.get(`${apiBaseUrl}/api/total/all`, { withCredentials: true });
+        console.log('API Response Data:', response.data);
+
         this.rowData = response.data;
-        setTimeout(() => {
-          if (this.gridColumnApi) {
+
+        // Ensure the gridColumnApi (or gridApi) is defined before trying to auto-size columns
+        if (this.gridColumnApi) {
+          setTimeout(() => {
             this.autoSizeColumns();
-          } else {
-            console.error('gridColumnApi is undefined. Cannot auto-size columns.');
-          }
-        }, 100);
-
-
-        console.log(response.data)
+          }, 100); // Adding a small delay to ensure grid is fully rendered
+        } else {
+          console.error('gridColumnApi is undefined. Cannot auto-size columns.');
+        }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching data:', error.response ? error.response.data : error.message);
       }
     },
     autoSizeColumns() {
-      const allColumnIds = this.gridColumnApi.getAllColumns()
-        .map(column => column.getColId());
-      this.gridColumnApi.autoSizeColumns(allColumnIds, true);
+      if (this.gridApi) {
+        const allColumns = this.gridApi.getAllDisplayedColumns();
+        if (allColumns && allColumns.length > 0) {
+          const allColumnIds = allColumns.map(column => column.getColId());
+          this.gridApi.autoSizeColumns(allColumnIds);
+        } else {
+          console.error('No columns found to auto-size.');
+        }
+      } else {
+        console.error('Grid API is not available.');
+      }
     },
     onRowDoubleClicked(event) {
       this.selectedRow = event.data;

@@ -25,6 +25,10 @@
       <v-col cols="auto">
         <v-btn color="primary" class="button-spacing" @click="downloadTemplate">Download Template</v-btn>
       </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="selectRandomRows" class="button-spacing">Select Random 2000 Rows</v-btn>
+      </v-col>
+
     </v-row>
 
     <v-row>
@@ -246,7 +250,8 @@ export default {
         context: {
           addToWishlist:this.addToWishlist,
           },
-        };
+        rowMultiSelectWithClick: true, // Add this line
+      };
     },
     wishlistRenderer(params) {
             // Create button element with heart icon
@@ -422,6 +427,23 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    },
+    selectRandomRows() {
+      const rowNodes = [];
+      this.gridApi.forEachNode((node) => rowNodes.push(node));
+      for (let i = rowNodes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rowNodes[i], rowNodes[j]] = [rowNodes[j], rowNodes[i]];
+      }
+
+      // Take the first 2000 nodes
+      const selectedNodes = rowNodes.slice(0, 2000);
+
+      // Optionally, clear previous selection
+      // this.gridApi.deselectAll();
+
+      // Select the nodes
+      selectedNodes.forEach((node) => node.setSelected(true));
     },
   },
 };

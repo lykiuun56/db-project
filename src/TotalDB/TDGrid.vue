@@ -25,6 +25,9 @@
       <v-col cols="auto">
         <v-btn color="success" @click="showMailchimpForm" class="button-spacing">Send Mailchimp Email</v-btn>
       </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="selectRandomRows" class="button-spacing">Select Random creators</v-btn>
+      </v-col>
     </v-row>
 
     <v-row>
@@ -258,15 +261,15 @@ export default {
       try {
         // Fetch templates from the backend
         const response = await axios.get(`${apiBaseUrl}/api/total/templates`);
-        
+
         // Since only names are returned, map them directly to the dropdown
         this.mailchimpTemplates = response.data;  // response.data is now just a list of names
       } catch (error) {
         console.error('Error fetching Mailchimp templates:', error);
       }
     },
-     // Show Mailchimp email form dialog
-     showMailchimpForm() {
+    // Show Mailchimp email form dialog
+    showMailchimpForm() {
       // Check if gridApi is available
       if (!this.gridApi) {
         console.error('Grid API is not available.');
@@ -296,7 +299,7 @@ export default {
       }
 
       try {
-        const { id } = this.selectedRow;  // Assuming each row has an 'id' field
+        const {id} = this.selectedRow;  // Assuming each row has an 'id' field
 
         await axios.post(`${apiBaseUrl}/api/total/sendMailchimpEmail`, {
           totalDatabaseId: id,
@@ -317,22 +320,29 @@ export default {
     },
     getColumnDefs() {
       return [
-        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true },
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
-        { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
-        { headerName: 'Email', field: 'email', sortable: true, filter: true },
+        {
+          headerName: 'ID',
+          field: 'id',
+          sortable: true,
+          filter: true,
+          checkboxSelection: true,
+          headerCheckboxSelection: true
+        },
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        {headerName: 'Followers', field: 'followers', sortable: true, filter: true},
+        {headerName: 'Email', field: 'email', sortable: true, filter: true},
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
           cellEditor: 'agSelectCellEditor',
-          cellEditorParams: { values: [true, false] },
+          cellEditorParams: {values: [true, false]},
           valueFormatter: params => (params.value ? 'Yes' : 'No'),
           width: 100,
           // sortable: true,
           // filter: true,
           // cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
         },
-        { headerName: 'Categories', field: 'categories', sortable: true, filter: true },
+        {headerName: 'Categories', field: 'categories', sortable: true, filter: true},
 
       ];
 
@@ -341,7 +351,7 @@ export default {
       return {
         pagination: true,
         paginationPageSize: 10,
-        defaultColDef: { resizable: true },
+        defaultColDef: {resizable: true},
         autoHeight: true,
         rowSelection: 'multiple',
       };
@@ -355,7 +365,7 @@ export default {
       console.log('Grid Column API:', this.gridColumnApi);
 
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/total/all`, { withCredentials: true });
+        const response = await axios.get(`${apiBaseUrl}/api/total/all`, {withCredentials: true});
         console.log('API Response Data:', response.data);
 
         this.rowData = response.data;
@@ -544,7 +554,7 @@ export default {
     },
     async submitCBDForm() {
       try {
-        const { id } = this.selectedRow;
+        const {id} = this.selectedRow;
         await axios.post(`${apiBaseUrl}/api/collaborated/newCollaborated`, {
           id: id,
           poc: this.poc,
@@ -559,7 +569,33 @@ export default {
         this.closeCBDForm();
       }
     },
-  },
+    selectRandomRows() {
+      const numberOfRows = parseInt(prompt('Enter the number of rows to select:', '2000'));
+      if (isNaN(numberOfRows) || numberOfRows <= 0) {
+        alert('Please enter a valid positive integer.');
+        return;
+      }
+
+      const allRows = this.rowData.slice(); // Copy the array to avoid mutating the original data
+
+      // Shuffle the array using the Fisher-Yates algorithm
+      for (let i = allRows.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allRows[i], allRows[j]] = [allRows[j], allRows[i]];
+      }
+
+      // Select the first N rows
+      const selectedRowsData = allRows.slice(0, numberOfRows);
+
+      // Map data to nodes and select them in the grid
+      const selectedIds = new Set(selectedRowsData.map(row => row.id));
+      this.gridApi.forEachNode((node) => {
+        if (selectedIds.has(node.data.id)) {
+          node.setSelected(true);
+        }
+      });
+    }
+  }
 };
 </script>
 

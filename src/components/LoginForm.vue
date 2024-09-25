@@ -1,5 +1,12 @@
 <template>
-  <v-form @submit.prevent="handleSubmit" class="login-form" v-model="valid">
+  <v-container fluid>
+    <v-row
+        align="center"
+        justify="center"
+        style="min-height: 100vh;"
+    >
+      <v-col cols="6" sm="3" md="3">
+        <v-form @submit.prevent="handleSubmit" class="login-form" v-model="valid">
     <v-card-title class="text-center text-h4 mb-4 custom-font custom-title">
       {{ isSignup ? 'Sign Up' : 'Login' }}
     </v-card-title>
@@ -45,22 +52,31 @@
         required
         class="input-field"
     ></v-text-field>
-    <v-btn type="submit" color="primary" class="submit-btn" :disabled="!valid">
-      {{ isSignup ? 'Sign Up' : 'Login' }}
-    </v-btn>
+
+          <v-row justify="center">
+            <v-btn type="submit" color="primary" class="submit-btn" :disabled="!valid">
+            {{ isSignup ? 'Sign Up' : 'Login' }}
+            </v-btn>
+          </v-row>
     <v-alert v-if="error" type="error" dismissible>{{ error }}</v-alert>
     <v-alert v-if="successMessage" type="success" dismissible>{{ successMessage }}</v-alert>
-    <v-row align="center" justify="space-between" class="mt-4">
-      <v-col cols="auto">
-        <v-text>{{ isSignup ? 'Already have an account?' : 'Need an account?' }}</v-text>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="secondary" @click="toggleMode">
-          {{ isSignup ? 'Login' : 'Sign Up' }}
-        </v-btn>
+          <v-row align="center" justify="space-between" class="mt-4">
+            <v-col cols="auto">
+              <v-text>{{ isSignup ? 'Already have an account?' : 'Need an account?' }}</v-text>
+            </v-col>
+            <v-col cols="auto">
+              <!-- Replace the v-btn with a v-text containing an anchor tag -->
+              <v-text>
+                <a href="#" @click.prevent="toggleMode" class="hyperlink-text">
+                  {{ isSignup ? 'Login' : 'Sign Up' }}
+                </a>
+              </v-text>
+            </v-col>
+          </v-row>
+  </v-form>
       </v-col>
     </v-row>
-  </v-form>
+  </v-container>
 </template>
 
 <script>
@@ -159,3 +175,8 @@ export default {
   },
 };
 </script>
+
+<style>
+
+
+</style>

@@ -30,8 +30,8 @@
     <v-row>
       <v-col cols="12">
         <ag-grid-vue ref="agGrid" class="ag-theme-alpine" style="width: 100%; height: 600px;" :columnDefs="columnDefs"
-          :rowData="rowData" :gridOptions="gridOptions" @grid-ready="onGridReady" :domLayout="'autoHeight'"
-          @row-double-clicked="onRowDoubleClicked"></ag-grid-vue>
+                     :rowData="rowData" :gridOptions="gridOptions" @grid-ready="onGridReady" :domLayout="'autoHeight'"
+                     @row-double-clicked="onRowDoubleClicked"></ag-grid-vue>
       </v-col>
     </v-row>
 
@@ -48,37 +48,37 @@
                 <!-- Dropdown for Categories -->
                 <v-col cols="12" sm="6">
                   <v-select
-                    v-model="mailchimpCategories"
-                    :items="categoriesList"
-                    label="Categories"
-                    required
+                      v-model="mailchimpCategories"
+                      :items="categoriesList"
+                      label="Categories"
+                      required
                   />
                 </v-col>
 
                 <!-- Input for Project Name -->
                 <v-col cols="12" sm="6">
-                  <v-text-field 
-                    v-model="mailchimpProjectName" 
-                    label="Project Name"
+                  <v-text-field
+                      v-model="mailchimpProjectName"
+                      label="Project Name"
                   />
                 </v-col>
 
                 <v-col cols="12" sm="6">
-                  <v-text-field 
-                    v-model="mailchimpPOC" 
-                    label="POC"
+                  <v-text-field
+                      v-model="mailchimpPOC"
+                      label="POC"
                   />
                 </v-col>
 
                 <!-- Template Dropdown -->
                 <v-col cols="12" sm="6">
                   <v-select
-                    v-model="selectedTemplate"
-                    :items="mailchimpTemplates"
-                    label="Select Template"
-                    item-text="name"
-                    item-value="id"
-                    required
+                      v-model="selectedTemplate"
+                      :items="mailchimpTemplates"
+                      label="Select Template"
+                      item-text="name"
+                      item-value="id"
+                      required
                   />
                 </v-col>
 
@@ -104,35 +104,35 @@
             <v-container>
               <v-row>
                 <v-col cols="12" sm="6" v-for="(value, key) in selectedRow" :key="key">
-                  <v-text-field 
-                    v-model="selectedRow[key]" 
-                    :label="key" 
-                    readonly
+                  <v-text-field
+                      v-model="selectedRow[key]"
+                      :label="key"
+                      readonly
                   />
                 </v-col>
-                
+
                 <!-- Dropdown for Categories -->
                 <v-col cols="12" sm="6">
                   <v-select
-                    v-model="categories"
-                    :items="categoriesList"
-                    label="Categories"
-                    required
+                      v-model="categories"
+                      :items="categoriesList"
+                      label="Categories"
+                      required
                   />
                 </v-col>
 
                 <!-- Additional fields for POC and Project Name -->
                 <v-col cols="12" sm="6">
-                  <v-text-field 
-                    v-model="poc" 
-                    label="POC"
+                  <v-text-field
+                      v-model="poc"
+                      label="POC"
                   />
                 </v-col>
 
                 <v-col cols="12" sm="6">
-                  <v-text-field 
-                    v-model="projectName" 
-                    label="Project Name"
+                  <v-text-field
+                      v-model="projectName"
+                      label="Project Name"
                   />
                 </v-col>
               </v-row>
@@ -147,24 +147,30 @@
       </v-card>
     </v-dialog>
 
-    <edit-pop-out 
-      v-model="isEditDialogVisible" 
-      :rowData="selectedRow"
-      :nonEditableFields="['id', 'handle_name', 'email', 'is_Blocked']"
-      :isTDGrid="true"
-      @save="onSaveEdit"
-      @close="isEditDialogVisible = false" />
+    <edit-pop-out
+        v-model="isEditDialogVisible"
+        :rowData="selectedRow"
+        :nonEditableFields="['id', 'handle_name', 'email', 'is_Blocked']"
+        :isTDGrid="true"
+        @save="onSaveEdit"
+        @close="isEditDialogVisible = false" />
 
     <add-pop-out
-      :visible="showAddForm"
-      :title="'Add to Total Database'"
-      :fields="fields"
-      :formData="formData"
-      :show-file-upload="true"
-      @close="showAddForm = false"
-      @save="submitAdd"
-      @saveFile="submitFileAdd"
-    />
+        :visible="showAddForm"
+        :title="'Add to Total Database'"
+        :fields="fields"
+        :formData="formData"
+        :show-file-upload="true"
+        @close="showAddForm = false"
+        @save="submitAdd"
+        @saveFile="submitFileAdd">
+      <v-select
+          v-model="formData.categories"
+          :items="categoriesList"
+          label="Categories"
+          required
+      />
+    </add-pop-out>
 
   </v-container>
 </template>
@@ -200,7 +206,7 @@ export default {
       selectedTemplate: null,
       categoriesList: [],
       mailchimpTemplates: [],
-    
+
       formData: {
         handle_name: '',
         followers: '',
@@ -211,6 +217,8 @@ export default {
         { name: 'handle_name', label: 'Handle Name', required: true },
         { name: 'email', label: 'Email', required: true},
         { name: 'followers', label: 'Followers' },
+        { name: 'categories', label: 'Categories', type: 'select', options: this.categoriesList },
+
       ],
 
 
@@ -230,6 +238,7 @@ export default {
       try {
         const response = await axios.get(`${apiBaseUrl}/api/collaborated_projects/partitionsList`);
         this.categoriesList = response.data;
+        this.fields.find(field => field.name === 'categories').options = this.categoriesList; // Set options in the form
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -298,6 +307,8 @@ export default {
           // filter: true,
           // cellRenderer: (params) => params.value ? 'Yes' : 'No' // Correctly handling boolean values
         },
+        { headerName: 'Categories', field: 'categories', sortable: true, filter: true },
+
       ];
 
     },
@@ -332,7 +343,7 @@ export default {
     },
     autoSizeColumns() {
       const allColumnIds = this.gridColumnApi.getAllColumns()
-        .map(column => column.getColId());
+          .map(column => column.getColId());
       this.gridColumnApi.autoSizeColumns(allColumnIds, true);
     },
     onRowDoubleClicked(event) {
@@ -403,14 +414,14 @@ export default {
           }
         }
         await axios.post(`${apiBaseUrl}/api/total/add`, data)
-          .then(() => {
-            this.refreshGridData();  // Refresh grid data after successful add
-            this.showAddForm = false; // Close the form
-          })
-          .catch(error => {
-            console.error('Error adding data:', error);
-            alert('Failed to add entry.'); // Notify the user in case of an error
-          });
+            .then(() => {
+              this.refreshGridData();  // Refresh grid data after successful add
+              this.showAddForm = false; // Close the form
+            })
+            .catch(error => {
+              console.error('Error adding data:', error);
+              alert('Failed to add entry.'); // Notify the user in case of an error
+            });
       } catch (error) {
         console.error('Unexpected error:', error);
       }

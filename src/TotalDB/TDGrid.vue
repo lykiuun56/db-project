@@ -47,65 +47,33 @@
               <v-row>
                 <!-- Dropdown for Categories -->
                 <v-col cols="12" sm="6">
-<<<<<<< HEAD
                   <v-select v-model="mailchimpCategories" :items="categoriesList" label="Categories" required />
-=======
-                  <v-select
-                      v-model="mailchimpCategories"
-                      :items="categoriesList"
-                      label="Categories"
-                      required
-                  />
->>>>>>> 4fb0524dec9631f7d879a3ad709fb8c2d9b231d0
                 </v-col>
 
                 <!-- Input for Project Name -->
                 <v-col cols="12" sm="6">
-<<<<<<< HEAD
                   <v-text-field v-model="mailchimpProjectName" label="Project Name" required />
-=======
-                  <v-text-field
-                      v-model="mailchimpProjectName"
-                      label="Project Name"
-                  />
->>>>>>> 4fb0524dec9631f7d879a3ad709fb8c2d9b231d0
                 </v-col>
 
                 <!-- Input for POC -->
                 <v-col cols="12" sm="6">
-<<<<<<< HEAD
                   <v-text-field v-model="mailchimpPOC" label="POC" required />
                 </v-col>
 
                 <!-- Input for Subject Line -->
                 <v-col cols="12" sm="6">
                   <v-text-field v-model="mailchimpSubject" label="Subject Line" required />
-=======
-                  <v-text-field
-                      v-model="mailchimpPOC"
-                      label="POC"
-                  />
->>>>>>> 4fb0524dec9631f7d879a3ad709fb8c2d9b231d0
                 </v-col>
 
                 <!-- Template Dropdown -->
                 <!-- Template Dropdown -->
                 <v-col cols="12" sm="6">
                   <v-select
-<<<<<<< HEAD
                     v-if="mailchimpTemplates.length > 0"
                     v-model="selectedTemplateName"
                     :items="mailchimpTemplates"
                     label="Select Template"
                     required
-=======
-                      v-model="selectedTemplate"
-                      :items="mailchimpTemplates"
-                      label="Select Template"
-                      item-text="name"
-                      item-value="id"
-                      required
->>>>>>> 4fb0524dec9631f7d879a3ad709fb8c2d9b231d0
                   />
                 </v-col>
                 <!-- <v-col cols="12" sm="6">
@@ -245,17 +213,10 @@ export default {
       mailchimpCategories: '',
       mailchimpProjectName: '',
       mailchimpPOC: '',
-<<<<<<< HEAD
       mailchimpSubject: '',
       selectedTemplateName: '',  // Store the selected template ID
       mailchimpTemplates: [],  // Store all template options
       categoriesList: [],  // For categories selection
-=======
-      selectedTemplate: null,
-      categoriesList: [],
-      mailchimpTemplates: [],
-
->>>>>>> 4fb0524dec9631f7d879a3ad709fb8c2d9b231d0
       formData: {
         handle_name: '',
         followers: '',
@@ -412,7 +373,6 @@ export default {
       }
     },
     autoSizeColumns() {
-<<<<<<< HEAD
       if (this.gridApi) {
         const allColumns = this.gridApi.getAllDisplayedColumns();
         if (allColumns && allColumns.length > 0) {
@@ -424,11 +384,6 @@ export default {
       } else {
         console.error('Grid API is not available.');
       }
-=======
-      const allColumnIds = this.gridColumnApi.getAllColumns()
-          .map(column => column.getColId());
-      this.gridColumnApi.autoSizeColumns(allColumnIds, true);
->>>>>>> 4fb0524dec9631f7d879a3ad709fb8c2d9b231d0
     },
     onRowDoubleClicked(event) {
       this.selectedRow = event.data;

@@ -35,59 +35,40 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'; // Import mapState for Vuex state mapping
-import axios from '@/axios';
-import { apiBaseUrl } from '@/config';
+import { mapState, mapActions } from 'vuex'; // Import mapState and mapActions for Vuex state mapping
 
 export default {
   name: 'ViewWishlist',
   data() {
     return {
-      wishlists: [], // Array to store fetched wishlists
       loading: false, // Loading state for API call
       fetched: false, // Indicates if data has been fetched at least once
     };
   },
   computed: {
-    ...mapState(['userId']), // Map userId from Vuex store state
+    ...mapState(['userId', 'wishlists']), // Map userId and wishlists from Vuex store state
   },
   watch: {
     userId(newUserId) {
       // Fetch wishlists automatically when userId changes
       if (newUserId) {
         this.fetchWishlists(newUserId);
+      } else {
+        // If userId becomes null (e.g., user logs out), clear the wishlists
+        this.$store.commit('SET_WISHLISTS', []);
       }
     }
   },
   mounted() {
     // Fetch wishlists on mount if userId is already available
-    console.log('User ID:', this.userId); // Check if userId is available
     if (this.userId) {
       this.fetchWishlists(this.userId);
     }
   },
   methods: {
-    async fetchWishlists(userId) {
-      this.loading = true;
-      this.fetched = false;
+    ...mapActions(['fetchWishlists']), // Map the 'fetchWishlists' action
 
-      try {
-        const response = await axios.get(`${apiBaseUrl}/api/wishlists/user/${userId}`);
-        console.log('Fetched wishlists:', response.data); // Log response data
-        this.wishlists = response.data.map(wishlist => ({
-          ...wishlist,
-          items: wishlist.items || [] // Default to empty array if 'items' is undefined
-        }));
-      } catch (error) {
-        console.error('Failed to fetch wishlists', error);
-        this.$emit('alert', 'Failed to fetch wishlists');
-      } finally {
-        this.loading = false;
-        this.fetched = true;
-      }
-    },
     viewWishlist(wishlistId) {
-      console.log('Navigating to WishlistDetail with ID:', wishlistId);
       this.$router.push({ name: 'WishlistDetail', params: { wishlistId: Number(wishlistId) } });
     }
   }

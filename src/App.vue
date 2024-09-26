@@ -7,47 +7,50 @@
 
     <!-- Main App Bar (visible if logged in) -->
     <v-app-bar app clipped-left v-if="isLoggedIn">
-      <!-- Space between elements -->
-      <v-spacer></v-spacer>
-
       <!-- Wishlist Dropdown Menu -->
-      <v-menu offset-y :close-on-content-click="false" v-model="dropdownVisible">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on">
+      <v-menu
+          v-model="dropdownVisible"
+          :close-on-content-click="false"
+          offset-y
+      >
+        <template #activator="{ props }">
+          <v-btn icon v-bind="props">
             <v-icon>mdi-heart</v-icon>
           </v-btn>
         </template>
         <v-list>
           <v-list-item @click="navigateTo('/create-wishlist')">
-            <v-list-item-title>Create Wishlist</v-list-item-title>
+            <v-list-item-content>
+              <v-list-item-title>Create Wishlist</v-list-item-title>
+            </v-list-item-content>
           </v-list-item>
           <v-list-item @click="navigateTo('/view-wishlist')">
-            <v-list-item-title>View Wishlist</v-list-item-title>
+            <v-list-item-content>
+              <v-list-item-title>View Wishlist</v-list-item-title>
+            </v-list-item-content>
           </v-list-item>
         </v-list>
       </v-menu>
 
       <!-- User Profile Button -->
-      <v-btn icon>
+      <v-btn icon @click="navigateTo('/profile')">
         <v-icon>mdi-account</v-icon>
       </v-btn>
     </v-app-bar>
 
-    <!-- Wishlist Summary Bar (additional bar) -->
+    <!-- Wishlist Summary Bar (visible if logged in and wishlist has items) -->
     <v-app-bar app color="primary" dense v-if="isLoggedIn && wishlist.length">
-      <v-toolbar-title>
-        Wishlist
-      </v-toolbar-title>
+      <v-toolbar-title>Wishlist</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="navigateTo('/view-wishlist')">
         <v-icon>mdi-eye</v-icon>
       </v-btn>
     </v-app-bar>
 
-    <!-- Main Content -->
+    <!-- Main Content Area -->
     <v-main>
       <v-container fluid class="fill-height">
-        <!-- Login Form or Main Content Based on Authentication -->
+        <!-- Display Login Form if not logged in, else show routed views -->
         <LoginForm v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
         <router-view v-else></router-view>
       </v-container>
@@ -61,63 +64,84 @@ import LoginForm from '@/components/LoginForm.vue';
 
 export default {
   name: 'App',
+
   components: {
     AppSidebar,
-    LoginForm
+    LoginForm,
   },
+
   data() {
     return {
-      isLoggedIn: false,
-      dropdownVisible: false,
-      wishlist: [] // Array to hold wishlist items
+      isLoggedIn: false,       // Tracks user authentication status
+      dropdownVisible: false,  // Controls visibility of the wishlist dropdown
+      wishlist: [],            // Holds wishlist items
     };
   },
+
   methods: {
+    /**
+     * Handles successful login by updating the state and loading the wishlist.
+     */
     handleLoginSuccess() {
       this.isLoggedIn = true;
-      // Load wishlist items on login success (replace with actual data fetch)
-      this.wishlist = this.loadWishlist();
+      this.fetchWishlist();
     },
+
+    /**
+     * Navigates to the specified route and closes the dropdown menu.
+     * @param {string} path - The route path to navigate to.
+     */
     navigateTo(path) {
       this.$router.push(path);
       this.dropdownVisible = false; // Close dropdown after navigation
     },
-    loadWishlist() {
-      // Placeholder method, replace with actual data fetch logic
-      return [
-        {id: 1, name: 'Wishlist Item 1'},
-        {id: 2, name: 'Wishlist Item 2'}
+
+    /**
+     * Fetches the user's wishlist from the server.
+     * Replace the placeholder with actual API call logic.
+     */
+    fetchWishlist() {
+      // TODO: Replace with actual API call to fetch wishlist
+      this.wishlist = [
+        { id: 1, name: 'Wishlist Item 1' },
+        { id: 2, name: 'Wishlist Item 2' },
       ];
-    }
-  }
+    },
+  },
 };
 </script>
 
-<style>
+<style scoped>
+/* Ensures the main container takes full height */
+.fill-height {
+  height: 100%;
+}
+
+/* Adds padding to the main container */
 .v-main .v-container {
   padding-top: 16px;
 }
 
+/* Styles for avatar components */
 .v-avatar {
   background-color: #42A5F5;
   color: white;
   font-weight: bold;
 }
 
+/* Adds horizontal padding to the app bar */
 .v-app-bar {
   padding: 0 16px;
 }
 
+/* Utility class for left margin */
 .ml-3 {
   margin-left: 16px;
 }
 
+/* Styles the search icon dimensions */
 .search-icon {
   width: 24px;
   height: 24px;
-}
-
-.fill-height {
-  height: 100%;
 }
 </style>

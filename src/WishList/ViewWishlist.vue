@@ -20,7 +20,7 @@
               class="wishlist-item"
           >
             <v-list-item-content>
-              <v-list-item-title>Wishlist: {{ wishlist.name }}</v-list-item-title>
+              <v-list-item-title>{{ wishlist.name }}</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </v-list>

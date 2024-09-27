@@ -26,42 +26,14 @@
       <v-col cols="auto">
         <v-btn color="primary" @click="selectRandomRows" class="button-spacing">Select Random creators</v-btn>
       </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="showWishlistDialog" class="button-spacing">Add Selected to Wishlist</v-btn>
+      </v-col>
     </v-row>
 
+
     <!-- Wishlist Selection and Add Selected Button -->
-    <v-row>
-      <v-col cols="auto">
-        <v-select
-            v-if="userWishlists && userWishlists.length > 0"
-            v-model="selectedWishlistId"
-            :items="userWishlists"
-            item-text= "name"
-            item-value="id"
-            label="Select Wishlist"
-            required
-            class="button-spacing"
-        >
-          <template v-slot:item="data">
-            <v-list-item>
-              <v-list-item-conten>
-                <v-list-item-title> {{data.item.name}}</v-list-item-title>
-                <v-list-item-subtitle>ID: {{data.item.id}}</v-list-item-subtitle>
-              </v-list-item-conten>
-            </v-list-item>
-          </template>
-        </v-select>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn
-            color="primary"
-            @click="addSelectedToWishlist"
-            :disabled="!selectedWishlistId || selectedRows.length === 0"
-            class="button-spacing"
-        >
-          Add Selected to Wishlist
-        </v-btn>
-      </v-col>
-    </v-row>
+    <!-- Wishlist Selection Dialog -->
 
     <!-- Data Grid -->
     <v-row>
@@ -108,6 +80,29 @@
           required
       />
     </add-pop-out>
+
+    <v-dialog v-model="isWishlistDialogVisible" max-width="500px">
+      <v-card>
+        <v-card-title>Select Wishlist</v-card-title>
+        <v-card-text>
+          <div>
+            <v-btn
+                v-for="wishlist in userWishlists"
+                :key="wishlist.id"
+                @click="selectedWishlistId = wishlist.id"
+                :color="selectedWishlistId === wishlist.id ? 'primary' : ''"
+                class="ma-2"
+            >
+              {{ wishlist.name }}
+            </v-btn>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" @click="confirmAddToWishlist">Add</v-btn>
+          <v-btn @click="isWishlistDialogVisible = false">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
   </v-container>
 </template>
@@ -176,6 +171,8 @@ export default {
       selectedRows: [],
       selectedWishlistId: null, // Holds the selected wishlist ID
       userWishlists: [], // Holds the list of user's wishlists
+      isWishlistDialogVisible: false, // Controls the visibility of the wishlist selection dialog
+
     };
   },
   created() {
@@ -200,6 +197,42 @@ export default {
         console.error('Error fetching categories:', error);
       }
     },
+    showWishlistDialog() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      if (selectedNodes.length === 0) {
+        alert("Please select at least one row to add to the wishlist.");
+        return;
+      }
+      this.isWishlistDialogVisible = true;
+    },
+
+    async confirmAddToWishlist() {
+      if (!this.selectedWishlistId) {
+        alert("Please select a wishlist.");
+        return;
+      }
+
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const creatorIds = selectedNodes.map(node => node.data.id);
+
+      if (creatorIds.length === 0) {
+        alert("No creators selected.");
+        return;
+      }
+
+      try {
+        await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, creatorIds);
+        alert(`Successfully added ${creatorIds.length} creators to the wishlist!`);
+        this.refreshGridData();
+      } catch (error) {
+        console.error('Error adding selected creators to wishlist:', error);
+        alert('Failed to add selected creators to the wishlist.');
+      } finally {
+        this.isWishlistDialogVisible = false;
+        this.selectedWishlistId = null;
+      }
+    },
+
     async fetchUserWishlists() {
       if (!this.getUserId) {
         console.error('User ID is not available.');
@@ -208,15 +241,13 @@ export default {
       }
       try {
         const response = await axios.get(`${apiBaseUrl}/api/wishlists/user/${this.getUserId}`);
-        console.log('Raw API Response:', response.data); // Debugging
         if (Array.isArray(response.data)) {
           this.userWishlists = response.data
-              .map(wishlists => ({
-            id: wishlists.id,
-            name: wishlists.name,
-          }))
+              .map(wishlist => ({
+                id: wishlist.id,
+                name: wishlist.name,
+              }))
               .filter(wishlist => wishlist.id !== undefined && wishlist.name !== undefined);
-          console.log('Formatted userWishlists:', this.userWishlists); // Debugging
         } else {
           console.error('Invalid data format for userWishlists:', response.data);
           this.userWishlists = [];
@@ -225,7 +256,6 @@ export default {
         console.error('Error fetching user wishlists:', error);
       }
     },
-
 
     getColumnDefs() {
       return [

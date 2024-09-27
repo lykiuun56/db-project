@@ -14,9 +14,6 @@
         <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected</v-btn>
       </v-col>
       <v-col cols="auto">
-        <v-btn color="primary" @click="showAddForm = true" class="button-spacing">Add Creator</v-btn>
-      </v-col>
-      <v-col cols="auto">
         <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete Selected</v-btn>
       </v-col>
     </v-row>
@@ -37,31 +34,41 @@
       </v-col>
     </v-row>
 
-    <!-- Add or Edit Creator Dialogs -->
-    <edit-pop-out
-        v-model="isEditDialogVisible"
-        :rowData="selectedRow"
-        :nonEditableFields="['id', 'email']"
-        @save="onSaveEdit"
-        @close="isEditDialogVisible = false"
-    />
-
-    <add-pop-out
-        :visible="showAddForm"
-        :title="'Add Creator'"
-        :fields="fields"
-        :formData="formData"
-        @close="showAddForm = false"
-        @save="submitAdd"
-    />
+    <!-- Edit Dialog -->
+    <v-dialog v-model="isEditDialogVisible" max-width="600px">
+      <v-card>
+        <v-card-title>Edit Creator</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="updateCreator">
+            <v-text-field v-model="selectedRow.handle_name" label="Handle Name"></v-text-field>
+            <v-text-field v-model="selectedRow.tiktok_url" label="TikTok URL"></v-text-field>
+            <v-text-field v-model="selectedRow.followers" label="Followers"></v-text-field>
+            <v-text-field v-model="selectedRow.full_name" label="Full Name"></v-text-field>
+            <v-text-field v-model="selectedRow.full_address" label="Full Address"></v-text-field>
+            <v-text-field v-model="selectedRow.email" label="Email"></v-text-field>
+            <v-text-field v-model="selectedRow.phone" label="Phone"></v-text-field>
+            <v-text-field v-model="selectedRow.collaborated_times" label="Collaborated Times"></v-text-field>
+            <v-textarea v-model="selectedRow.notes" label="Notes"></v-textarea>
+            <v-text-field v-model="selectedRow.poc" label="POC"></v-text-field>
+            <v-text-field v-model="selectedRow.state" label="State"></v-text-field>
+            <v-text-field v-model="selectedRow.categories" label="Categories"></v-text-field>
+            <v-checkbox v-model="selectedRow.is_Blocked" label="Is Blocked"></v-checkbox>
+            <v-checkbox v-model="selectedRow.linked" label="Linked"></v-checkbox>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="isEditDialogVisible = false">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="updateCreator">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
-import EditPopOut from '@/components/EditPopOut.vue';
-import AddPopOut from '@/components/AddPopOut.vue';
 import { apiBaseUrl } from '@/config';
 import { exportToExcel } from '@/utils/exportUtils';
 
@@ -69,8 +76,6 @@ export default {
   name: 'WishlistCreators',
   components: {
     AgGridVue,
-    EditPopOut,
-    AddPopOut
   },
   props: {
     wishlistId: {
@@ -80,73 +85,50 @@ export default {
   },
   data() {
     return {
-      showAddForm: false,
-      formData: {
-        handle_name: '',
-        followers: '',
-        email: '',
-        tiktok_url: '',
-        categories: '',
-        full_name: '',
-        state: '',
-        full_address: '',
-        phone: '',
-        collaborated_times: '',
-        poc: '',
-        notes: '',
-        is_Blocked: false
-      },
-      fields: [
-        { name: 'project_name', label: 'Project Name', required: true},
-        { name: 'poc', label: 'POC', required: true},
-        { name: 'handle_name', label: 'Handle Name', required: true },
-        { name: 'tiktok_url', label: 'TikTok URL' },
-        { name: 'followers', label: 'Followers' },
-        { name: 'categories', label: 'Categories', type: 'select', options: this.categoriesList },
-        { name: 'full_name', label: 'Full Name' },
-        { name: 'state', label: 'State' },
-        { name: 'full_address', label: 'Full Address' },
-        { name: 'email', label: 'Email', required: true},
-        { name: 'phone', label: 'Phone' },
-        { name: 'notes', label: 'Notes' },
-        { name: 'linked', label: 'Linked'}
-      ],
       columnDefs: this.getColumnDefs(),
-      rowData: null, // This will hold the creator data
+      rowData: null,
       gridOptions: this.getGridOptions(),
       selectedRow: null,
       isEditDialogVisible: false,
+      gridApi: null,
     };
   },
   async mounted() {
-    await this.fetchWishlistCreators(this.wishlistId);
+    await this.fetchWishlistCreators();
   },
   methods: {
     getColumnDefs() {
       return [
-        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true},
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
-        { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, width: 300 },
-        { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
-        { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true },
-        { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true },
-        { headerName: 'Email', field: 'email', sortable: true, filter: true },
-        { headerName: 'Phone', field: 'phone', sortable: true, filter: true },
-        { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true},
-        { headerName: 'Notes', field: 'notes', sortable: true, filter: true },
-        { headerName: 'POC', field: 'poc', sortable: true, filter: true },
-        { headerName: 'State', field: 'state', sortable: true, filter: true },
-        { headerName: '最后合作种类', field: 'categories', sortable: true, filter: true },
+        {
+          headerName: 'ID',
+          field: 'id',
+          sortable: true,
+          filter: true,
+          checkboxSelection: true,
+          headerCheckboxSelection: true
+        },
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        {headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, width: 300},
+        {headerName: 'Followers', field: 'followers', sortable: true, filter: true},
+        {headerName: 'Full Name', field: 'full_name', sortable: true, filter: true},
+        {headerName: 'Full Address', field: 'full_address', sortable: true, filter: true},
+        {headerName: 'Email', field: 'email', sortable: true, filter: true},
+        {headerName: 'Phone', field: 'phone', sortable: true, filter: true},
+        {headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true},
+        {headerName: 'Notes', field: 'notes', sortable: true, filter: true},
+        {headerName: 'POC', field: 'poc', sortable: true, filter: true},
+        {headerName: 'State', field: 'state', sortable: true, filter: true},
+        {headerName: '最后合作种类', field: 'categories', sortable: true, filter: true},
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
           width: 150,
           filter: true,
-          editable: false, // Make the checkbox non-editable
-          valueFormatter: params => params.value === null ? 'N/A' : (params.value ? 'Yes' : 'No'), // Handle null, true, and false
+          editable: false,
+          valueFormatter: params => params.value === null ? 'N/A' : (params.value ? 'Yes' : 'No'),
           cellRenderer: params => {
-            const isChecked = params.value === true; // Set checked only if true
-            return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
+            const isChecked = params.value === true;
+            return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`;
           }
         },
         {
@@ -154,17 +136,18 @@ export default {
           field: 'expired_date',
           sortable: true,
           filter: true,
-          valueFormatter: this.formatDateTime,  // Call the custom formatter
+          valueFormatter: this.formatDateTime,
         },
-        { headerName: 'Linked',
+        {
+          headerName: 'Linked',
           field: 'linked',
           width: 150,
           filter: true,
-          editable: false, // Make the checkbox non-editable
-          valueFormatter: params => params.value === null ? 'N/A' : (params.value ? 'Yes' : 'No'), // Handle null, true, and false
+          editable: false,
+          valueFormatter: params => params.value === null ? 'N/A' : (params.value ? 'Yes' : 'No'),
           cellRenderer: params => {
-            const isChecked = params.value === true; // Set checked only if true
-            return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
+            const isChecked = params.value === true;
+            return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`;
           }
         },
       ];
@@ -173,41 +156,24 @@ export default {
       return {
         pagination: true,
         paginationPageSize: 10,
-        defaultColDef: { resizable: true },
+        defaultColDef: {resizable: true},
         rowSelection: 'multiple'
       };
     },
-    async fetchWishlistCreators(wishlistId) {
+    async fetchWishlistCreators() {
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/wishlists/${wishlistId}/creators`);
-        this.rowData = response.data; // Assuming the API returns an array of creators
+        const response = await axios.get(`${apiBaseUrl}/api/wishlists/${this.wishlistId}/creators`);
+        this.rowData = response.data;
       } catch (error) {
         console.error('Error fetching wishlist creators:', error);
       }
     },
+    onGridReady(params) {
+      this.gridApi = params.api;
+    },
     onRowDoubleClicked(event) {
-      this.selectedRow = event.data;
+      this.selectedRow = {...event.data};
       this.isEditDialogVisible = true;
-    },
-    async onSaveEdit(updatedData) {
-      try {
-        await axios.put(`${apiBaseUrl}/api/creators/${updatedData.id}`, updatedData);
-        await this.fetchWishlistCreators(this.wishlistId); // Refresh the grid data
-      } catch (error) {
-        console.error('Error updating creator data:', error);
-      } finally {
-        this.isEditDialogVisible = false;
-      }
-    },
-    async submitAdd(newCreatorData) {
-      try {
-        await axios.post(`${apiBaseUrl}/api/creators`, { ...newCreatorData, wishlistId: this.wishlistId });
-        await this.fetchWishlistCreators(this.wishlistId); // Refresh the grid data after adding
-      } catch (error) {
-        console.error('Error adding new creator:', error);
-      } finally {
-        this.showAddForm = false;
-      }
     },
     exportAllToExcel() {
       exportToExcel(this.rowData, "wishlist_creators_all");
@@ -221,24 +187,44 @@ export default {
       const selectedNodes = this.gridApi.getSelectedNodes();
       const selectedData = selectedNodes.map(node => node.data);
 
+      if (selectedData.length === 0) {
+        alert("Please select at least one creator to delete.");
+        return;
+      }
+
+      const confirmDelete = confirm(`Are you sure you want to delete ${selectedData.length} creator(s)?`);
+      if (!confirmDelete) return;
+
       for (const data of selectedData) {
         try {
-          await axios.delete(`${apiBaseUrl}/api/creators/${data.id}`);
+          await axios.delete(`${apiBaseUrl}/api/wishlists/${this.wishlistId}/removeCreator/${data.id}`);
         } catch (error) {
           console.error('Error deleting creator:', error);
         }
       }
 
-      await this.fetchWishlistCreators(this.wishlistId); // Refresh the grid data after deleting
+      await this.fetchWishlistCreators();
+    },
+    async updateCreator() {
+      try {
+        await axios.put(`${apiBaseUrl}/api/wishlists/${this.wishlistId}/creators/${this.selectedRow.id}`, this.selectedRow);
+        this.isEditDialogVisible = false;
+        await this.fetchWishlistCreators();
+      } catch (error) {
+        console.error('Error updating creator:', error);
+      }
+    },
+    formatDateTime(params) {
+      if (!params.value) return '';
+      const date = new Date(params.value);
+      return date.toLocaleString();
     },
   }
 };
 </script>
 
-
 <style scoped>
-/* Add custom styles if needed */
-.my-4 {
-  margin: 16px 0;
+.button-spacing {
+  margin-right: 8px;
 }
 </style>

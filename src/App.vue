@@ -38,14 +38,6 @@
       </v-btn>
     </v-app-bar>
 
-    <!-- Wishlist Summary Bar (visible if logged in and wishlist has items) -->
-    <v-app-bar app color="primary" dense v-if="isLoggedIn && wishlist.length">
-      <v-toolbar-title>Wishlist</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="navigateTo('/view-wishlist')">
-        <v-icon>mdi-eye</v-icon>
-      </v-btn>
-    </v-app-bar>
 
     <!-- Main Content Area -->
     <v-main>
@@ -96,17 +88,6 @@ export default {
       this.dropdownVisible = false; // Close dropdown after navigation
     },
 
-    /**
-     * Fetches the user's wishlist from the server.
-     * Replace the placeholder with actual API call logic.
-     */
-    fetchWishlist() {
-      // TODO: Replace with actual API call to fetch wishlist
-      this.wishlist = [
-        { id: 1, name: 'Wishlist Item 1' },
-        { id: 2, name: 'Wishlist Item 2' },
-      ];
-    },
   },
 };
 </script>

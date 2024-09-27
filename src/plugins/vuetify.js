@@ -11,7 +11,12 @@ export default createVuetify({
   icons: {
     defaultSet: 'mdi', // Ensure 'mdi' is used if using Material Design Icons
   },
+  theme: {
+    themes: {
+      light: {
+        background: '#f5f5f5', // Set the global background color here if desired
+      },
+    },
+  },
 });
 
-export class VIcon {
-}

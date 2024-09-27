@@ -10,6 +10,7 @@
         color="grey-darken-3"
         width="240"
         class="pa-0"
+        style="top: 64px;"
     >
       <AppSidebar />
     </v-navigation-drawer>
@@ -17,8 +18,8 @@
     <!-- Main App Bar (visible if logged in) -->
     <v-app-bar
         app
-        :elevation="2"
-        color="primary"
+        :elevation="10"
+        color="#121212"
         height="64"
         v-if="isLoggedIn"
     >
@@ -26,8 +27,8 @@
       <v-app-bar-nav-icon @click="toggleSidebar" color="white"></v-app-bar-nav-icon>
 
       <!-- App title or logo -->
-      <v-app-bar-title class="text-h5 font-weight-bold">
-        <span class="text-white">Puff-Media</span>
+      <v-app-bar-title class="text-h5 font-weight-bold color:#121212">
+        <img src="@/assets/log1.png" alt="Puff-Media Logo" style="height: 120px; width: 120px; object-fit: contain;">
       </v-app-bar-title>
 
       <v-spacer></v-spacer>
@@ -96,7 +97,7 @@
     </v-app-bar>
 
     <!-- Main Content Area -->
-    <v-main>
+    <v-main style="background:#121212">
       <v-container fluid class="fill-height pa-0">
         <!-- Display Login Form if not logged in, else show routed views -->
         <LoginForm v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
@@ -184,5 +185,17 @@ const toggleSidebar = () => {
 
 .v-navigation-drawer {
   top: 64px !important;
+  margin-top: 0 !important; /* Remove any extra margin */
+  padding-top: 0 !important; /* Remove any extra padding */
 }
+
+#app{
+  background-color: #000000; /* Set your desired color */
+
+}
+
+
+
+
+
 </style>

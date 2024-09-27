@@ -17,12 +17,12 @@
         </template>
 
         <v-list-item
-            @click="$router.push('/total-database-home')"
+            @click="$router.push('/td-grid')"
             title="Total Database Home"
             prepend-icon="mdi-home-circle"
         ></v-list-item>
         <v-list-item
-            @click="$router.push('/collaborated-database')"
+            @click="$router.push('/cd-grid')"
             title="Collaborated Database"
             prepend-icon="mdi-account-group"
         ></v-list-item>

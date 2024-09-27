@@ -208,7 +208,7 @@ export default {
 
           // Emit event or navigate as needed
           this.$emit('login-success');
-          this.$router.push('/view-wishlist'); // Redirect to wishlists page
+          this.$router.push('/td-grid'); // Redirect to wishlists page
         } else {
           this.error = response.data.error || 'Invalid username or password';
         }

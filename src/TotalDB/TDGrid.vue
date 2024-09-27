@@ -1,50 +1,106 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12">
-        <h1>Total Database</h1>
-      </v-col>
-    </v-row>
-    <v-row>
-      <!-- Action Buttons -->
-      <v-col cols="auto">
-        <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" @click="showAddForm = true" class="button-spacing">Add</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="black" @click="blockSelected" class="button-spacing">Block</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" @click="downloadTemplate" class="button-spacing">Download Template</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="success" @click="showCBDForm" class="button-spacing">Write To CBD</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="success" @click="showMailchimpForm" class="button-spacing">Send Mailchimp Email</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <!-- Updated to open the Select Random Dialog -->
-        <v-btn color="primary" @click="openSelectRandomDialog" class="button-spacing">Select Random creators</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" @click="resetView" class="button-spacing">Reset</v-btn>
+      <v-col cols="12"  >
+        <h1 style="color: white">Total Database</h1>
       </v-col>
     </v-row>
 
+    <!-- Dropdown Menus -->
+    <v-row class="mb-4">
+      <!-- Data Management Dropdown -->
+      <v-col cols="auto">
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn color="#4700cf" v-bind="props">
+              Data Management
+              <v-icon right>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="showAddForm = true">
+              <v-list-item-title>Add</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="deleteSelected">
+              <v-list-item-title>Delete</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="blockSelected">
+              <v-list-item-title>Block</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
+
+      <!-- Export Options Dropdown -->
+      <v-col cols="auto">
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn color="#33007D" v-bind="props">
+              Export Options
+              <v-icon right>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="exportAllToExcel">
+              <v-list-item-title>Export All</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="exportSelectedToExcel">
+              <v-list-item-title>Export Selected</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="downloadTemplate">
+              <v-list-item-title>Download Template</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
+
+      <!-- Actions Dropdown -->
+      <v-col cols="auto">
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn color="#4f1787" v-bind="props">
+              Actions
+              <v-icon right>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="showCBDForm">
+              <v-list-item-title>Write To CBD</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="showMailchimpForm">
+              <v-list-item-title>Send Mailchimp Email</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="openSelectRandomDialog">
+              <v-list-item-title>Select Random Creators</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
+      <v-spacer></v-spacer>
+
+
+      <!-- Download Template Button -->
+      <v-col cols="auto">
+        <v-btn color="#00b19e" @click="downloadTemplate" class="elevation-2">
+          <v-icon left>mdi-file-download</v-icon>
+          Template
+        </v-btn>
+      </v-col>
+
+      <v-col cols ="auto">
+        <v-btn color="#9f0000" @click="resetView" class="elevation-2">
+          <v-icon left>mdi-refresh</v-icon>
+          Reset
+        </v-btn>
+      </v-col>
+    </v-row>
+
+    <!-- AG Grid component -->
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
             ref="agGrid"
-            class="ag-theme-alpine"
+            class="ag-theme-alpine-auto-dark"
             style="width: 100%; height: 600px;"
             :columnDefs="columnDefs"
             :rowData="rowData"
@@ -255,6 +311,8 @@ import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 import AddPopOut from '@/components/AddPopOut.vue';
 import templateFile from '@/assets/td_template.xlsx';
+// import 'ag-grid-enterprise';
+
 
 export default {
   name: 'TotalDatabaseGrid',
@@ -315,6 +373,8 @@ export default {
           },
         ],
         defaultToolPanel: 'filters', // Optional: Open Filters panel by default
+        position: 'right',
+
       },
       // New data properties for Select Random Dialog
       isSelectRandomDialogVisible: false,
@@ -467,6 +527,8 @@ export default {
         // Enable multi-row selection via checkbox
         suppressRowClickSelection: true,
         // Other grid options as needed
+        sideBar: this.sideBar,
+
       };
     },
     async onGridReady(params) {
@@ -825,10 +887,79 @@ export default {
 @import "~ag-grid-community/styles/ag-grid.css";
 @import "~ag-grid-community/styles/ag-theme-alpine.css";
 
-.ag-theme-alpine {
+/* AG Grid Custom Theme Adjustments */
+.ag-theme-alpine-dark {
   width: 100%;
   height: 600px;
+  background-color: transparent !important; /* Make grid background transparent */
+  border: none !important; /* Remove grid border */
+  box-shadow: none; /* Remove any default shadows */
 }
+
+.ag-theme-alpine-dark .ag-header {
+  background-color: transparent !important; /* Transparent header background */
+  color: #ffffff; /* Header text color */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+}
+
+.ag-theme-alpine-dark .ag-header-cell {
+  border: none; /* Remove default borders */
+}
+
+.ag-theme-alpine-dark .ag-cell {
+  background-color: rgba(255, 255, 255, 0.05) !important; /* Slight transparent cell background */
+  color: #e0e0e0; /* Cell text color */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle cell border */
+}
+
+.ag-theme-alpine-dark .ag-row:hover {
+  background-color: rgba(0, 0, 0, 0.2) !important; /* Hover effect */
+}
+
+.ag-theme-alpine-dark .ag-row-selected {
+  background-color: rgba(100, 181, 246, 0.3) !important; /* Selected row background */
+  color: #ffffff; /* Selected row text color */
+}
+
+.ag-theme-alpine-dark .ag-root-wrapper {
+  background-color: transparent !important; /* Transparent wrapper */
+}
+
+.ag-theme-alpine-dark .ag-icon {
+  fill: #ffffff; /* White icons */
+}
+
+.ag-theme-alpine-dark .ag-row, .ag-cell {
+  border: none !important; /* Remove default cell borders */
+}
+
+.ag-theme-alpine-dark .ag-ltr .ag-header-cell, .ag-theme-alpine-dark .ag-header {
+  border-right: none !important; /* Remove right header border */
+}
+
+/* Customize scrollbar */
+.ag-theme-alpine-dark .ag-body-horizontal-scroll {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.ag-theme-alpine-dark .ag-body-horizontal-scroll .ag-horizontal-scroll-viewport::-webkit-scrollbar {
+  height: 8px;
+}
+
+.ag-theme-alpine-dark .ag-body-horizontal-scroll .ag-horizontal-scroll-viewport::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ag-theme-alpine-dark .ag-body-horizontal-scroll .ag-horizontal-scroll-viewport::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.ag-theme-alpine-dark .ag-body-horizontal-scroll .ag-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+
 
 /* Optional: Adjust button spacing */
 .button-spacing {

@@ -6,36 +6,32 @@
     </v-navigation-drawer>
 
     <!-- Main App Bar (visible if logged in) -->
-    <v-app-bar app clipped-left v-if="isLoggedIn">
+    <v-app-bar app clipped-right v-if="isLoggedIn">
       <!-- Wishlist Dropdown Menu -->
-      <v-menu
-          v-model="dropdownVisible"
-          :close-on-content-click="false"
-          offset-y
+      <v-bottom-navigation
+          v-if="isLoggedIn"
+          app
+          grow
       >
-        <template #activator="{ props }">
-          <v-btn icon v-bind="props">
-            <v-icon>mdi-heart</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="navigateTo('/create-wishlist')">
-            <v-list-item-content>
-              <v-list-item-title>Create Wishlist</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-item @click="navigateTo('/view-wishlist')">
-            <v-list-item-content>
-              <v-list-item-title>View Wishlist</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+        <!-- Wishlist Navigation -->
+        <v-btn @click="navigateTo('/create-wishlist')">
+          <v-icon>mdi-heart-plus</v-icon>
+          <span>Create Wishlist</span>
+        </v-btn>
 
-      <!-- User Profile Button -->
-      <v-btn icon @click="navigateTo('/profile')">
-        <v-icon>mdi-account</v-icon>
-      </v-btn>
+        <v-btn @click="navigateTo('/view-wishlist')">
+          <v-icon>mdi-heart</v-icon>
+          <span>View Wishlist</span>
+        </v-btn>
+
+        <!-- User Profile Navigation -->
+        <v-btn @click="navigateTo('/profile')">
+          <v-icon>mdi-account</v-icon>
+          <span>Profile</span>
+        </v-btn>
+      </v-bottom-navigation>
+
+
     </v-app-bar>
 
 
@@ -49,6 +45,11 @@
     </v-main>
   </v-app>
 </template>
+
+
+
+
+
 
 <script>
 import AppSidebar from '@/components/AppSidebar.vue';

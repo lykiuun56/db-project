@@ -310,15 +310,6 @@ export default {
             return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
           }
         },
-        {
-          headerName: 'Add to Wishlist',
-          field: 'wishlist',
-          width: 150,
-          cellRenderer: this.wishlistRenderer,
-          cellRendererParams: {
-            addToWishlist: this.addToWishlist,
-          }
-        }
       ];
     },
     formatDateTime(params) {
@@ -351,22 +342,6 @@ export default {
         },
         rowMultiSelectWithClick: true, // Add this line
       };
-    },
-    // Renderer for the 'Add to Wishlist' button in each row
-    wishlistRenderer(params) {
-      // Create button element with heart icon
-      const button = document.createElement('button');
-      button.innerHTML = 'Add to Wishlist';
-      button.style.background = '#FFCDD2';
-      button.style.border = 'none';
-      button.style.cursor = 'pointer';
-      button.style.padding = '5px 10px';
-      button.style.borderRadius = '5px';
-
-      button.addEventListener('click', () => {
-        params.context.addToWishlist(params.data);
-      });
-      return button; // Return the button element
     },
 
     // Method to add a single creator to the selected wishlist

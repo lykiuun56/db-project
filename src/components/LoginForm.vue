@@ -1,114 +1,132 @@
 <template>
-  <v-container fluid>
-    <v-row
-        align="center"
-        justify="center"
-        style="min-height: 100vh;"
-    >
+  <v-container fluid class="fill-height">
+    <v-row align="center" justify="center">
       <v-col cols="12" sm="8" md="6" lg="4">
-        <v-form @submit.prevent="handleSubmit" class="login-form" v-model="valid">
-          <v-card class="pa-5">
-            <v-card-title class="text-center text-h5 mb-4 custom-font custom-title">
-              {{ isSignup ? 'Sign Up' : 'Login' }}
-            </v-card-title>
+        <v-card elevation="8" rounded="lg" class="login-card">
+          <v-card-title class="text-center text-h4 font-weight-bold primary--text py-4">
+            {{ isSignup ? 'Sign Up' : 'Login' }}
+          </v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="handleSubmit" v-model="valid" lazy-validation>
+              <v-text-field
+                  v-model="username"
+                  label="Username"
+                  prepend-icon="mdi-account"
+                  :rules="[v => !!v || 'Username is required']"
+                  required
+                  outlined
+                  dense
+              ></v-text-field>
 
-            <v-text-field
-                v-model="username"
-                label="Username"
-                :rules="[v => !!v || 'Username is required']"
-                required
-                class="input-field"
-            ></v-text-field>
+              <v-text-field
+                  v-if="isSignup"
+                  v-model="email"
+                  label="Email"
+                  prepend-icon="mdi-email"
+                  type="email"
+                  :rules="[v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Email must be valid']"
+                  required
+                  outlined
+                  dense
+              ></v-text-field>
 
-            <v-text-field
-                v-if="isSignup"
-                v-model="email"
-                label="Email"
-                type="email"
-                :rules="[v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Email must be valid']"
-                required
-                class="input-field"
-            ></v-text-field>
+              <v-text-field
+                  v-model="password"
+                  label="Password"
+                  prepend-icon="mdi-lock"
+                  :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="showPassword ? 'text' : 'password'"
+                  @click:append="showPassword = !showPassword"
+                  :rules="[v => !!v || 'Password is required']"
+                  required
+                  outlined
+                  dense
+              ></v-text-field>
 
-            <v-text-field
-                v-model="password"
-                label="Password"
-                type="password"
-                :rules="[v => !!v || 'Password is required']"
-                required
-                class="input-field"
-            ></v-text-field>
+              <v-text-field
+                  v-model="poc"
+                  label="Poc"
+                  prepend-icon="mdi-account-key"
+                  :rules="[v => !!v || 'Poc is required']"
+                  required
+                  outlined
+                  dense
+              ></v-text-field>
 
-            <v-text-field
-                v-model="poc"
-                label="Poc"
-                :rules="[v => !!v || 'Poc is required']"
-                required
-                class="input-field"
-            ></v-text-field>
+              <v-text-field
+                  v-if="isSignup"
+                  v-model="confirmPassword"
+                  label="Confirm Password"
+                  prepend-icon="mdi-lock-check"
+                  :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                  :type="showConfirmPassword ? 'text' : 'password'"
+                  @click:append="showConfirmPassword = !showConfirmPassword"
+                  :rules="[v => !!v || 'Password confirmation is required', v => v === password || 'Passwords must match']"
+                  required
+                  outlined
+                  dense
+              ></v-text-field>
 
-            <v-text-field
-                v-if="isSignup"
-                v-model="confirmPassword"
-                label="Confirm Password"
-                type="password"
-                :rules="[v => !!v || 'Password confirmation is required', v => v === password || 'Passwords must match']"
-                required
-                class="input-field"
-            ></v-text-field>
-
-            <v-row justify="center" class="mt-4">
               <v-btn
                   type="submit"
                   color="primary"
-                  class="submit-btn"
+                  block
+                  large
+                  :loading="loading"
                   :disabled="!valid || loading"
+                  class="mt-4"
               >
-                <v-icon left v-if="loading">mdi-loading</v-icon>
                 {{ isSignup ? 'Sign Up' : 'Login' }}
               </v-btn>
-            </v-row>
+            </v-form>
+          </v-card-text>
 
-            <!-- Error Message -->
-            <v-alert
-                v-if="error"
-                type="error"
-                dismissible
-                class="mt-4"
+          <v-card-actions class="justify-center pb-4">
+            <v-btn text color="primary" @click="toggleMode">
+              {{ isSignup ? 'Already have an account? Login' : 'Need an account? Sign Up' }}
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+
+        <v-snackbar
+            v-model="showError"
+            color="error"
+            timeout="5000"
+            top
+        >
+          {{ error }}
+          <template v-slot:action="{ attrs }">
+            <v-btn
+                text
+                v-bind="attrs"
+                @click="showError = false"
             >
-              {{ error }}
-            </v-alert>
+              Close
+            </v-btn>
+          </template>
+        </v-snackbar>
 
-            <!-- Success Message -->
-            <v-alert
-                v-if="successMessage"
-                type="success"
-                dismissible
-                class="mt-4"
+        <v-snackbar
+            v-model="showSuccess"
+            color="success"
+            timeout="5000"
+            top
+        >
+          {{ successMessage }}
+          <template v-slot:action="{ attrs }">
+            <v-btn
+                text
+                v-bind="attrs"
+                @click="showSuccess = false"
             >
-              {{ successMessage }}
-            </v-alert>
-
-            <!-- Toggle Login/Signup -->
-            <v-row align="center" justify="space-between" class="mt-4">
-              <v-col cols="auto">
-                <v-text>{{ isSignup ? 'Already have an account?' : 'Need an account?' }}</v-text>
-              </v-col>
-              <v-col cols="auto">
-                <v-text>
-                  <a href="#" @click.prevent="toggleMode" class="hyperlink-text">
-                    {{ isSignup ? 'Login' : 'Sign Up' }}
-                  </a>
-                </v-text>
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-form>
+              Close
+            </v-btn>
+          </template>
+        </v-snackbar>
       </v-col>
     </v-row>
   </v-container>
 </template>
-
 <script>
 import axios from '@/axios';
 import { apiBaseUrl } from '@/config';
@@ -128,6 +146,8 @@ export default {
       valid: false,
       isSignup: false,
       loading: false,
+      showPassword: false,
+      showConfirmPassword: false,
     };
   },
   methods: {
@@ -212,8 +232,10 @@ export default {
 
         if (response.data.success) {
           this.successMessage = 'Sign up successful! Please log in with your new account.';
+          this.showSuccess = true;
           this.isSignup = false;
           this.username = '';
+          this.resetForm();
           this.email = '';
           this.password = '';
           this.confirmPassword = '';
@@ -239,7 +261,17 @@ export default {
         this.email = '';
         this.confirmPassword = '';
       }
+      this.resetForm();
     },
+    resetForm() {
+      this.username = '';
+      this.email = '';
+      this.password = '';
+      this.confirmPassword = '';
+      this.poc = '';
+      this.error = null;
+      this.successMessage = '';
+      },
   },
 };
 </script>

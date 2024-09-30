@@ -1,46 +1,27 @@
-
+// src/plugins/axios.js
 import axios from 'axios';
+import store from '@/utils/store'; // Import the Vuex store
 
-// Create an Axios instance with default configurations
+// Create an Axios instance
 const axiosInstance = axios.create({
-    baseURL: 'http://localhost:5000', // Base URL for your backend API
-    withCredentials: true, // Send cookies with each request
+    baseURL: 'http://localhost:5000', // Replace with your backend URL
     headers: {
-        'Content-Type': 'application/json', // Default content type for requests
-        // Add any other custom headers if needed
-    }
+        'Content-Type': 'application/json',
+    },
 });
 
-// Add a request interceptor to include any additional configurations (if needed)
+// Request interceptor to add auth token if available
 axiosInstance.interceptors.request.use(
-    config => {
-        // You can modify the request config here, like adding authorization tokens
-        // For example, if you have a token in local storage:
-        // const token = localStorage.getItem('token');
-        // if (token) {
-        //   config.headers['Authorization'] = `Bearer ${token}`;
-        // }
+    (config) => {
+        const token = store.state.authToken; // Access token from Vuex store
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
         return config;
     },
-    error => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
-// Add a response interceptor for global error handling (if needed)
-axiosInstance.interceptors.response.use(
-    response => response,
-    error => {
-        // Handle error responses globally (optional)
-        if (error.response && error.response.status === 401) {
-            // Handle unauthorized access, redirect to login if needed
-            // window.location.href = '/login';
-        }
-        return Promise.reject(error);
-    }
-);
-delete axios.defaults.headers.common['Authorization'];
-
+// Optionally, add response interceptors for global error handling
 
 export default axiosInstance;
-

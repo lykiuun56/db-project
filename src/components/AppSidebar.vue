@@ -1,75 +1,106 @@
 <template>
-  <v-app>
-    <v-navigation-drawer app>
-      <v-list dense>
-        <v-list-item>
-          <v-list-item-content>
-            <v-list-item-title>Main Menu</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-divider></v-divider>
-        <v-list-item @click="$router.push('/total-database-home')">
-          <v-btn text block>Total Database Home</v-btn>
-        </v-list-item>
-        <v-list-item @click="$router.push('/collaborated-database')">
-          <v-btn text block>Collaborated Database</v-btn>
-        </v-list-item>
-        <v-list-item @click="$router.push('/block-someone/management-email')">
-          <v-btn text block >Management Email</v-btn>
-        </v-list-item>
-        <v-list-item @click="$router.push('/block-someone/black-list')">
-          <v-btn text block>Black List</v-btn>
-        </v-list-item>
-        <v-list-item @click="$router.push('/remove-duplicate')">
-          <v-btn text block>Remove Duplicate</v-btn>
-        </v-list-item>
-        <v-list-item @click="$router.push('/tiktok-home')">
-          <v-btn text block>Tik Tok Service</v-btn>
-        </v-list-item>
-        <v-list-item @click="$router.push('/email-extra')">
-          <v-btn text block>Email Extraction</v-btn>
-        </v-list-item>
-        <v-list-item @click="$router.push('/total-project')">
-          <v-btn text block>Total Project</v-btn>
-        </v-list-item>
-        <v-list-item @click="$router.push('/collaborated-project')">
-          <v-btn text block>Collaborated Project</v-btn>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-  </v-app>
+  <v-navigation-drawer
+      app
+      permanent
+      color="grey-darken-4"
+      width="240"
+  >
+
+    <v-list density="compact" nav>
+      <v-list-group value="database">
+        <template v-slot:activator="{ props }">
+          <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-database"
+              title="Database"
+          ></v-list-item>
+        </template>
+
+        <v-list-item
+            @click="$router.push('/total-database-home')"
+            title="Total Database Home"
+            prepend-icon="mdi-home-circle"
+        ></v-list-item>
+        <v-list-item
+            @click="$router.push('/collaborated-database')"
+            title="Collaborated Database"
+            prepend-icon="mdi-account-group"
+        ></v-list-item>
+      </v-list-group>
+
+      <v-list-group value="management">
+        <template v-slot:activator="{ props }">
+          <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-shield-account"
+              title="Management"
+          ></v-list-item>
+        </template>
+
+        <v-list-item
+            @click="$router.push('/block-someone/management-email')"
+            title="Management Email"
+            prepend-icon="mdi-email"
+        ></v-list-item>
+        <v-list-item
+            @click="$router.push('/block-someone/black-list')"
+            title="Black List"
+            prepend-icon="mdi-block-helper"
+        ></v-list-item>
+      </v-list-group>
+
+      <v-list-item
+          @click="$router.push('/remove-duplicate')"
+          prepend-icon="mdi-content-duplicate"
+          title="Remove Duplicate"
+      ></v-list-item>
+      <v-list-item
+          @click="$router.push('/tiktok-home')"
+          prepend-icon="mdi-music-note"
+          title="TikTok Service"
+      ></v-list-item>
+      <v-list-item
+          @click="$router.push('/email-extra')"
+          prepend-icon="mdi-email-plus"
+          title="Email Extraction"
+      ></v-list-item>
+
+      <v-list-group value="projects">
+        <template v-slot:activator="{ props }">
+          <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-briefcase"
+              title="Projects"
+          ></v-list-item>
+        </template>
+
+        <v-list-item
+            @click="$router.push('/total-project')"
+            title="Total Project"
+            prepend-icon="mdi-view-grid"
+        ></v-list-item>
+        <v-list-item
+            @click="$router.push('/collaborated-project')"
+            title="Collaborated Project"
+            prepend-icon="mdi-account-group"
+        ></v-list-item>
+      </v-list-group>
+    </v-list>
+
+  </v-navigation-drawer>
 </template>
 
-<script>
-export default {
-  name: 'AppSidebar'
-};
+<script setup>
+// import { useRouter } from 'vue-router'
+
 </script>
 
-<style>
-.v-navigation-drawer {
-  background-color: white;
-}
-.v-list-item-title {
-  font-weight: bold;
-}
-.v-divider {
-  margin: 8px 0;
-}
-.v-btn {
-  margin: 8px 0;
-}
-.exp-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 30px;
+<style scoped>
+.v-list-item__prepend > .v-icon {
+  margin-inline-end: 8px;
 }
 
-.exp-icon {
-  margin-left: 28px;
-}
-.exp-text {
-  text-align: center;
+.v-list-group__items .v-list-item {
+  padding-inline-start: 16px;
 }
 </style>

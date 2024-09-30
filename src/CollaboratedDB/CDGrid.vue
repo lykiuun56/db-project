@@ -6,6 +6,7 @@
       </v-col>
     </v-row>
 
+    <!-- Action Buttons -->
     <v-row>
       <v-col cols="auto">
         <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All</v-btn>
@@ -19,57 +20,90 @@
       <v-col cols="auto">
         <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete</v-btn>
       </v-col>
-      <!-- <v-col cols="auto">
-        <v-btn color="black" class="button-spacing">Block</v-btn>
-      </v-col> -->
       <v-col cols="auto">
         <v-btn color="primary" class="button-spacing" @click="downloadTemplate">Download Template</v-btn>
       </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="selectRandomRows" class="button-spacing">Select Random creators</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="showWishlistDialog" class="button-spacing">Add Selected to Wishlist</v-btn>
+      </v-col>
     </v-row>
 
+
+    <!-- Wishlist Selection and Add Selected Button -->
+    <!-- Wishlist Selection Dialog -->
+
+    <!-- Data Grid -->
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
-          ref="agGrid"
-          class="ag-theme-alpine"
-          style="width: 100%; height: 600px;"
-          :columnDefs="columnDefs"
-          :rowData="rowData"
-          :gridOptions="gridOptions"
-          @grid-ready="onGridReady"
-          :domLayout="'autoHeight'"
-          rowSelection="multiple"
-          @row-double-clicked="onRowDoubleClicked"
+            ref="agGrid"
+            class="ag-theme-alpine"
+            style="width: 100%; height: 600px;"
+            :columnDefs="columnDefs"
+            :rowData="rowData"
+            :gridOptions="gridOptions"
+            @grid-ready="onGridReady"
+            :domLayout="'autoHeight'"
+            rowSelection="multiple"
+            @row-double-clicked="onRowDoubleClicked"
         ></ag-grid-vue>
       </v-col>
     </v-row>
 
+    <!-- Edit Dialog -->
     <edit-pop-out
-      v-model="isEditDialogVisible"
-      :rowData="selectedRow"
-      :nonEditableFields="['id', 'handle_name', 'email', 'collaborated_times', 'categories', 'expired_date', 'is_Blocked']"
-      @save="onSaveEdit"
-      @close="isEditDialogVisible = false"
+        v-model="isEditDialogVisible"
+        :rowData="selectedRow"
+        :nonEditableFields="['id', 'handle_name', 'email', 'collaborated_times', 'categories', 'expired_date', 'is_Blocked']"
+        @save="onSaveEdit"
+        @close="isEditDialogVisible = false"
     />
 
+    <!-- Add Dialog -->
     <add-pop-out
-      :visible="showAddForm"
-      :title="'Add to Collaborated Database'"
-      :fields="fields"
-      :formData="formData"
-      @close="showAddForm = false"
-      @save="submitAdd"
-      @saveFile="submitFileAdd"
+        :visible="showAddForm"
+        :title="'Add to Collaborated Database'"
+        :fields="fields"
+        :formData="formData"
+        @close="showAddForm = false"
+        @save="submitAdd"
+        @saveFile="submitFileAdd"
     >
       <!-- Categories Dropdown -->
       <v-select
-        v-model="formData.categories"
-        :items="categoriesList"
-        label="Categories"
-        required
+          v-model="formData.categories"
+          :items="categoriesList"
+          label="Categories"
+          required
       />
     </add-pop-out>
-    
+
+    <v-dialog v-model="isWishlistDialogVisible" max-width="500px">
+      <v-card>
+        <v-card-title>Select Wishlist</v-card-title>
+        <v-card-text>
+          <div>
+            <v-btn
+                v-for="wishlist in userWishlists"
+                :key="wishlist.id"
+                @click="selectedWishlistId = wishlist.id"
+                :color="selectedWishlistId === wishlist.id ? 'primary' : ''"
+                class="ma-2"
+            >
+              {{ wishlist.name }}
+            </v-btn>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" @click="confirmAddToWishlist">Add</v-btn>
+          <v-btn @click="isWishlistDialogVisible = false">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -127,7 +161,7 @@ export default {
         { name: 'notes', label: 'Notes' },
         { name: 'linked', label: 'Linked'}
       ],
-      
+
       categoriesList: [],
       columnDefs: this.getColumnDefs(),
       rowData: null,
@@ -135,14 +169,21 @@ export default {
       selectedRow: null,
       isEditDialogVisible: false,
       selectedRows: [],
+      selectedWishlistId: null, // Holds the selected wishlist ID
+      userWishlists: [], // Holds the list of user's wishlists
+      isWishlistDialogVisible: false, // Controls the visibility of the wishlist selection dialog
+
     };
   },
   created() {
     this.fetchCategories();
+    this.fetchUserWishlists();
+
   },
   computed: {
     ...mapGetters(['getUserId']), // Map the getter from Vuex to get the userId
   },
+
   methods: {
 
     // Fetch categories from the backend
@@ -156,27 +197,88 @@ export default {
         console.error('Error fetching categories:', error);
       }
     },
-    // async fetchWishlist() {
-    //   try {
-    //     const response = await axios.get(`${apiBaseUrl}/api/wishlists/`)
-    //   }
-    // }
-    
+    showWishlistDialog() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      if (selectedNodes.length === 0) {
+        alert("Please select at least one row to add to the wishlist.");
+        return;
+      }
+      this.isWishlistDialogVisible = true;
+    },
+
+    async confirmAddToWishlist() {
+      if (!this.selectedWishlistId) {
+        alert("Please select a wishlist.");
+        return;
+      }
+
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const creatorIds = selectedNodes.map(node => node.data.id);
+
+      if (creatorIds.length === 0) {
+        alert("No creators selected.");
+        return;
+      }
+
+      try {
+        await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, creatorIds);
+        alert(`Successfully added ${creatorIds.length} creators to the wishlist!`);
+        this.refreshGridData();
+      } catch (error) {
+        console.error('Error adding selected creators to wishlist:', error);
+        alert('Failed to add selected creators to the wishlist.');
+      } finally {
+        this.isWishlistDialogVisible = false;
+        this.selectedWishlistId = null;
+      }
+    },
+
+    async fetchUserWishlists() {
+      if (!this.getUserId) {
+        console.error('User ID is not available.');
+        alert('User ID is not available. Please log in again.');
+        return;
+      }
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/wishlists/user/${this.getUserId}`);
+        if (Array.isArray(response.data)) {
+          this.userWishlists = response.data
+              .map(wishlist => ({
+                id: wishlist.id,
+                name: wishlist.name,
+              }))
+              .filter(wishlist => wishlist.id !== undefined && wishlist.name !== undefined);
+        } else {
+          console.error('Invalid data format for userWishlists:', response.data);
+          this.userWishlists = [];
+        }
+      } catch (error) {
+        console.error('Error fetching user wishlists:', error);
+      }
+    },
+
     getColumnDefs() {
       return [
-        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true},
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
-        { headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, width: 300 },
-        { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
-        { headerName: 'Full Name', field: 'full_name', sortable: true, filter: true },
-        { headerName: 'Full Address', field: 'full_address', sortable: true, filter: true },
-        { headerName: 'Email', field: 'email', sortable: true, filter: true },
-        { headerName: 'Phone', field: 'phone', sortable: true, filter: true },
-        { headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true},
-        { headerName: 'Notes', field: 'notes', sortable: true, filter: true },
-        { headerName: 'POC', field: 'poc', sortable: true, filter: true },
-        { headerName: 'State', field: 'state', sortable: true, filter: true },
-        { headerName: '最后合作种类', field: 'categories', sortable: true, filter: true },
+        {
+          headerName: 'ID',
+          field: 'id',
+          sortable: true,
+          filter: true,
+          checkboxSelection: true,
+          headerCheckboxSelection: true
+        },
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        {headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, width: 300},
+        {headerName: 'Followers', field: 'followers', sortable: true, filter: true},
+        {headerName: 'Full Name', field: 'full_name', sortable: true, filter: true},
+        {headerName: 'Full Address', field: 'full_address', sortable: true, filter: true},
+        {headerName: 'Email', field: 'email', sortable: true, filter: true},
+        {headerName: 'Phone', field: 'phone', sortable: true, filter: true},
+        {headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true},
+        {headerName: 'Notes', field: 'notes', sortable: true, filter: true},
+        {headerName: 'POC', field: 'poc', sortable: true, filter: true},
+        {headerName: 'State', field: 'state', sortable: true, filter: true},
+        {headerName: '最后合作种类', field: 'categories', sortable: true, filter: true},
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
@@ -196,8 +298,9 @@ export default {
           filter: true,
           valueFormatter: this.formatDateTime,  // Call the custom formatter
         },
-        { headerName: 'Linked', 
-          field: 'linked', 
+        {
+          headerName: 'Linked',
+          field: 'linked',
           width: 150,
           filter: true,
           editable: false, // Make the checkbox non-editable
@@ -207,15 +310,6 @@ export default {
             return `<input type="checkbox" ${isChecked ? 'checked' : ''} disabled />`; // Checkbox, but disabled
           }
         },
-        {
-          headerName: 'Add to Wishlist',
-          field: 'wishlist',
-          width: 150,
-          cellRenderer: this.wishlistRenderer,
-          cellRendererParams: {
-            addToWishlist: this.addToWishlist,
-          }
-        }
       ];
     },
     formatDateTime(params) {
@@ -240,51 +334,39 @@ export default {
       return {
         pagination: true,
         paginationPageSize: 10,
-        defaultColDef: { resizable: true },
+        defaultColDef: {resizable: true},
         autoHeight: true,
         rowSelection: 'multiple',
         context: {
-          addToWishlist:this.addToWishlist,
-          },
-        };
+          addToWishlist: this.addToWishlist,
+        },
+        rowMultiSelectWithClick: true, // Add this line
+      };
     },
-    wishlistRenderer(params) {
-            // Create button element with heart icon
-            const button = document.createElement('button');
-            button.innerHTML = 'Add to Wishlist';
-            button.style.background = '#FFCDD2';
-            button.style.border = 'none';
-            button.style.cursor = 'pointer';
-            button.style.padding = '5px 10px';
-            button.style.borderRadius = '5px';
 
-            button.addEventListener('click', () => {
-              params.context.addToWishlist(params.data);
-            });
-            return button; // Return null initially while the request is processed
-    },
-    // Toggle Wishlist
+    // Method to add a single creator to the selected wishlist
     async addToWishlist(rowData) {
-      if(!this.getUserId) {
-        alert(('User ID is not available.'));
+      if (!this.getUserId) {
+        alert('User ID is not available.');
         return;
       }
-      const creatorIds = rowData.id;
+
+      if (!this.selectedWishlistId) {
+        alert('Please select a wishlist first.');
+        return;
+      }
+
+      const creatorId = rowData.id;
 
       try {
-        await axios.post (`${apiBaseUrl}/api/wishlists/add-creators`, null, {
-          params: {
-            userId : this.getUserId,
-            creatorIds: creatorIds,
-
-          },
-        });
+        await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, [creatorId]);
         alert('Successfully added to wishlist!');
-      }catch (error) {
-        console.error('Error adding to wishlist',error );
-        alert('Failed to add to wishlist.')
+      } catch (error) {
+        console.error('Error adding to wishlist', error);
+        alert('Failed to add to wishlist.');
       }
     },
+
 
     async onGridReady(params) {
       this.gridApi = params.api;
@@ -302,8 +384,8 @@ export default {
     },
     autoSizeColumns() {
       const allColumnIds = this.gridColumnApi.getAllColumns()
-        .filter(column => column.getColId() !== 'tiktok_url')
-        .map(column => column.getColId());
+          .filter(column => column.getColId() !== 'tiktok_url')
+          .map(column => column.getColId());
 
       this.gridColumnApi.autoSizeColumns(allColumnIds, true);
     },
@@ -384,14 +466,14 @@ export default {
 
         // await axios.post(`${apiBaseUrl}/api/collaborated/add/${projectName}/${poc}`, data)
         await axios.post(`${apiBaseUrl}/api/collaborated/add`, payload)
-          .then(() => {
-            this.refreshGridData();  // Refresh grid data after successful add
-            this.showAddForm = false; // Close the form
-          })
-          .catch(error => {
-            console.error('Error adding data:', error);
-            alert('Failed to add entry.'); // Notify the user in case of an error
-          });
+            .then(() => {
+              this.refreshGridData();  // Refresh grid data after successful add
+              this.showAddForm = false; // Close the form
+            })
+            .catch(error => {
+              console.error('Error adding data:', error);
+              alert('Failed to add entry.'); // Notify the user in case of an error
+            });
       } catch (error) {
         console.error('Unexpected error:', error);
       }
@@ -423,6 +505,65 @@ export default {
       link.click();
       document.body.removeChild(link);
     },
+    selectRandomRows() {
+      const numberOfRows = parseInt(prompt('Enter the number of rows to select:', '2000'));
+      if (isNaN(numberOfRows) || numberOfRows <= 0) {
+        alert('Please enter a valid positive integer.');
+        return;
+      }
+
+      const allRows = this.rowData.slice(); // Copy the array to avoid mutating the original data
+
+      // Shuffle the array using the Fisher-Yates algorithm
+      for (let i = allRows.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allRows[i], allRows[j]] = [allRows[j], allRows[i]];
+      }
+
+      // Select the first N rows
+      const selectedRowsData = allRows.slice(0, numberOfRows);
+
+      // Map data to nodes and select them in the grid
+      const selectedIds = new Set(selectedRowsData.map(row => row.id));
+      this.gridApi.forEachNode((node) => {
+        if (selectedIds.has(node.data.id)) {
+          node.setSelected(true);
+        }
+      });
+    },
+    async addSelectedToWishlist() {
+      if (!this.selectedWishlistId) {
+        alert('Please select a wishlist to add creators.');
+        return;
+      }
+
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const selectedData = selectedNodes.map(node => node.data);
+      const creatorIds = selectedData.map(data => data.id);
+
+      if (creatorIds.length === 0) {
+        alert('Please select at least one creator to add.');
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to add ${creatorIds.length} creators to the selected wishlist?`)) {
+        return;
+      }
+
+      try {
+        await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, creatorIds);
+        alert('Successfully added selected creators to the wishlist!');
+        this.refreshGridData(); // Optionally refresh data
+      } catch (error) {
+        console.error('Error adding selected creators to wishlist:', error);
+        alert('Failed to add selected creators to the wishlist.');
+      }
+    },
+
+  },
+  mounted() {
+    this.columnDefs = this.getColumnDefs();
+    this.gridOptions = this.getGridOptions();
   },
 };
 </script>

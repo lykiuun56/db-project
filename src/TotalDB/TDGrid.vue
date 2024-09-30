@@ -28,8 +28,17 @@
       <v-col cols="auto">
         <v-btn color="success" @click="showCBDForm" class="button-spacing">Write To CBD</v-btn>
       </v-col>
-      <v-col cols="auto">
+      <!-- <v-col cols="auto">
         <v-btn color="success" @click="showMailchimpForm" class="button-spacing">Send Mailchimp Email</v-btn>
+      </v-col> -->
+      <v-col cols="auto">
+        <v-btn color="info" @click="fetchScheduledCampaigns" class="button-spacing">View Scheduled Campaigns</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="primary" @click="showTagForm" class="button-spacing">Add Mailchimp Tag</v-btn>
+      </v-col>
+      <v-col cols="auto">
+        <v-btn color="success" @click="showMailchimpForm" class="button-spacing">Campaign</v-btn>
       </v-col>
       <v-col cols="auto">
         <!-- Updated to open the Select Random Dialog -->

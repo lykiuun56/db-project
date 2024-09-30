@@ -358,11 +358,6 @@ export default {
       selectedTag: '',
       mailchimpTags: [],
       isSelectRandomDialogVisible: false,  // Initial value for dialog visibility
-      snackbar: {
-        show: false,
-        message: '',
-        color: ''
-      },
       selectRandomNumber: '',           // Holds the number of creators to select
       selectRandomProjectName: '',      // Holds the project name to exclude
       formData: {
@@ -382,6 +377,14 @@ export default {
       gridOptions: this.getGridOptions(),
       selectedRow: null,
       isEditDialogVisible: false,
+
+      isLoading: false, // For loading indicator
+      snackbar: { // For notifications
+        show: false,
+        message: '',
+        color: 'success', // or 'error', etc.
+      },
+
       isScheduledCampaignsDialogVisible: false,
       campaignsList: [], // To store list of campaigns with subject_line and id
       selectedCampaign: null, // Store the selected campaign's id
@@ -397,6 +400,11 @@ export default {
   //   this.fetchMailchimpTemplates();
   // },
   methods: {
+    showSnackbar(message, color = 'success') {
+      this.snackbar.message = message;
+      this.snackbar.color = color;
+      this.snackbar.show = true;
+    },
     // Fetch Mailchimp templates for dropdown
     async fetchMailchimpTemplates() {
       try {

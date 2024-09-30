@@ -237,15 +237,17 @@
         :fields="fields"
         :formData="formData"
         :show-file-upload="true"
+        :forTotalDatabase="true"
         @close="showAddForm = false"
-        @save="submitAdd"
+        @saveToDB="submitAddToDB"
+        @saveToBoth="submitAddToBoth"
         @saveFile="submitFileAdd">
-      <v-select
+        <v-select
           v-model="formData.categories"
           :items="categoriesList"
           label="Categories"
           required
-      />
+        />
     </add-pop-out>
 
   </v-container>
@@ -501,7 +503,7 @@ export default {
           valueFormatter: params => (params.value ? 'Yes' : 'No'),
           width: 100,
         },
-        { headerName: 'Categories', field: 'categories', sortable: true, filter: true },
+        { headerName: 'Categories', field: 'categories', sortable: true, filter: true},
       ];
     },
 
@@ -634,24 +636,63 @@ export default {
       }
     },
 
-    async submitFileAdd(formData) {
+    // async submitFileAdd(formData) {
+    //   try {
+    //     await axios.post(`${apiBaseUrl}/api/total/addByFile`, formData, {
+    //       headers: {
+    //         'Content-Type': 'multipart/form-data',
+    //       },
+    //     }).then(() => {
+    //       this.refreshGridData();  // Refresh grid data after successful file upload
+    //       this.showAddForm = false; // Close the form
+    //       console.log('Data Added')
+    //     }).catch(error => {
+    //       console.error('Error uploading file:', error);
+    //       alert('Failed to upload file.');
+    //     });
+    //   } catch (error) {
+    //     console.error('Unexpected error:', error);
+    //   }
+    // },
+
+    async submitAddToDB(formData) {
+      try {
+        await axios.post(`${apiBaseUrl}/api/total/addByFileToDB`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }).then(() => {
+          this.refreshGridData();  // Refresh grid data after successful add
+          this.showAddForm = false; // Close the form
+          console.log('Data Added to DB');
+        }).catch(error => {
+          console.error('Error adding data:', error);
+          alert('Failed to add entry.');
+        });
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    },
+
+    async submitAddToBoth(formData) {
       try {
         await axios.post(`${apiBaseUrl}/api/total/addByFile`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         }).then(() => {
-          this.refreshGridData();  // Refresh grid data after successful file upload
+          this.refreshGridData();  // Refresh grid data after successful add
           this.showAddForm = false; // Close the form
-          console.log('Data Added')
+          console.log('Data Added to Both DB and Mailchimp');
         }).catch(error => {
-          console.error('Error uploading file:', error);
-          alert('Failed to upload file.');
+          console.error('Error adding data:', error);
+          alert('Failed to add entry.');
         });
       } catch (error) {
         console.error('Unexpected error:', error);
       }
     },
+
 
     downloadTemplate() {
       const link = document.createElement('a');

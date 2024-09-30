@@ -120,18 +120,26 @@
                 <v-col cols="12" sm="6">
                   <v-text-field v-model="mailchimpSubject" label="Subject Line" required />
                 </v-col>
-
                 <!-- Template Dropdown -->
                 <v-col cols="12" sm="6">
                   <v-select
-                      v-if="mailchimpTemplates.length > 0"
-                      v-model="selectedTemplateName"
-                      :items="mailchimpTemplates"
-                      label="Select Template"
-                      required
+                    v-if="mailchimpTemplates.length > 0"
+                    v-model="selectedTemplateName"
+                    :items="mailchimpTemplates"
+                    label="Select Template"
+                    required
                   />
                 </v-col>
-
+                <!-- Tag Selection -->
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-if="mailchimpTags.length > 0"
+                    v-model="selectedTag"
+                    :items="mailchimpTags"
+                    label="Select Tag"
+                    required
+                  />
+                </v-col>
                 <!-- Schedule time -->
                 <v-col cols="12">
                   <v-text-field v-model="scheduledTime" label="Schedule Time" type="datetime-local" />
@@ -158,7 +166,52 @@
       </v-card>
     </v-dialog>
 
-    <!-- CollaboratedDB Form Dialog -->
+    <v-dialog v-model="isTagDialogVisible" max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Add Mailchimp Tag</span>
+        </v-card-title>
+        <v-card-text>
+          <v-form ref="form">
+            <v-container>
+              <v-row>
+                <!-- Dropdown for Categories -->
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-model="tagCategories"
+                    :items="categoriesList"
+                    label="Categories"
+                    required
+                  />
+                </v-col>
+                <!-- POC Field -->
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="tagPoc"
+                    label="POC"
+                    required
+                  />
+                </v-col>
+                <!-- Project Name Field -->
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="tagProjectName"
+                    label="Project Name"
+                    required
+                  />
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeTagForm">Cancel</v-btn>
+          <v-btn color="green darken-1" text @click="submitTagForm">Submit Tag</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-dialog v-model="isCBDDialogVisible" max-width="600px">
       <v-card>
         <v-card-title>
@@ -212,7 +265,29 @@
       </v-card>
     </v-dialog>
 
-    <!-- Edit Dialog Component -->
+    <!-- Scheduled Campaigns Dialog -->
+    <v-dialog v-model="isScheduledCampaignsDialogVisible" max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Scheduled Campaigns</span>
+        </v-card-title>
+        <v-card-text>
+          <!-- Dropdown for listing scheduled campaigns -->
+          <v-select
+            v-model="selectedCampaign"
+            :items="campaignsList"
+            label="Select a Scheduled Campaign"
+            required
+          />
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="red darken-1" text @click="deleteCampaign">Delete Campaign</v-btn>
+          <v-btn color="blue darken-1" text @click="unscheduleCampaign">Unschedule Campaign</v-btn>
+          <v-btn color="blue darken-1" text @click="closeScheduledCampaignsDialog">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <edit-pop-out
         v-model="isEditDialogVisible"
         :rowData="selectedRow"
@@ -276,9 +351,12 @@ export default {
       selectedRows: [],  // For categories selection
       isMailchimpDialogVisible: false,
       mailchimpSubject: '',
-      selectedTemplateName: '',  // Store the selected template name
-      mailchimpTemplates: [],  // Store all template options
-      categoriesList: [],  // For categories selection
+      mailchimpFrom: '',
+      mailchimpReply: '',
+      selectedTemplateName: '',  // Store the selected template ID
+      mailchimpTemplates: [],  // Store all template options 
+      selectedTag: '',
+      mailchimpTags: [],
       formData: {
         handle_name: '',
         followers: '',
@@ -296,42 +374,14 @@ export default {
       gridOptions: this.getGridOptions(),
       selectedRow: null,
       isEditDialogVisible: false,
-      fullRowData: [],
-      sideBar: { // Sidebar Configuration Added
-        toolPanels: [
-          {
-            id: 'filters',
-            labelDefault: 'Filters',
-            labelKey: 'filters',
-            iconKey: 'filter',
-            toolPanel: 'agFiltersToolPanel',
-          },
-          {
-            id: 'columns',
-            labelDefault: 'Columns',
-            labelKey: 'columns',
-            iconKey: 'columns',
-            toolPanel: 'agColumnsToolPanel',
-          },
-        ],
-        defaultToolPanel: 'filters', // Optional: Open Filters panel by default
-      },
-      // New data properties for Select Random Dialog
-      isSelectRandomDialogVisible: false,
-      selectRandomNumber: '',
-      selectRandomProjectName: '',
-      isLoading: false, // For loading indicator
-      snackbar: { // For notifications
-        show: false,
-        message: '',
-        color: 'success', // or 'error', etc.
-      },
+      isScheduledCampaignsDialogVisible: false,
+      campaignsList: [], // To store list of campaigns with subject_line and id
+      selectedCampaign: null, // Store the selected campaign's id
+    
     };
   },
   created() {
     this.fetchCategories();
-  },
-  mounted() {
     this.fetchMailchimpTemplates();
     this.fetchTags();
   },
@@ -339,20 +389,6 @@ export default {
   //   this.fetchMailchimpTemplates();
   // },
   methods: {
-    showSnackbar(message, color = 'success') {
-      this.snackbar.message = message;
-      this.snackbar.color = color;
-      this.snackbar.show = true;
-    },
-    async fetchCategories() {
-      try {
-        const response = await axios.get(`${apiBaseUrl}/api/collaborated_projects/partitionsList`);
-        this.categoriesList = response.data;
-        this.fields.find(field => field.name === 'categories').options = this.categoriesList; // Set options in the form
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    },
     // Fetch Mailchimp templates for dropdown
     async fetchMailchimpTemplates() {
       try {
@@ -365,24 +401,19 @@ export default {
         console.error('Error fetching Mailchimp templates:', error);
       }
     },
-    // Show Mailchimp email form dialog
-    showMailchimpForm() {
-      // Check if gridApi is available
-      if (!this.gridApi) {
-        console.error('Grid API is not available.');
-        this.showSnackbar('Grid is not ready yet.', 'error');
-        return;
-      }
 
-      const selectedNodes = this.gridApi.getSelectedNodes();
-      if (selectedNodes.length === 1) {
-        this.selectedRow = selectedNodes[0].data;
-        this.isMailchimpDialogVisible = true;
-      } else if (selectedNodes.length > 1) {
-        this.showSnackbar('Please select only one row to send an email.', 'warning');
-      } else {
-        this.showSnackbar('Please select a row first.', 'warning');
+    async fetchTags() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/total/tags`);
+        this.mailchimpTags = response.data;
+      } catch(error) {
+        console.error('Error fetching Mailchimp tags:', error)
       }
+    },
+
+    // Show Mailchimp email form dialog
+    showMailchimpForm() {  
+      this.isMailchimpDialogVisible = true;   
     },
     closeMailchimpForm() {
       this.isMailchimpDialogVisible = false;
@@ -390,8 +421,8 @@ export default {
 
     // Submit the Mailchimp email form
     async submitMailchimpForm() {
-      if (!this.mailchimpCategories || !this.mailchimpProjectName || !this.mailchimpPOC || !this.mailchimpSubject || !this.selectedTemplateName) {
-        this.showSnackbar('Please fill in all the required fields.', 'error');
+      if (!this.scheduledTime || !this.selectedTag|| !this.mailchimpSubject || !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply) {
+        alert('Please fill in all the required fields.');
         return;
       }
       try {
@@ -404,13 +435,123 @@ export default {
           scheduledTime: this.scheduledTime
         });
 
-        this.showSnackbar('Email successfully scheduled.', 'success');
+        alert('Tag successfully scheduled.');
         this.closeMailchimpForm();
       } catch (error) {
-        console.error('Error sending Mailchimp email:', error);
-        this.showSnackbar('Failed to send email.', 'error');
+        console.error('Error sending Mailchimp Campaign:', error);
+        alert('Failed to send Campaign Info.');
       }
     },
+
+    // Opens the form to add a tag
+    showTagForm() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      if (selectedNodes.length > 0) {
+        this.selectedRows = selectedNodes.map(node => node.data); // Store all selected rows
+        this.isTagDialogVisible = true; // Show the dialog
+      } else {
+        alert('Please select at least one row to add a Mailchimp tag.');
+      }
+    },
+    closeTagForm() {
+      this.isTagDialogVisible = false;
+    },
+    async submitTagForm() {
+      try {
+        // Ensure the required fields are provided
+        if (!this.tagCategories || !this.tagPoc || !this.tagProjectName) {
+          alert('Please fill out all fields.');
+          return;
+        }
+
+        // Prepare payload for backend
+        const totalDatabaseIds = this.selectedRows.map(row => row.id); // Array of selected IDs
+        const payload = {
+          totalDatabaseIds, // Send multiple IDs as array
+          categories: this.tagCategories,
+          poc: this.tagPoc,
+          projectName: this.tagProjectName,
+        };
+
+        console.log('Payload:', payload); // Log payload to confirm structure before sending
+
+        // Send POST request to backend
+        const response = await axios.post(`${apiBaseUrl}/api/total/tag`, payload);
+
+        if (response.data) {
+          alert('Tags added successfully.');
+          this.closeTagForm();
+          this.refreshGridData();
+        } else {
+          alert('Failed to add tags.');
+        }
+      } catch (error) {
+        console.error('Error submitting Mailchimp tags:', error);
+        alert('Failed to submit tags.');
+      }
+    },
+
+
+    // Fetch the list of scheduled campaigns
+    async fetchScheduledCampaigns() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/total/campaigns`);
+        if (response.data) {
+          this.campaignsList = response.data; // response.data is now a list of subject lines
+          this.isScheduledCampaignsDialogVisible = true; // Open the dialog
+        } else {
+          alert('No scheduled campaigns found.');
+        }
+      } catch (error) {
+        console.error('Error fetching scheduled campaigns:', error);
+        alert('Failed to fetch scheduled campaigns.');
+      }
+    },
+
+    async unscheduleCampaign() {
+      if (!this.selectedCampaign) {
+        alert('Please select a campaign to unschedule.');
+        return;
+      }
+      try {
+        await axios.post(`${apiBaseUrl}/api/total/campaigns/unschedule`, this.selectedCampaign);
+        alert('Campaign unscheduled successfully.');
+        this.closeScheduledCampaignsDialog();
+      } catch (error) {
+        console.error('Error unscheduling campaign:', error);
+        alert('Failed to unschedule the campaign.');
+      }
+    },
+
+    async deleteCampaign() {
+      if (!this.selectedCampaign) {
+        alert('Please select a campaign to delete.');
+        return;
+      }
+      try {
+        await axios.delete(`${apiBaseUrl}/api/total/campaigns/delete`, { data: this.selectedCampaign });
+        alert('Campaign deleted successfully.');
+        this.closeScheduledCampaignsDialog();
+      } catch (error) {
+        console.error('Error deleting campaign:', error);
+        alert('Failed to delete the campaign.');
+      }
+    },
+
+    closeScheduledCampaignsDialog() {
+      this.isScheduledCampaignsDialogVisible = false;
+    },
+
+    async fetchCategories() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/collaborated_projects/partitionsList`);
+        this.categoriesList = response.data;
+        this.fields.find(field => field.name === 'categories').options = this.categoriesList; // Set options in the form
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    },
+
     getColumnDefs() {
       return [
         {
@@ -443,18 +584,12 @@ export default {
         {
           headerName: 'Is Blocked',
           field: 'is_Blocked',
-          sortable: true,
-          filter: 'agSetColumnFilter', // Set filter for boolean values
-          cellRenderer: params => (params.value ? 'Yes' : 'No'),
-          width: 120,
+          cellEditor: 'agSelectCellEditor',
+          cellEditorParams: { values: [true, false] },
+          valueFormatter: params => (params.value ? 'Yes' : 'No'),
+          width: 100,
         },
-        {
-          headerName: 'Categories',
-          field: 'categories',
-          sortable: true,
-          filter: 'agSetColumnFilter', // Set filter for categorical data
-        },
-        // ... additional columns as needed ...
+        { headerName: 'Categories', field: 'categories', sortable: true, filter: true},
       ];
     },
 
@@ -625,10 +760,10 @@ export default {
         }).then(() => {
           this.refreshGridData();  // Refresh grid data after successful add
           this.showAddForm = false; // Close the form
-          this.showSnackbar('File uploaded successfully.', 'success');
+          console.log('Data Added to Both DB and Mailchimp');
         }).catch(error => {
-          console.error('Error uploading file:', error);
-          this.showSnackbar('Failed to upload file.', 'error');
+          console.error('Error adding data:', error);
+          alert('Failed to add entry.');
         });
       } catch (error) {
         console.error('Unexpected error:', error);

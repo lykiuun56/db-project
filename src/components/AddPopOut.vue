@@ -55,7 +55,11 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-        <v-btn color="blue darken-1" text @click="submitForm">Save</v-btn>
+        <template v-if="forTotalDatabase">
+          <v-btn color="blue darken-1" text @click="submitSaveToDB">Save to DB</v-btn>
+          <v-btn color="green darken-1" text @click="submitSaveToBoth">Save to Both</v-btn>
+        </template>
+        <v-btn v-else color="blue darken-1" text @click="submitForm">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -84,6 +88,10 @@ export default {
     showFileUpload: {
       type: Boolean,
       default: true, // Show the file upload input by default
+    },
+    forTotalDatabase: {  // New prop added here
+      type: Boolean,
+      default: false, // Default is false for all other use cases
     },
   },
   data() {
@@ -124,12 +132,27 @@ export default {
         }
       }
     },
-    submitFile() {
-      const formData = new FormData();
-      formData.append('file', this.selectedFile);
-      formData.append('formData', JSON.stringify(this.localFormData));
-      this.$emit('saveFile', formData);
-      this.close();
+    submitSaveToDB() {
+      if (this.$refs.form.validate()) {
+        const formData = new FormData();
+        formData.append('formData', JSON.stringify(this.localFormData));
+        if (this.selectedFile) {
+          formData.append('file', this.selectedFile);
+        }
+        this.$emit('saveToDB', formData);  // Emitting the event with formData
+        this.close();
+      }
+    },
+    submitSaveToBoth() {
+      if (this.$refs.form.validate()) {
+        const formData = new FormData();
+        formData.append('formData', JSON.stringify(this.localFormData));
+        if (this.selectedFile) {
+          formData.append('file', this.selectedFile);
+        }
+        this.$emit('saveToBoth', formData);  // Emitting the event with formData
+        this.close();
+      }
     },
     resetForm() {
       this.selectedFile = null;

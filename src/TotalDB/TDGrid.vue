@@ -10,7 +10,7 @@
     <v-row class="mb-4">
       <!-- Data Management Dropdown -->
       <v-col cols="auto">
-        <v-menu>
+        <v-menu >
           <template v-slot:activator="{ props }">
             <v-btn color="#4700cf" v-bind="props">
               Data Management
@@ -46,9 +46,6 @@
             </v-list-item>
             <v-list-item @click="exportSelectedToExcel">
               <v-list-item-title>Export Selected</v-list-item-title>
-            </v-list-item>
-            <v-list-item @click="downloadTemplate">
-              <v-list-item-title>Download Template</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -104,10 +101,10 @@
             style="width: 100%; height: 600px;"
             :columnDefs="columnDefs"
             :rowData="rowData"
-            :sideBar="sideBar"
             :gridOptions="gridOptions"
             @grid-ready="onGridReady"
             :domLayout="'autoHeight'"
+            rowSelection="multiple"
             @row-double-clicked="onRowDoubleClicked">
         </ag-grid-vue>
       </v-col>
@@ -115,7 +112,7 @@
 
     <!-- Select Random Creators Dialog -->
     <v-dialog v-model="isSelectRandomDialogVisible" max-width="500px">
-      <v-card>
+      <v-card color = "#222222">
         <v-card-title>
           <span class="headline">Select Random Creators</span>
         </v-card-title>
@@ -164,7 +161,7 @@
 
     <!-- Mailchimp Email Form Dialog -->
     <v-dialog v-model="isMailchimpDialogVisible" max-width="600px">
-      <v-card>
+      <v-card  color ="#222222">
         <v-card-title>
           <span class="headline">Send Email via Mailchimp</span>
         </v-card-title>
@@ -221,7 +218,7 @@
 
     <!-- CollaboratedDB Form Dialog -->
     <v-dialog v-model="isCBDDialogVisible" max-width="600px">
-      <v-card>
+      <v-card color ="#222222">
         <v-card-title>
           <span class="headline">Write To CollaboratedDB</span>
         </v-card-title>
@@ -355,27 +352,6 @@ export default {
       selectedRow: null,
       isEditDialogVisible: false,
       fullRowData: [],
-      sideBar: { // Sidebar Configuration Added
-        toolPanels: [
-          {
-            id: 'filters',
-            labelDefault: 'Filters',
-            labelKey: 'filters',
-            iconKey: 'filter',
-            toolPanel: 'agFiltersToolPanel',
-          },
-          {
-            id: 'columns',
-            labelDefault: 'Columns',
-            labelKey: 'columns',
-            iconKey: 'columns',
-            toolPanel: 'agColumnsToolPanel',
-          },
-        ],
-        defaultToolPanel: 'filters', // Optional: Open Filters panel by default
-        position: 'right',
-
-      },
       // New data properties for Select Random Dialog
       isSelectRandomDialogVisible: false,
       selectRandomNumber: '',

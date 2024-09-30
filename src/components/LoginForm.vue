@@ -1,39 +1,47 @@
 <template>
-  <v-container fluid class="fill-height">
+  <v-container fluid class="fill-height bg-indigo-900">
     <v-row align="center" justify="center">
       <v-col cols="12" sm="8" md="6" lg="4">
-        <v-card elevation="8" rounded="lg" class="login-card">
-          <v-card-title class="text-center text-h4 font-weight-bold primary--text py-4">
-            {{ isSignup ? 'Sign Up' : 'Login' }}
+        <v-card color = "#222222" elevation="8" rounded="lg" class="login-card bg-indigo-800">
+          <v-card-title class="text-center py-4">
+            <div class="mx-auto mb-4 w-24 h-24 bg-purple-600 rounded-full flex items-center justify-center">
+              <img src="@/assets/logo.png" alt="Puff-Media Logo" style="height: 120px; width: 120px; object-fit: contain;">
+            </div>
           </v-card-title>
           <v-card-text>
             <v-form @submit.prevent="handleSubmit" v-model="valid" lazy-validation>
               <v-text-field
                   v-model="username"
                   label="Username"
-                  prepend-icon="mdi-account"
+                  prepend-inner-icon="mdi-account"
                   :rules="[v => !!v || 'Username is required']"
                   required
                   outlined
                   dense
+                  dark
+                  color="#4700CF"
+                  class="mb-4"
               ></v-text-field>
 
               <v-text-field
                   v-if="isSignup"
                   v-model="email"
                   label="Email"
-                  prepend-icon="mdi-email"
+                  prepend-inner-icon="mdi-email"
                   type="email"
                   :rules="[v => !!v || 'Email is required', v => /.+@.+\..+/.test(v) || 'Email must be valid']"
                   required
                   outlined
                   dense
+                  dark
+                  color="#4700CF"
+                  class="mb-4"
               ></v-text-field>
 
               <v-text-field
                   v-model="password"
                   label="Password"
-                  prepend-icon="mdi-lock"
+                  prepend-inner-icon="mdi-lock"
                   :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                   :type="showPassword ? 'text' : 'password'"
                   @click:append="showPassword = !showPassword"
@@ -41,23 +49,29 @@
                   required
                   outlined
                   dense
+                  dark
+                  color="#4700CF"
+                  class="mb-4"
               ></v-text-field>
 
               <v-text-field
                   v-model="poc"
-                  label="Poc"
-                  prepend-icon="mdi-account-key"
-                  :rules="[v => !!v || 'Poc is required']"
+                  label="POC"
+                  prepend-inner-icon="mdi-account-key"
+                  :rules="[v => !!v || 'POC is required']"
                   required
                   outlined
                   dense
+                  dark
+                  color="#4700CF"
+                  class="mb-4"
               ></v-text-field>
 
               <v-text-field
                   v-if="isSignup"
                   v-model="confirmPassword"
                   label="Confirm Password"
-                  prepend-icon="mdi-lock-check"
+                  prepend-inner-icon="mdi-lock-check"
                   :append-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
                   :type="showConfirmPassword ? 'text' : 'password'"
                   @click:append="showConfirmPassword = !showConfirmPassword"
@@ -65,24 +79,27 @@
                   required
                   outlined
                   dense
+                  dark
+                  color="#4700CF"
+                  class="mb-4"
               ></v-text-field>
 
               <v-btn
                   type="submit"
-                  color="primary"
+                  color="#4700CF"
                   block
                   large
                   :loading="loading"
                   :disabled="!valid || loading"
-                  class="mt-4"
+                  class="mt-4 text-white"
               >
-                {{ isSignup ? 'Sign Up' : 'Login' }}
+                {{ isSignup ? 'Sign Up' : 'LOGIN' }}
               </v-btn>
             </v-form>
           </v-card-text>
 
           <v-card-actions class="justify-center pb-4">
-            <v-btn text color="primary" @click="toggleMode">
+            <v-btn text color="white" @click="toggleMode">
               {{ isSignup ? 'Already have an account? Login' : 'Need an account? Sign Up' }}
             </v-btn>
           </v-card-actions>
@@ -128,21 +145,21 @@
   </v-container>
 </template>
 <script>
+import { mapActions } from 'vuex';
 import axios from '@/axios';
 import { apiBaseUrl } from '@/config';
-import { mapActions } from 'vuex';
 
 export default {
   name: 'LoginForm',
   data() {
     return {
       username: '',
-      email: '', // Added for signup
+      email: '', // For signup
       password: '',
-      confirmPassword: '', // Added for signup
+      confirmPassword: '', // For signup
       poc: '',
       error: null,
-      successMessage: '', // Added for signup success
+      successMessage: '',
       valid: false,
       isSignup: false,
       loading: false,
@@ -150,12 +167,16 @@ export default {
       showConfirmPassword: false,
     };
   },
-  methods: {
-    ...mapActions(['login']), // Map Vuex's login action
 
-    /**
-     * Handles form submission for login and signup.
-     */
+  created() {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      this.loginWithToken(token);
+    }
+  },
+  methods: {
+    ...mapActions(['login', 'logout']), // Map Vuex's login and logout actions
+
     async handleSubmit() {
       if (!this.valid) return;
       this.error = null;
@@ -166,10 +187,9 @@ export default {
         if (this.isSignup) {
           await this.signup();
         } else {
-          await this.loginUser(); // Call the local loginUser method
+          await this.loginUser();
         }
       } catch (error) {
-        // Handle unexpected errors
         this.error = 'An unexpected error occurred. Please try again.';
         console.error('HandleSubmit Error:', error);
       } finally {
@@ -177,50 +197,25 @@ export default {
       }
     },
 
-    /**
-     * Handles user login.
-     */
+    async handleLogout() {
+      await this.logout(); // Call the Vuex logout action
+
+      // Redirect to login page after logging out
+      this.$router.push('/login');
+    },
     async loginUser() {
       try {
-        const response = await axios.post(`${apiBaseUrl}/api/login`, {
-          username: this.username,
-          password: this.password,
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true, // Include cookies in the request if needed
-        });
+        await this.login({ username: this.username, password: this.password });
 
-        if (response.data.success) {
-          const userId = response.data.userId;
-          // Removed the unused 'token' variable
-          const poc = response.data.poc;
-          const wishlistId = response.data.wishlistId;
-
-          // Dispatch Vuex's login action
-          await this.login({ username: this.username, password: this.password });
-
-          // Optionally, handle additional data
-          console.log('User ID in Login:', userId);
-          console.log('User Poc in Login:', poc);
-          console.log('User wishlistId in login:', wishlistId);
-
-          // Emit event or navigate as needed
-          this.$emit('login-success');
-          this.$router.push('/td-grid'); // Redirect to wishlists page
-        } else {
-          this.error = response.data.error || 'Invalid username or password';
-        }
+        // Redirect to another page (like the wishlist page)
+        this.$emit('login-success');
+        this.$router.push('/td-grid');
       } catch (error) {
         console.error('Login error:', error);
-        this.error = error.response?.data?.error || 'An error occurred. Please try again.';
+        this.error = error.response?.data?.error || 'Invalid username or password';
       }
     },
 
-    /**
-     * Handles user signup.
-     */
     async signup() {
       try {
         const response = await axios.post(`${apiBaseUrl}/api/signup`, {
@@ -234,12 +229,7 @@ export default {
           this.successMessage = 'Sign up successful! Please log in with your new account.';
           this.showSuccess = true;
           this.isSignup = false;
-          this.username = '';
           this.resetForm();
-          this.email = '';
-          this.password = '';
-          this.confirmPassword = '';
-          this.poc = '';
         } else {
           this.error = response.data.message || 'Signup failed';
         }
@@ -249,20 +239,34 @@ export default {
       }
     },
 
-    /**
-     * Toggles between login and signup modes.
-     */
+    async loginWithToken(token) {
+      try {
+        const response = await axios.post(`${apiBaseUrl}/api/verify-token`, null, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token in Authorization header
+          },
+        });
+
+        if (response.data.success) {
+          // If the token is valid, log the user in via Vuex
+          await this.login({ username: response.data.username, token });
+          await this.fetchWishlists(response.data.userId); // Fetch wishlists after login
+          this.$router.push('/td-grid');
+        } else {
+          this.logout(); // If token is invalid, log out the user
+        }
+      } catch (error) {
+        console.error('Token verification error:', error);
+        this.logout(); // Log out the user if token verification fails
+      }
+    },
+
+
     toggleMode() {
       this.isSignup = !this.isSignup;
-      this.error = null;
-      this.successMessage = null;
-      // Optionally, reset form fields
-      if (!this.isSignup) {
-        this.email = '';
-        this.confirmPassword = '';
-      }
       this.resetForm();
     },
+
     resetForm() {
       this.username = '';
       this.email = '';
@@ -271,31 +275,13 @@ export default {
       this.poc = '';
       this.error = null;
       this.successMessage = '';
-      },
+    },
   },
 };
 </script>
 
 <style scoped>
 .login-form {
-  /* Add your custom styles here */
-}
-
-.input-field {
-  margin-bottom: 1rem;
-}
-
-.submit-btn {
-  width: 100%;
-}
-
-.hyperlink-text {
-  color: #1976D2; /* Vuetify primary color */
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.hyperlink-text:hover {
-  text-decoration: underline;
+  /* Add custom styles here */
 }
 </style>

@@ -74,7 +74,7 @@
         <template v-slot:activator="{ props }">
           <v-btn icon v-bind="props" color="white">
             <v-avatar color="white" size="36">
-              <v-icon color="primary">mdi-account</v-icon>
+              <v-icon color="#4700CF">mdi-account</v-icon>
             </v-avatar>
           </v-btn>
         </template>
@@ -82,13 +82,13 @@
         <v-list>
           <v-list-item @click="navigateTo('/profile')">
             <v-list-item-title>
-              <v-icon start>mdi-account</v-icon>
+              <v-icon start color ="#4700CF">mdi-account</v-icon>
               Profile
             </v-list-item-title>
           </v-list-item>
           <v-list-item @click="logout">
             <v-list-item-title>
-              <v-icon start>mdi-logout</v-icon>
+              <v-icon start color = "red">mdi-logout</v-icon>
               Logout
             </v-list-item-title>
           </v-list-item>

@@ -1,6 +1,6 @@
 <template>
   <v-dialog v-model="dialog" max-width="600px">
-    <v-card>
+    <v-card color = "#222222">
       <v-card-title>
         <span class="headline">Edit Row</span>
       </v-card-title>

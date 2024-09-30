@@ -2,45 +2,102 @@
   <v-container fluid>
     <v-row>
       <v-col cols="12">
-        <h1>Collaborated Database</h1>
+        <h1 style="color: white">Collaborated Database</h1>
       </v-col>
     </v-row>
 
-    <!-- Action Buttons -->
-    <v-row>
+    <v-row class="mb-4">
+      <!-- Data Management Dropdown -->
       <v-col cols="auto">
-        <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All</v-btn>
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn color="#4700cf" v-bind="props">
+              Data Management
+              <v-icon right>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="showAddForm = true">
+              <v-list-item-title>Add</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="deleteSelected">
+              <v-list-item-title>Delete</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-col>
+
+      <!-- Export Options Dropdown -->
       <v-col cols="auto">
-        <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected</v-btn>
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn color="#33007D" v-bind="props">
+              Export Options
+              <v-icon right>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="exportAllToExcel">
+              <v-list-item-title>Export All</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="exportSelectedToExcel">
+              <v-list-item-title>Export Selected</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-col>
+
+      <!-- Actions Dropdown -->
       <v-col cols="auto">
-        <v-btn color="primary" @click="showAddForm = true" class="button-spacing">Add</v-btn>
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn color="#4f1787" v-bind="props">
+              Actions
+              <v-icon right>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="selectRandomRows">
+              <v-list-item-title>Select Random Creators</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-col>
+      <v-spacer></v-spacer>
+
+
+
+
       <v-col cols="auto">
-        <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete</v-btn>
+        <v-btn color="#00b19e" @click="showWishlistDialog" class="elevation-2">
+          <v-icon left>mdi-heart</v-icon>
+          Wishlist
+        </v-btn>
       </v-col>
+      <!-- Download Template Button -->
       <v-col cols="auto">
-        <v-btn color="primary" class="button-spacing" @click="downloadTemplate">Download Template</v-btn>
+        <v-btn color="#00b19e" @click="downloadTemplate" class="elevation-2">
+          <v-icon left>mdi-file-download</v-icon>
+          Template
+        </v-btn>
       </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" @click="selectRandomRows" class="button-spacing">Select Random creators</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="primary" @click="showWishlistDialog" class="button-spacing">Add Selected to Wishlist</v-btn>
+
+      <v-col cols ="auto">
+        <v-btn color="#9f0000" @click="resetView" class="elevation-2">
+          <v-icon left>mdi-refresh</v-icon>
+          Reset
+        </v-btn>
       </v-col>
     </v-row>
 
 
-    <!-- Wishlist Selection and Add Selected Button -->
-    <!-- Wishlist Selection Dialog -->
 
     <!-- Data Grid -->
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
             ref="agGrid"
-            class="ag-theme-alpine"
+            class="ag-theme-alpine-auto-dark"
             style="width: 100%; height: 600px;"
             :columnDefs="columnDefs"
             :rowData="rowData"
@@ -52,6 +109,15 @@
         ></ag-grid-vue>
       </v-col>
     </v-row>
+    <!-- Snackbar for Notifications -->
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+      {{ snackbar.message }}
+      <v-btn color="white" text @click="snackbar.show = false">Close</v-btn>
+    </v-snackbar>
+
+    <!-- Loading Indicator -->
+    <v-progress-linear v-if="isLoading" indeterminate color="primary"></v-progress-linear>
+
 
     <!-- Edit Dialog -->
     <edit-pop-out
@@ -82,7 +148,7 @@
     </add-pop-out>
 
     <v-dialog v-model="isWishlistDialogVisible" max-width="500px">
-      <v-card>
+      <v-card color ="#222222">
         <v-card-title>Select Wishlist</v-card-title>
         <v-card-text>
           <div>
@@ -90,8 +156,10 @@
                 v-for="wishlist in userWishlists"
                 :key="wishlist.id"
                 @click="selectedWishlistId = wishlist.id"
-                :color="selectedWishlistId === wishlist.id ? 'primary' : ''"
+                :color="selectedWishlistId === wishlist.id ? '#4700cf' : 'secondary'"
                 class="ma-2"
+                :style="{ color: selectedWishlistId === wishlist.id ? '#4700cf' : '#4700cf' }"
+
             >
               {{ wishlist.name }}
             </v-btn>
@@ -172,6 +240,13 @@ export default {
       selectedWishlistId: null, // Holds the selected wishlist ID
       userWishlists: [], // Holds the list of user's wishlists
       isWishlistDialogVisible: false, // Controls the visibility of the wishlist selection dialog
+      isLoading: false, // For loading indicator
+      snackbar: { // For notifications
+        show: false,
+        message: '',
+        color: 'success', // or 'error', etc.
+      },
+      fullRowData: [],
 
     };
   },
@@ -186,6 +261,11 @@ export default {
 
   methods: {
 
+    showSnackbar(message, color = 'success') {
+      this.snackbar.message = message;
+      this.snackbar.color = color;
+      this.snackbar.show = true;
+    },
     // Fetch categories from the backend
     async fetchCategories() {
       try {
@@ -200,7 +280,7 @@ export default {
     showWishlistDialog() {
       const selectedNodes = this.gridApi.getSelectedNodes();
       if (selectedNodes.length === 0) {
-        alert("Please select at least one row to add to the wishlist.");
+        this.showSnackbar("Please select at least one row to add to the wishlist.");
         return;
       }
       this.isWishlistDialogVisible = true;
@@ -208,7 +288,7 @@ export default {
 
     async confirmAddToWishlist() {
       if (!this.selectedWishlistId) {
-        alert("Please select a wishlist.");
+        this.showSnackbar("Please select a wishlist.");
         return;
       }
 
@@ -216,17 +296,17 @@ export default {
       const creatorIds = selectedNodes.map(node => node.data.id);
 
       if (creatorIds.length === 0) {
-        alert("No creators selected.");
+        this.showSnackbar("No creators selected.");
         return;
       }
 
       try {
         await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, creatorIds);
-        alert(`Successfully added ${creatorIds.length} creators to the wishlist!`);
+        this.showSnackbar(`Successfully added ${creatorIds.length} creators to the wishlist!`);
         this.refreshGridData();
       } catch (error) {
         console.error('Error adding selected creators to wishlist:', error);
-        alert('Failed to add selected creators to the wishlist.');
+        this.showSnackbar('Failed to add selected creators to the wishlist.');
       } finally {
         this.isWishlistDialogVisible = false;
         this.selectedWishlistId = null;
@@ -236,7 +316,7 @@ export default {
     async fetchUserWishlists() {
       if (!this.getUserId) {
         console.error('User ID is not available.');
-        alert('User ID is not available. Please log in again.');
+        this.showSnackbar('User ID is not available. Please log in again.');
         return;
       }
       try {
@@ -347,12 +427,12 @@ export default {
     // Method to add a single creator to the selected wishlist
     async addToWishlist(rowData) {
       if (!this.getUserId) {
-        alert('User ID is not available.');
+        this.showSnackbar('User ID is not available.');
         return;
       }
 
       if (!this.selectedWishlistId) {
-        alert('Please select a wishlist first.');
+        this.showSnackbar('Please select a wishlist first.');
         return;
       }
 
@@ -360,10 +440,10 @@ export default {
 
       try {
         await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, [creatorId]);
-        alert('Successfully added to wishlist!');
+        this.showSnackbar('Successfully added to wishlist!');
       } catch (error) {
         console.error('Error adding to wishlist', error);
-        alert('Failed to add to wishlist.');
+        this.showSnackbar('Failed to add to wishlist.');
       }
     },
 
@@ -407,6 +487,8 @@ export default {
       try {
         const response = await axios.get(`${apiBaseUrl}/api/collaborated/all`);
         this.rowData = response.data;
+        this.fullRowData = response.data; // Update fullRowData as well
+
       } catch (error) {
         console.error('Error refreshing data:', error);
       }
@@ -452,7 +534,7 @@ export default {
         const requiredFields = ['project_name', 'poc', 'handle_name', 'email'];
         for (const field of requiredFields) {
           if (!data[field] || data[field].trim() === '') {
-            alert(`Please fill out the required field: ${field.replace('_', ' ')}`);
+            this.showSnackbar(`Please fill out the required field: ${field.replace('_', ' ')}`);
             return;
           }
         }
@@ -472,7 +554,7 @@ export default {
             })
             .catch(error => {
               console.error('Error adding data:', error);
-              alert('Failed to add entry.'); // Notify the user in case of an error
+              this.showSnackbar('Failed to add entry.'); // Notify the user in case of an error
             });
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -490,7 +572,7 @@ export default {
           this.showAddForm = false; // Close the form
         }).catch(error => {
           console.error('Error uploading file:', error);
-          alert('Failed to upload file.');
+          this.showSnackbar('Failed to upload file.');
         });
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -508,7 +590,7 @@ export default {
     selectRandomRows() {
       const numberOfRows = parseInt(prompt('Enter the number of rows to select:', '2000'));
       if (isNaN(numberOfRows) || numberOfRows <= 0) {
-        alert('Please enter a valid positive integer.');
+        this.showSnackbar('Please enter a valid positive integer.');
         return;
       }
 
@@ -533,7 +615,7 @@ export default {
     },
     async addSelectedToWishlist() {
       if (!this.selectedWishlistId) {
-        alert('Please select a wishlist to add creators.');
+        this.showSnackbar('Please select a wishlist to add creators.');
         return;
       }
 
@@ -542,7 +624,7 @@ export default {
       const creatorIds = selectedData.map(data => data.id);
 
       if (creatorIds.length === 0) {
-        alert('Please select at least one creator to add.');
+        this.showSnackbar('Please select at least one creator to add.');
         return;
       }
 
@@ -552,14 +634,21 @@ export default {
 
       try {
         await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, creatorIds);
-        alert('Successfully added selected creators to the wishlist!');
+        this.showSnackbar('Successfully added selected creators to the wishlist!');
         this.refreshGridData(); // Optionally refresh data
       } catch (error) {
         console.error('Error adding selected creators to wishlist:', error);
-        alert('Failed to add selected creators to the wishlist.');
+        this.showSnackbar('Failed to add selected creators to the wishlist.');
       }
     },
-
+    resetView() {
+      this.rowData = this.fullRowData;
+      this.gridApi.setRowData(this.rowData);
+      // Optionally, clear filters and selections
+      this.gridApi.setFilterModel(null);
+      this.gridApi.deselectAll();
+      this.showSnackbar('View has been reset.', 'info');
+    }
   },
   mounted() {
     this.columnDefs = this.getColumnDefs();

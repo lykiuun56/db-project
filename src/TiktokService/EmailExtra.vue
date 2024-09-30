@@ -2,12 +2,12 @@
   <v-container class="add-to-database-container">
     <v-row justify="center">
       <v-col cols="12" class="text-center">
-        <h1>Email Extraction</h1>
+        <h1 style="color: white">Email Extraction</h1>
       </v-col>
     </v-row>
     <v-row justify="center">
       <v-col cols="12" md="5">
-        <v-file-input v-model="selectedFile" label="选择文件" outlined></v-file-input>
+        <v-file-input  style="color: white" v-model="selectedFile" label="选择文件" outlined></v-file-input>
       </v-col>
     </v-row>
     <v-row justify="center">

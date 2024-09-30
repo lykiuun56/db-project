@@ -2,10 +2,10 @@
   <v-container fluid>
     <v-row>
       <v-col cols="3">
-        <v-text-field v-model="handleName" label="Handle Name" dense></v-text-field>
+        <v-text-field style="color: white" v-model="handleName" label="Handle Name" dense></v-text-field>
       </v-col>
       <v-col cols="3">
-        <v-text-field v-model="email" label="Email" dense></v-text-field>
+        <v-text-field style="color: white" v-model="email" label="Email" dense></v-text-field>
       </v-col>
       <v-col cols="3" class="text-center">
         <v-btn color="primary" @click="simpleSearch">Simple Search</v-btn>

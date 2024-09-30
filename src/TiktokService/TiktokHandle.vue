@@ -1,13 +1,13 @@
 <template>
   <v-container class="add-to-database-container">
     <v-row justify="center">
-      <v-col cols="12" class="text-center">
+      <v-col  style="color: white" cols="12" class="text-center">
         <h1>TikTok Search Handle Name</h1>
       </v-col>
     </v-row>
     <v-row justify="center">
       <v-col cols="12" md="5">
-        <v-file-input v-model="selectedFile" label="Select File" outlined></v-file-input>
+        <v-file-input style="color: white" v-model="selectedFile" label="Select File" outlined></v-file-input>
       </v-col>
     </v-row>
     <v-row justify="center">

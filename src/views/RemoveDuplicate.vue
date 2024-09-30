@@ -2,7 +2,7 @@
   <v-container>
     <v-row justify="center">
       <v-col cols="12" class="text-center">
-        <h1>Remove Duplicate</h1>
+        <h1 style="color: white">Remove Duplicate</h1>
       </v-col>
     </v-row>
     <v-row justify="center">
@@ -10,6 +10,7 @@
         <v-file-input
             label="Select Input File"
             outlined
+            style="color: white"
             v-model="inputFile"
         ></v-file-input>
       </v-col>
@@ -17,6 +18,7 @@
     <v-row justify="center">
       <v-col cols="12" md="5">
         <v-file-input
+            style="color: white"
             label="Select Blacklist File"
             outlined
             v-model="blackListFile"

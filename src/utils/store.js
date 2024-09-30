@@ -37,16 +37,27 @@ export default createStore({
         // ... other mutations
     },
     actions: {
-        async login({ commit, dispatch }, credentials) {
+        async login({ commit, dispatch }, { username, password, token }) {
             try {
-                const response = await axios.post(`${apiBaseUrl}/api/login`, credentials);
-                const { userId, token } = response.data;
+                // If token is passed, assume the user is already authenticated
+                if (token) {
+                    commit('SET_AUTH_TOKEN', token);
+                    // Optionally fetch wishlists and other data
+                    const userId = localStorage.getItem('userId');
+                    await dispatch('fetchWishlists', userId);
+                } else {
+                    // For regular login
+                    const response = await axios.post(`${apiBaseUrl}/api/login`, { username, password });
+                    const { userId, token } = response.data;
+                    commit('SET_USER_ID', userId);
+                    commit('SET_AUTH_TOKEN', token);
 
-                commit('SET_USER_ID', userId);
-                commit('SET_AUTH_TOKEN', token);
+                    // Store token and userId in localStorage
+                    localStorage.setItem('authToken', token);
+                    localStorage.setItem('userId', userId);
 
-                // Fetch wishlists after successful login
-                await dispatch('fetchWishlists', userId);
+                    await dispatch('fetchWishlists', userId);
+                }
             } catch (error) {
                 console.error('Login failed:', error);
                 throw error;
@@ -55,6 +66,9 @@ export default createStore({
         logout({ commit }) {
             commit('CLEAR_AUTH');
             commit('CLEAR_WISHLISTS');
+            // Clear the token and userId from localStorage
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userId');
         },
         async createWishlist({ commit, state }, { name }) {
             try {
@@ -75,13 +89,17 @@ export default createStore({
         },
         async fetchWishlists({ commit }, userId) {
             try {
-                const response = await axios.get(`${apiBaseUrl}/api/wishlists/user/${userId}`);
+                const token = localStorage.getItem('authToken');
+                const response = await axios.get(`${apiBaseUrl}/api/wishlists/user/${userId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 commit('SET_WISHLISTS', response.data);
             } catch (error) {
                 console.error('Failed to fetch wishlists:', error);
                 throw error;
             }
-        },
+        }
+
         // ... other actions
     },
     getters: {

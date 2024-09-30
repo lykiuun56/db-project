@@ -2,27 +2,42 @@
   <v-container fluid>
     <v-row>
       <v-col cols="12">
-        <h1>Wishlist Creators</h1>
+        <h1 style="color: white" >Wishlist Creators</h1>
       </v-col>
     </v-row>
 
-    <v-row>
-      <v-col cols="auto">
-        <v-btn color="primary" @click="exportAllToExcel" class="button-spacing">Export All</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="secondary" @click="exportSelectedToExcel" class="button-spacing">Export Selected</v-btn>
-      </v-col>
-      <v-col cols="auto">
-        <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete Selected</v-btn>
-      </v-col>
+    <v-row class="mb-4">
+
+    <!-- Export Options Dropdown -->
+    <v-col cols="auto">
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-btn color="#33007D" v-bind="props">
+            Export Options
+            <v-icon right>mdi-chevron-down</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="exportAllToExcel">
+            <v-list-item-title>Export All</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="exportSelectedToExcel">
+            <v-list-item-title>Export Selected</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-col>
+    <v-spacer></v-spacer>
+    <v-col cols="auto">
+      <v-btn color="error" @click="deleteSelected" class="button-spacing">Delete Selected</v-btn>
+    </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
             ref="agGrid"
-            class="ag-theme-alpine"
+            class="ag-theme-alpine-auto-dark"
             style="width: 100%; height: 600px;"
             :columnDefs="columnDefs"
             :rowData="rowData"

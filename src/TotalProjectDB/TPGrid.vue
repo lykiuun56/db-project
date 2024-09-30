@@ -2,14 +2,14 @@
   <v-container fluid>
     <v-row>
       <v-col cols="12">
-        <h1>Total Project</h1>
-        <v-btn color="primary" @click="exportToExcel">Export to Excel</v-btn> <!-- Button to trigger export -->
+        <h1 style="color: white" >Total Project</h1>
+        <v-btn color="#4700cf" @click="exportToExcel">Export to Excel</v-btn> <!-- Button to trigger export -->
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
-            class="ag-theme-alpine"
+            class="ag-theme-alpine-auto-dark"
             style="width: 100%; height: 600px;"
             :columnDefs="columnDefs"
             :rowData="rowData"

@@ -5,6 +5,7 @@ import router from './router';
 import './assets/global.css';
 import store from './utils/store';
 
+
 import 'vuetify/styles'; // Import Vuetify styles
 
 

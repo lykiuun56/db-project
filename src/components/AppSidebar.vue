@@ -38,12 +38,12 @@
         </template>
 
         <v-list-item
-            @click="$router.push('/block-someone/management-email')"
+            @click="$router.push('/md-grid')"
             title="Management Email"
             prepend-icon="mdi-email"
         ></v-list-item>
         <v-list-item
-            @click="$router.push('/block-someone/black-list')"
+            @click="$router.push('/bl-grid')"
             title="Black List"
             prepend-icon="mdi-block-helper"
         ></v-list-item>
@@ -54,11 +54,27 @@
           prepend-icon="mdi-content-duplicate"
           title="Remove Duplicate"
       ></v-list-item>
-      <v-list-item
-          @click="$router.push('/tiktok-home')"
-          prepend-icon="mdi-music-note"
-          title="TikTok Service"
-      ></v-list-item>
+
+      <v-list-group value="Tik Tok">
+        <template v-slot:activator="{ props }">
+          <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-music-note"
+              title="Tik Tok"
+          ></v-list-item>
+        </template>
+
+        <v-list-item
+            @click="$router.push('/tik-hash-tag')"
+            title="Search by Hash Tag"
+            prepend-icon="mdi-tag"
+        ></v-list-item>
+        <v-list-item
+            @click="$router.push('/tik-search-name')"
+            title="Search Handle Name"
+            prepend-icon="mdi-alpha-n-box-outline"
+        ></v-list-item>
+      </v-list-group>
       <v-list-item
           @click="$router.push('/email-extra')"
           prepend-icon="mdi-email-plus"
@@ -73,17 +89,47 @@
               title="Projects"
           ></v-list-item>
         </template>
+        <v-list-group value="total-projects">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+            v-bind="props"
+            prepend-icon= mdi-view-grid
+            title="total-project"
+            ></v-list-item>
+          </template>
 
-        <v-list-item
-            @click="$router.push('/total-project')"
-            title="Total Project"
-            prepend-icon="mdi-view-grid"
-        ></v-list-item>
-        <v-list-item
-            @click="$router.push('/collaborated-project')"
-            title="Collaborated Project"
-            prepend-icon="mdi-account-group"
-        ></v-list-item>
+          <v-list-item
+              @click="$router.push('/tp-grid')"
+              title="View the database"
+              prepend-icon="mdi-grid-large"
+          ></v-list-item>
+          <v-list-item
+              @click="$router.push('/tp-search')"
+              title="Find Creators"
+              prepend-icon="mdi-magnify"
+          ></v-list-item>
+        </v-list-group>
+
+        <v-list-group value="Collaborated-projects">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+                v-bind="props"
+                prepend-icon= mdi-account-group
+                title="Collaborated-project"
+            ></v-list-item>
+          </template>
+
+          <v-list-item
+              @click="$router.push('/cp-grid')"
+              title="View the database"
+              prepend-icon="mdi-grid-large"
+          ></v-list-item>
+          <v-list-item
+              @click="$router.push('/cp-search')"
+              title="Find Creators"
+              prepend-icon="mdi-magnify"
+          ></v-list-item>
+        </v-list-group>
       </v-list-group>
     </v-list>
 

@@ -1,6 +1,6 @@
 <template>
     <v-dialog v-model="localVisible" max-width="800px">
-      <v-card>
+      <v-card color ="#222222">
         <v-card-title>
           <span class="text-h5">{{ title }}</span>
         </v-card-title>

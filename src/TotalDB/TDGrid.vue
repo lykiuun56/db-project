@@ -357,6 +357,14 @@ export default {
       mailchimpTemplates: [],  // Store all template options 
       selectedTag: '',
       mailchimpTags: [],
+      isSelectRandomDialogVisible: false,  // Initial value for dialog visibility
+      snackbar: {
+        show: false,
+        message: '',
+        color: ''
+      },
+      selectRandomNumber: '',           // Holds the number of creators to select
+      selectRandomProjectName: '',      // Holds the project name to exclude
       formData: {
         handle_name: '',
         followers: '',

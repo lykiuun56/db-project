@@ -767,7 +767,45 @@ export default {
       }
     },
 
-    async submitFileAdd(formData) {
+    // async submitFileAdd(formData) {
+    //   try {
+    //     await axios.post(`${apiBaseUrl}/api/total/addByFile`, formData, {
+    //       headers: {
+    //         'Content-Type': 'multipart/form-data',
+    //       },
+    //     }).then(() => {
+    //       this.refreshGridData();  // Refresh grid data after successful file upload
+    //       this.showAddForm = false; // Close the form
+    //       console.log('Data Added')
+    //     }).catch(error => {
+    //       console.error('Error uploading file:', error);
+    //       alert('Failed to upload file.');
+    //     });
+    //   } catch (error) {
+    //     console.error('Unexpected error:', error);
+    //   }
+    // },
+
+    async submitAddToDB(formData) {
+      try {
+        await axios.post(`${apiBaseUrl}/api/total/addByFileToDB`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }).then(() => {
+          this.refreshGridData();  // Refresh grid data after successful add
+          this.showAddForm = false; // Close the form
+          console.log('Data Added to DB');
+        }).catch(error => {
+          console.error('Error adding data:', error);
+          alert('Failed to add entry.');
+        });
+      } catch (error) {
+        console.error('Unexpected error:', error);
+      }
+    },
+
+    async submitAddToBoth(formData) {
       try {
         await axios.post(`${apiBaseUrl}/api/total/addByFile`, formData, {
           headers: {

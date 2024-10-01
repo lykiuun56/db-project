@@ -64,11 +64,17 @@
             <v-list-item @click="showCBDForm">
               <v-list-item-title>Write To CBD</v-list-item-title>
             </v-list-item>
-            <v-list-item @click="showMailchimpForm">
-              <v-list-item-title>Send Mailchimp Email</v-list-item-title>
+<!--            <v-list-item @click="showMailchimpForm">-->
+<!--              <v-list-item-title>Send Mailchimp Email</v-list-item-title>-->
+<!--            </v-list-item>-->
+            <v-list-item @click="fetchScheduledCampaigns">
+              <v-list-item-title>View Scheduled Campaigns</v-list-item-title>
             </v-list-item>
-            <v-list-item @click="openSelectRandomDialog">
-              <v-list-item-title>Select Random Creators</v-list-item-title>
+            <v-list-item @click="showTagForm">
+              <v-list-item-title>Add Mailchimp Tag</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="showMailchimpForm">
+              <v-list-item-title>Campaign</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -220,7 +226,7 @@
     </v-dialog>
 
     <v-dialog v-model="isTagDialogVisible" max-width="600px">
-      <v-card>
+      <v-card color="#222222">
         <v-card-title>
           <span class="headline">Add Mailchimp Tag</span>
         </v-card-title>
@@ -320,7 +326,7 @@
 
     <!-- Scheduled Campaigns Dialog -->
     <v-dialog v-model="isScheduledCampaignsDialogVisible" max-width="600px">
-      <v-card>
+      <v-card color ="#222222">
         <v-card-title>
           <span class="headline">Scheduled Campaigns</span>
         </v-card-title>
@@ -492,7 +498,7 @@ export default {
     // Submit the Mailchimp email form
     async submitMailchimpForm() {
       if (!this.scheduledTime || !this.selectedTag|| !this.mailchimpSubject || !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply) {
-        alert('Please fill in all the required fields.');
+        this.showSnackbar('Please fill in all the required fields.');
         return;
       }
       try {
@@ -505,11 +511,11 @@ export default {
           scheduledTime: this.scheduledTime
         });
 
-        alert('Tag successfully scheduled.');
+        this.showSnackbar('Tag successfully scheduled.');
         this.closeMailchimpForm();
       } catch (error) {
         console.error('Error sending Mailchimp Campaign:', error);
-        alert('Failed to send Campaign Info.');
+        this.showSnackbar('Failed to send Campaign Info.');
       }
     },
 
@@ -520,7 +526,7 @@ export default {
         this.selectedRows = selectedNodes.map(node => node.data); // Store all selected rows
         this.isTagDialogVisible = true; // Show the dialog
       } else {
-        alert('Please select at least one row to add a Mailchimp tag.');
+        this.showSnackbar('Please select at least one row to add a Mailchimp tag.');
       }
     },
     closeTagForm() {
@@ -530,7 +536,7 @@ export default {
       try {
         // Ensure the required fields are provided
         if (!this.tagCategories || !this.tagPoc || !this.tagProjectName) {
-          alert('Please fill out all fields.');
+          this.showSnackbar('Please fill out all fields.');
           return;
         }
 
@@ -549,15 +555,15 @@ export default {
         const response = await axios.post(`${apiBaseUrl}/api/total/tag`, payload);
 
         if (response.data) {
-          alert('Tags added successfully.');
+          this.showSnackbar('Tags added successfully.');
           this.closeTagForm();
           this.refreshGridData();
         } else {
-          alert('Failed to add tags.');
+          this.showSnackbar('Failed to add tags.');
         }
       } catch (error) {
         console.error('Error submitting Mailchimp tags:', error);
-        alert('Failed to submit tags.');
+        this.showSnackbar('Failed to submit tags.');
       }
     },
 
@@ -570,41 +576,41 @@ export default {
           this.campaignsList = response.data; // response.data is now a list of subject lines
           this.isScheduledCampaignsDialogVisible = true; // Open the dialog
         } else {
-          alert('No scheduled campaigns found.');
+          this.showSnackbar('No scheduled campaigns found.');
         }
       } catch (error) {
         console.error('Error fetching scheduled campaigns:', error);
-        alert('Failed to fetch scheduled campaigns.');
+        this.showSnackbar('Failed to fetch scheduled campaigns.');
       }
     },
 
     async unscheduleCampaign() {
       if (!this.selectedCampaign) {
-        alert('Please select a campaign to unschedule.');
+        this.showSnackbar('Please select a campaign to unschedule.');
         return;
       }
       try {
         await axios.post(`${apiBaseUrl}/api/total/campaigns/unschedule`, this.selectedCampaign);
-        alert('Campaign unscheduled successfully.');
+        this.showSnackbar('Campaign unscheduled successfully.');
         this.closeScheduledCampaignsDialog();
       } catch (error) {
         console.error('Error unscheduling campaign:', error);
-        alert('Failed to unschedule the campaign.');
+        this.showSnackbar('Failed to unschedule the campaign.');
       }
     },
 
     async deleteCampaign() {
       if (!this.selectedCampaign) {
-        alert('Please select a campaign to delete.');
+        this.showSnackbar('Please select a campaign to delete.');
         return;
       }
       try {
         await axios.delete(`${apiBaseUrl}/api/total/campaigns/delete`, { data: this.selectedCampaign });
-        alert('Campaign deleted successfully.');
+        this.showSnackbar('Campaign deleted successfully.');
         this.closeScheduledCampaignsDialog();
       } catch (error) {
         console.error('Error deleting campaign:', error);
-        alert('Failed to delete the campaign.');
+        this.showSnackbar('Failed to delete the campaign.');
       }
     },
 
@@ -852,7 +858,7 @@ export default {
           console.log('Data Added to DB');
         }).catch(error => {
           console.error('Error adding data:', error);
-          alert('Failed to add entry.');
+          this.showSnackbar('Failed to add entry.');
         });
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -871,7 +877,7 @@ export default {
           console.log('Data Added to Both DB and Mailchimp');
         }).catch(error => {
           console.error('Error adding data:', error);
-          alert('Failed to add entry.');
+          this.showSnackbar('Failed to add entry.');
         });
       } catch (error) {
         console.error('Unexpected error:', error);

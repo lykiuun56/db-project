@@ -118,13 +118,13 @@
 
 
     <v-dialog v-model="isMatchingDialogVisible" max-width="800px">
-      <v-card>
+      <v-card color="#222222">
         <v-card-title>Matching Emails</v-card-title>
         <v-card-text>
 
           <ag-grid-vue
               ref="matchingGrid"
-              class="ag-theme-alpine"
+              class="ag-theme-alpine-auto-dark"
               style="width: 100%; height: 400px;"
               :columnDefs="matchingColumnDefs"
               :rowData="matchingEmails"
@@ -143,7 +143,7 @@
 
     </v-dialog>
     <v-dialog v-model="isFindingDialogVisible" max-width="800px">
-      <v-card>
+      <v-card color = "#222222">
         <v-card-title>Finding Emails</v-card-title>
         <v-card-text>
           <v-text-field
@@ -154,7 +154,7 @@
           />
           <ag-grid-vue
               ref="matchingGrid"
-              class="ag-theme-alpine"
+              class="ag-theme-alpine-auto-dark"
               style="width: 100%; height: 400px;"
               :columnDefs="emailColumnDefs"
               :rowData="findingEmails"
@@ -476,9 +476,6 @@ export default {
           params: { emailEnding: this.emailDomain },
         });
         this.findingEmails = response.data;
-        if (this.findingGridApi) {
-          this.findingGridApi.setRowData(this.findingEmails);
-        }
       } catch (error) {
         console.error('Error finding matching emails:', error);
         alert('Error finding matching emails. Please try again.');

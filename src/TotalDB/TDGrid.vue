@@ -524,6 +524,9 @@ export default {
       const selectedNodes = this.gridApi.getSelectedNodes();
       if (selectedNodes.length > 0) {
         this.selectedRows = selectedNodes.map(node => node.data); // Store all selected rows
+        this.tagCategories = '';
+        this.tagPoc = '';
+        this.tagProjectName = '';
         this.isTagDialogVisible = true; // Show the dialog
       } else {
         this.showSnackbar('Please select at least one row to add a Mailchimp tag.');

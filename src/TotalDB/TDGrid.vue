@@ -364,6 +364,7 @@
         :show-file-upload="true"
         :forTotalDatabase="true"
         @close="showAddForm = false"
+        @save ="submitAdd"
         @saveToDB="submitAddToDB"
         @saveToBoth="submitAddToBoth"
         @saveFile="submitFileAdd">
@@ -849,22 +850,48 @@ export default {
     //   }
     // },
 
-    async submitAddToDB(formData) {
+    async submitAddToDB(dataOrFile, isFile = false) {
       try {
-        await axios.post(`${apiBaseUrl}/api/total/addByFileToDB`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }).then(() => {
-          this.refreshGridData();  // Refresh grid data after successful add
-          this.showAddForm = false; // Close the form
-          console.log('Data Added to DB');
-        }).catch(error => {
-          console.error('Error adding data:', error);
-          this.showSnackbar('Failed to add entry.');
-        });
+        if (isFile) {
+          // If it's a file, handle the file submission
+          const formData = new FormData();
+          formData.append('file', dataOrFile); // Assuming `dataOrFile` is a file object
+
+          await axios.post(`${apiBaseUrl}/api/total/addByFileToDB`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }).then(() => {
+            this.refreshGridData();  // Refresh grid data after successful add
+            this.showAddForm = false; // Close the form
+            this.showSnackbar('File added to DB successfully.', 'success');
+          }).catch(error => {
+            console.error('Error adding file:', error);
+            this.showSnackbar('Failed to add file.', 'error'); // Notify the user in case of an error
+          });
+        } else {
+          // Handle the form submission for normal data
+          const requiredFields = ['handle_name', 'email'];
+          for (const field of requiredFields) {
+            if (!dataOrFile[field] || dataOrFile[field].trim() === '') {
+              this.showSnackbar(`Please fill out the required field: ${field.replace('_', ' ')}`, 'error');
+              return;
+            }
+          }
+
+          await axios.post(`${apiBaseUrl}/api/total/add`, dataOrFile)
+              .then(() => {
+                this.refreshGridData();  // Refresh grid data after successful add
+                this.showAddForm = false; // Close the form
+                this.showSnackbar('Entry added successfully.', 'success');
+              }).catch(error => {
+                console.error('Error adding data:', error);
+                this.showSnackbar('Failed to add entry.', 'error'); // Notify the user in case of an error
+              });
+        }
       } catch (error) {
         console.error('Unexpected error:', error);
+        this.showSnackbar('An unexpected error occurred.', 'error');
       }
     },
 

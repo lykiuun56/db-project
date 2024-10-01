@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app class="app-wrapper">
     <!-- Navigation Drawer for Sidebar (visible if logged in and sidebar is not hidden) -->
     <v-navigation-drawer
         v-model="showSidebar"
@@ -192,6 +192,17 @@ const toggleSidebar = () => {
 #app{
   background-color: #000000; /* Set your desired color */
 
+}
+
+html, body {
+  background-color: #121212;
+  margin: 0;
+  padding: 0;
+}
+
+.app-wrapper {
+  background-color: #121212;
+  min-height: 100vh;
 }
 
 

@@ -1,5 +1,6 @@
 <template>
-  <v-container fluid>
+  <div class="total-database-wrapper">
+    <v-container fluid class="pa-0">
     <v-row>
       <v-col cols="12"  >
         <h1 style="color: white">Total Database</h1>
@@ -376,6 +377,7 @@
         />
     </add-pop-out>
   </v-container>
+  </div>
 </template>
 
 <script>
@@ -1110,80 +1112,82 @@ export default {
 
 /* AG Grid Custom Theme Adjustments */
 .ag-theme-alpine-dark {
+  --ag-background-color: transparent;
+  --ag-odd-row-background-color: rgba(255, 255, 255, 0.05);
+  --ag-header-background-color: rgba(0, 0, 0, 0.3);
+  --ag-row-hover-color: rgba(255, 255, 255, 0.1);
+  --ag-selected-row-background-color: rgba(0, 0, 0, 0.3);
+  --ag-row-border-color: rgba(255, 255, 255, 0.1);
+  --ag-cell-horizontal-border: none;
+
   width: 100%;
   height: 600px;
-  background-color: transparent !important; /* Make grid background transparent */
-  border: none !important; /* Remove grid border */
-  box-shadow: none; /* Remove any default shadows */
-}
-
-.ag-theme-alpine-dark .ag-header {
-  background-color: transparent !important; /* Transparent header background */
-  color: #ffffff; /* Header text color */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
-}
-
-.ag-theme-alpine-dark .ag-header-cell {
-  border: none; /* Remove default borders */
-}
-
-.ag-theme-alpine-dark .ag-cell {
-  background-color: rgba(255, 255, 255, 0.05) !important; /* Slight transparent cell background */
-  color: #e0e0e0; /* Cell text color */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle cell border */
-}
-
-.ag-theme-alpine-dark .ag-row:hover {
-  background-color: rgba(0, 0, 0, 0.2) !important; /* Hover effect */
-}
-
-.ag-theme-alpine-dark .ag-row-selected {
-  background-color: rgba(100, 181, 246, 0.3) !important; /* Selected row background */
-  color: #ffffff; /* Selected row text color */
+  color: #e0e0e0;
 }
 
 .ag-theme-alpine-dark .ag-root-wrapper {
-  background-color: transparent !important; /* Transparent wrapper */
+  border: none;
 }
 
-.ag-theme-alpine-dark .ag-icon {
-  fill: #ffffff; /* White icons */
+.ag-theme-alpine-dark .ag-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.ag-theme-alpine-dark .ag-row, .ag-cell {
-  border: none !important; /* Remove default cell borders */
+.ag-theme-alpine-dark .ag-row {
+  border-bottom: 1px solid var(--ag-row-border-color);
 }
 
-.ag-theme-alpine-dark .ag-ltr .ag-header-cell, .ag-theme-alpine-dark .ag-header {
-  border-right: none !important; /* Remove right header border */
+.ag-theme-alpine-dark .ag-row-selected {
+  background-color: var(--ag-selected-row-background-color) !important;
+}
+
+.ag-theme-alpine-dark .ag-row:hover {
+  background-color: var(--ag-row-hover-color) !important;
 }
 
 /* Customize scrollbar */
-.ag-theme-alpine-dark .ag-body-horizontal-scroll {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.ag-theme-alpine-dark .ag-body-horizontal-scroll .ag-horizontal-scroll-viewport::-webkit-scrollbar {
+.ag-theme-alpine-dark ::-webkit-scrollbar {
+  width: 8px;
   height: 8px;
 }
 
-.ag-theme-alpine-dark .ag-body-horizontal-scroll .ag-horizontal-scroll-viewport::-webkit-scrollbar-track {
+.ag-theme-alpine-dark ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.ag-theme-alpine-dark .ag-body-horizontal-scroll .ag-horizontal-scroll-viewport::-webkit-scrollbar-thumb {
+.ag-theme-alpine-dark ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
 }
 
-.ag-theme-alpine-dark .ag-body-horizontal-scroll .ag-horizontal-scroll-viewport::-webkit-scrollbar-thumb:hover {
+.ag-theme-alpine-dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.4);
 }
-
-
 
 /* Optional: Adjust button spacing */
 .button-spacing {
   margin-right: 8px;
 }
+html, body {
+  background-color: #121212; /* Dark background color */
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+.total-database-wrapper {
+   background-color: #121212; /* Match the body background color */
+   min-height: 100vh;
+   width: 100%;
+ }
+
+/* Ensure Vuetify container doesn't add unwanted padding */
+.v-container.pa-0 {
+  padding: 0 !important;
+}
+
+/* Optional: If you want to add some padding inside the wrapper */
+.total-database-wrapper .v-container {
+  padding: 16px;
+}
+
 </style>

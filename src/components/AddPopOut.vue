@@ -134,13 +134,30 @@ export default {
     submitForm() {
       if (this.$refs.form.validate()) {
         if (this.showFileUpload && this.selectedFile) {
-          this.submitFile();
+          // If a file needs to be uploaded, emit an event with the form data and file.
+          const formData = new FormData();
+          formData.append('formData', JSON.stringify(this.localFormData));
+          formData.append('file', this.selectedFile);
+
+          // Emit a different event for file saving, such as saveFile
+          this.$emit('saveFile', formData);
         } else {
+          // For regular form submission without file
           this.$emit('save', { ...this.localFormData });
-          this.close();
         }
+        this.close();
       }
     },
+    // submitForm() {
+    //   if (this.$refs.form.validate()) {
+    //     if (this.showFileUpload && this.selectedFile) {
+    //       this.submitFile();
+    //     } else {
+    //       this.$emit('save', { ...this.localFormData });
+    //       this.close();
+    //     }
+    //   }
+    // },
     submitSaveToDB() {
       if (this.$refs.form.validate()) {
         const formData = new FormData();

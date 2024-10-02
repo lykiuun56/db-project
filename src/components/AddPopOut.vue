@@ -60,6 +60,10 @@
           <v-btn color="blue darken-1" text @click="submitSaveToDB">Save to DB</v-btn>
           <v-btn color="green darken-1" text @click="submitSaveToBoth">Save to Both</v-btn>
         </template>
+        <template v-if="forCollaboratedDatabase">
+          <v-btn color="blue darken-1" text @click="submitForm">Save</v-btn>
+          <v-btn color="green darken-1" text @click="submitSaveToBoth">Save to Both</v-btn>
+        </template>
         <v-btn v-else color="blue darken-1" text @click="submitForm">Save</v-btn>
       </v-card-actions>
     </v-card>
@@ -91,6 +95,10 @@ export default {
       default: true, // Show the file upload input by default
     },
     forTotalDatabase: {  // New prop added here
+      type: Boolean,
+      default: false, // Default is false for all other use cases
+    },
+    forCollaboratedDatabase: { // New prop added here
       type: Boolean,
       default: false, // Default is false for all other use cases
     },

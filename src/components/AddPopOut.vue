@@ -60,6 +60,10 @@
           <v-btn color="blue darken-1" text @click="submitSaveToDB">Save to DB</v-btn>
           <v-btn color="green darken-1" text @click="submitSaveToBoth">Save to Both</v-btn>
         </template>
+        <template v-if="forCollaboratedDatabase">
+          <v-btn color="blue darken-1" text @click="submitForm">Save</v-btn>
+          <v-btn color="green darken-1" text @click="submitSaveToBoth">Save to Both</v-btn>
+        </template>
         <v-btn v-else color="blue darken-1" text @click="submitForm">Save</v-btn>
       </v-card-actions>
     </v-card>
@@ -91,6 +95,10 @@ export default {
       default: true, // Show the file upload input by default
     },
     forTotalDatabase: {  // New prop added here
+      type: Boolean,
+      default: false, // Default is false for all other use cases
+    },
+    forCollaboratedDatabase: { // New prop added here
       type: Boolean,
       default: false, // Default is false for all other use cases
     },
@@ -126,13 +134,30 @@ export default {
     submitForm() {
       if (this.$refs.form.validate()) {
         if (this.showFileUpload && this.selectedFile) {
-          this.submitFile();
+          // If a file needs to be uploaded, emit an event with the form data and file.
+          const formData = new FormData();
+          formData.append('formData', JSON.stringify(this.localFormData));
+          formData.append('file', this.selectedFile);
+
+          // Emit a different event for file saving, such as saveFile
+          this.$emit('saveFile', formData);
         } else {
+          // For regular form submission without file
           this.$emit('save', { ...this.localFormData });
-          this.close();
         }
+        this.close();
       }
     },
+    // submitForm() {
+    //   if (this.$refs.form.validate()) {
+    //     if (this.showFileUpload && this.selectedFile) {
+    //       this.submitFile();
+    //     } else {
+    //       this.$emit('save', { ...this.localFormData });
+    //       this.close();
+    //     }
+    //   }
+    // },
     submitSaveToDB() {
       if (this.$refs.form.validate()) {
         const formData = new FormData();

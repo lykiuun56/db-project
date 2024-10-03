@@ -8,6 +8,7 @@ export default createStore({
         userId: localStorage.getItem('userId') || null,
         authToken: localStorage.getItem('authToken') || null,
         userRole: localStorage.getItem('userRole') || null,  // Add user role
+        userPoc:localStorage.getItem('userPoc') || null,
         wishlists: [],
         // ... other state properties
     },
@@ -15,6 +16,10 @@ export default createStore({
         SET_USER_ROLE(state, payload) {
             state.userRole = payload;
             localStorage.setItem('userRole', payload);  // Store role in localStorage
+        },
+        SET_USER_POC(state, payload) {
+            state.userPoc = payload;
+            localStorage.setItem('userPoc',payload)
         },
         SET_USER_ID(state, payload) {
             state.userId = payload;
@@ -28,8 +33,10 @@ export default createStore({
             state.userId = null;
             state.authToken = null;
             state.userRole = null;  // Clear role on logout
+            state.userPoc = null;
             localStorage.removeItem('userId');
             localStorage.removeItem('authToken');
+            localStorage.removeItem('userPoc')
             localStorage.removeItem('userRole');  // Clear role from localStorage
         },
         SET_WISHLISTS(state, wishlists) {
@@ -55,17 +62,18 @@ export default createStore({
                 } else {
                     // For regular login
                     const response = await axios.post(`${apiBaseUrl}/api/login`, { username, password });
-                    const { userId, token, role } = response.data;
+                    const { userId, token, role, poc } = response.data;
                     console.log('Role from backend:', role);  // Debugging the role value
                     commit('SET_USER_ID', userId);
                     commit('SET_AUTH_TOKEN', token);
                     commit('SET_USER_ROLE', role);  // Store the user role
+                    commit('SET_USER_POC',poc)
 
                     // Store token and userId in localStorage
                     localStorage.setItem('authToken', token);
                     localStorage.setItem('userId', userId);
                     localStorage.setItem('userRole', role);  // Save role to localStorage
-
+                    localStorage.setItem('userPoc',poc);
                     await dispatch('fetchWishlists', userId);
                 }
             } catch (error) {
@@ -79,6 +87,9 @@ export default createStore({
             // Clear the token and userId from localStorage
             localStorage.removeItem('authToken');
             localStorage.removeItem('userId');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userPoc');
+
         },
         async createWishlist({ commit, state }, { name }) {
             try {
@@ -117,6 +128,7 @@ export default createStore({
         getAuthToken: (state) => state.authToken,
         getWishlists: (state) => state.wishlists,
         getUserRole: (state) => state.userRole,  // Add getter for user role
+        getUserPoc: (state) => state.userPoc,
         // ... other getters
     },
 });

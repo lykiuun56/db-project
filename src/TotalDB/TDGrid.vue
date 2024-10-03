@@ -217,15 +217,9 @@
                 <v-col cols="12" sm="6">
                   <v-text-field v-model="mailchimpReply" label="Reply To" required />
                 </v-col>
-                <!-- Input for POC-->
-                <v-col cols="12" sm="6">
-                  <v-text-field v-model="mailchimpPoc" label="Poc" required />
-                </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field v-model="mailchimpProjectName" label="Project Name" required />
                 </v-col>
-
-
               </v-row>
             </v-container>
           </v-form>
@@ -401,6 +395,7 @@ import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 import AddPopOut from '@/components/AddPopOut.vue';
 import templateFile from '@/assets/td_template.xlsx';
+import {mapState} from "vuex";
 
 export default {
   name: 'TotalDatabaseGrid',
@@ -408,6 +403,12 @@ export default {
     EditPopOut,
     AgGridVue,
     AddPopOut,
+  },
+  computed: {
+    ...mapState({
+      authToken: state => state.authToken, // Get token from Vuex state
+      userPoc: state => state.userPoc,
+    }),
   },
   data() {
     return {
@@ -514,7 +515,7 @@ export default {
 
     // Submit the Mailchimp email form
     async submitMailchimpForm() {
-      if (!this.scheduledTime || !this.selectedTag|| !this.mailchimpSubject || !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply || !this.mailchimpPoc) {
+      if (!this.scheduledTime || !this.selectedTag|| !this.mailchimpSubject || !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply) {
         this.showSnackbar('Please fill in all the required fields.');
         return;
       }
@@ -526,7 +527,7 @@ export default {
           templateName: this.selectedTemplateName,
           tag: this.selectedTag,
           scheduledTime: this.scheduledTime,
-          poc: this.mailchimpPoc,
+          poc: this.userPoc,
           projectName : this.mailchimpProjectName,
         });
         this.showSnackbar('Tag successfully scheduled.');
@@ -709,6 +710,7 @@ export default {
       this.gridColumnApi = params.columnApi || this.gridApi; // Fallback to gridApi if gridColumnApi is undefined
       console.log('Grid API:', this.gridApi);
       console.log('Grid Column API:', this.gridColumnApi);
+      console.log('userPoc:', this.userPoc);
       try {
         const response = await axios.get(`${apiBaseUrl}/api/total/all`, { withCredentials: true });
         console.log('API Response Data:', response.data);

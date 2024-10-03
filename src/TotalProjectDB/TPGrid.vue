@@ -9,7 +9,7 @@
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
-            class="ag-theme-alpine-auto-dark"
+            class="ag-theme-alpine-dark"
             style="width: 100%; height: 600px;"
             :columnDefs="columnDefs"
             :rowData="rowData"

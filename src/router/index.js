@@ -61,6 +61,8 @@ import CreateWishlist from "@/WishList/CreateWishlist.vue";
 import ViewWishlist from "@/WishList/ViewWishlist.vue";
 import WishlistDetail from '@/WishList/WishlistDetail.vue';
 
+import UserEmailStatus from '@/EmailStatus/ESGrid.vue';
+
 
 
 
@@ -304,7 +306,12 @@ const routes = [
         component: WishlistDetail,
         props: true // This allows route params to be passed as props
       },
-
+      {
+        path: '/profile',
+        name: UserEmailStatus,
+        component: UserEmailStatus,
+        props: true
+      },
     ]
   },
 

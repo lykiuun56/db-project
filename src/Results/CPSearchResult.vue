@@ -1,7 +1,7 @@
 <template>
   <div class="ag-theme-alpine" style="height: 500px; width: 100%;">
     <ag-grid-vue
-        class="ag-theme-alpine"
+        class="ag-theme-alpine-dark"
         style="width: 100%; height: 600px;"
         :columnDefs="columnDefs"
         :rowData="rowData"
@@ -34,10 +34,11 @@ export default {
   data() {
     return {
       columnDefs: [
-        { headerName: 'Handle Name', field: 'handleName', sortable: true, filter: true },
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
         { headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'Anker', field: 'anker', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'TXYZ', field: 'txyz', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'Categories', field: 'categories', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'Project Name', field: 'project_name', sortable: true, filter: true, flex: 1.5 },
+        { headerName: 'collaborated Times', field:'collaborated_times', sortable: true, filter: true, flex:1.5 }
       ],
       defaultColDef: {
         flex: 1,

@@ -4,8 +4,8 @@ import store from '@/utils/store'; // Import the Vuex store
 
 // Create an Axios instance
 const axiosInstance = axios.create({
-    baseURL:'http://creator-tools.us-east-1.elasticbeanstalk.com',
-    // baseURL: 'http://localhost:5000', // Replace with your backend URL
+    // baseURL:'http://creator-tools.us-east-1.elasticbeanstalk.com',
+    baseURL: 'http://localhost:5000', // Replace with your backend URL
     headers: {
         'Content-Type': 'application/json',
     },

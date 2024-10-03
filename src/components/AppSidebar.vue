@@ -3,9 +3,8 @@
       app
       permanent
       color="grey-darken-4"
-      width="240"
+      width="280"
   >
-
     <v-list density="compact" nav>
       <v-list-group value="database">
         <template v-slot:activator="{ props }">
@@ -23,7 +22,7 @@
         ></v-list-item>
         <v-list-item
             @click="$router.push('/cd-grid')"
-            title="Collaborated Database"
+            title="Collaborated"
             prepend-icon="mdi-account-group"
         ></v-list-item>
       </v-list-group>
@@ -39,7 +38,7 @@
 
         <v-list-item
             @click="$router.push('/md-grid')"
-            title="Management Email"
+            title="Agency Email"
             prepend-icon="mdi-email"
         ></v-list-item>
         <v-list-item
@@ -66,15 +65,16 @@
 
         <v-list-item
             @click="$router.push('/tik-hash-tag')"
-            title="Search by Hash Tag"
+            title="Hash Tag"
             prepend-icon="mdi-tag"
         ></v-list-item>
         <v-list-item
             @click="$router.push('/tik-search-name')"
-            title="Search Handle Name"
+            title="Handle Name"
             prepend-icon="mdi-alpha-n-box-outline"
         ></v-list-item>
       </v-list-group>
+
       <v-list-item
           @click="$router.push('/email-extra')"
           prepend-icon="mdi-email-plus"
@@ -89,23 +89,24 @@
               title="Projects"
           ></v-list-item>
         </template>
+
         <v-list-group value="total-projects">
           <template v-slot:activator="{ props }">
             <v-list-item
-            v-bind="props"
-            prepend-icon= mdi-view-grid
-            title="total-project"
+                v-bind="props"
+                prepend-icon="mdi-view-grid"
+                title="Total project"
             ></v-list-item>
           </template>
 
           <v-list-item
               @click="$router.push('/tp-grid')"
-              title="View the database"
+              title="View"
               prepend-icon="mdi-grid-large"
           ></v-list-item>
           <v-list-item
               @click="$router.push('/tp-search')"
-              title="Find Creators"
+              title="Find"
               prepend-icon="mdi-magnify"
           ></v-list-item>
         </v-list-group>
@@ -114,28 +115,26 @@
           <template v-slot:activator="{ props }">
             <v-list-item
                 v-bind="props"
-                prepend-icon= mdi-account-group
-                title="Collaborated-project"
+                prepend-icon="mdi-account-group"
+                title="Collaborated project"
             ></v-list-item>
           </template>
 
           <v-list-item
               @click="$router.push('/cp-grid')"
-              title="View the database"
+              title="View"
               prepend-icon="mdi-grid-large"
           ></v-list-item>
           <v-list-item
               @click="$router.push('/cp-search')"
-              title="Find Creators"
+              title="Find"
               prepend-icon="mdi-magnify"
           ></v-list-item>
         </v-list-group>
       </v-list-group>
     </v-list>
-
   </v-navigation-drawer>
 </template>
-
 <script setup>
 // import { useRouter } from 'vue-router'
 
@@ -148,5 +147,11 @@
 
 .v-list-group__items .v-list-item {
   padding-inline-start: 16px;
+}
+
+/* Ensure all text is visible */
+.v-list-item__content {
+  white-space: normal;
+  overflow: visible;
 }
 </style>

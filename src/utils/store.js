@@ -7,10 +7,15 @@ export default createStore({
     state: {
         userId: localStorage.getItem('userId') || null,
         authToken: localStorage.getItem('authToken') || null,
+        userRole: localStorage.getItem('userRole') || null,  // Add user role
         wishlists: [],
         // ... other state properties
     },
     mutations: {
+        SET_USER_ROLE(state, payload) {
+            state.userRole = payload;
+            localStorage.setItem('userRole', payload);  // Store role in localStorage
+        },
         SET_USER_ID(state, payload) {
             state.userId = payload;
             localStorage.setItem('userId', payload);
@@ -22,8 +27,10 @@ export default createStore({
         CLEAR_AUTH(state) {
             state.userId = null;
             state.authToken = null;
+            state.userRole = null;  // Clear role on logout
             localStorage.removeItem('userId');
             localStorage.removeItem('authToken');
+            localStorage.removeItem('userRole');  // Clear role from localStorage
         },
         SET_WISHLISTS(state, wishlists) {
             state.wishlists = wishlists;
@@ -48,13 +55,16 @@ export default createStore({
                 } else {
                     // For regular login
                     const response = await axios.post(`${apiBaseUrl}/api/login`, { username, password });
-                    const { userId, token } = response.data;
+                    const { userId, token, role } = response.data;
+                    console.log('Role from backend:', role);  // Debugging the role value
                     commit('SET_USER_ID', userId);
                     commit('SET_AUTH_TOKEN', token);
+                    commit('SET_USER_ROLE', role);  // Store the user role
 
                     // Store token and userId in localStorage
                     localStorage.setItem('authToken', token);
                     localStorage.setItem('userId', userId);
+                    localStorage.setItem('userRole', role);  // Save role to localStorage
 
                     await dispatch('fetchWishlists', userId);
                 }
@@ -106,6 +116,7 @@ export default createStore({
         getUserId: (state) => state.userId,
         getAuthToken: (state) => state.authToken,
         getWishlists: (state) => state.wishlists,
+        getUserRole: (state) => state.userRole,  // Add getter for user role
         // ... other getters
     },
 });

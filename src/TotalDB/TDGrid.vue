@@ -77,6 +77,10 @@
             <v-list-item @click="showMailchimpForm">
               <v-list-item-title>Campaign</v-list-item-title>
             </v-list-item>
+            <v-list-item @click="openSelectRandomDialog">
+              <v-list-item-title>Random Select</v-list-item-title>
+            </v-list-item>
+
           </v-list>
         </v-menu>
       </v-col>
@@ -104,7 +108,7 @@
       <v-col cols="12">
         <ag-grid-vue
             ref="agGrid"
-            class="ag-theme-alpine-auto-dark"
+            class="ag-theme-alpine-dark"
             style="width: 100%; height: 600px;"
             :columnDefs="columnDefs"
             :rowData="rowData"
@@ -213,6 +217,14 @@
                 <v-col cols="12" sm="6">
                   <v-text-field v-model="mailchimpReply" label="Reply To" required />
                 </v-col>
+                <!-- Input for POC-->
+                <v-col cols="12" sm="6">
+                  <v-text-field v-model="mailchimpPoc" label="Poc" required />
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field v-model="mailchimpProjectName" label="Project Name" required />
+                </v-col>
+
 
               </v-row>
             </v-container>
@@ -415,6 +427,8 @@ export default {
       mailchimpSubject: '',
       mailchimpFrom: '',
       mailchimpReply: '',
+      mailchimpPoc: '',
+      mailchimpProjectName: '',
       selectedTemplateName: '',  // Store the selected template ID
       mailchimpTemplates: [],  // Store all template options
       selectedTag: '',
@@ -500,7 +514,7 @@ export default {
 
     // Submit the Mailchimp email form
     async submitMailchimpForm() {
-      if (!this.scheduledTime || !this.selectedTag|| !this.mailchimpSubject || !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply) {
+      if (!this.scheduledTime || !this.selectedTag|| !this.mailchimpSubject || !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply || !this.mailchimpPoc) {
         this.showSnackbar('Please fill in all the required fields.');
         return;
       }
@@ -511,9 +525,10 @@ export default {
           reply_to: this.mailchimpReply,
           templateName: this.selectedTemplateName,
           tag: this.selectedTag,
-          scheduledTime: this.scheduledTime
+          scheduledTime: this.scheduledTime,
+          poc: this.mailchimpPoc,
+          projectName : this.mailchimpProjectName,
         });
-
         this.showSnackbar('Tag successfully scheduled.');
         this.closeMailchimpForm();
       } catch (error) {
@@ -1067,7 +1082,7 @@ export default {
         this.rowData = nodesToSelect.map(node => node.data);
 
         // Refresh the grid
-        this.gridApi.setRowData(this.rowData);
+        // this.gridApi.setRowData(this.rowData);
 
         this.showSnackbar(`Selected ${finalNumRows} random creators excluding those already assigned to "${project_name}".`, 'success');
 

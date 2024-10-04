@@ -61,10 +61,24 @@ export default {
   data() {
     return {
       columnDefs: [
-        { headerName: 'Campaign Id', field: 'campaign_id', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
-        { headerName: 'Poc Id', field: 'poc_id', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'Open Rate', field: 'open_rate', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'Click Rate', field: 'click-rate', sortable: true, filter: true, flex: 1.5 },
+        // { headerName: 'Campaign Id', field: 'campaign_id', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
+        { headerName: 'Campaign Name', field: 'campaign_name', sortable: true, filter: true},
+        { headerName: 'Emails Sent', field: 'emails_sent', sortable: true, filter: true},
+
+        { headerName: 'Open Rate',
+          field: 'open_rate',
+          sortable: true,
+          filter: true,
+          flex: 1.5,
+          valueFormatter: params => (params.value * 100).toFixed(2) + '%',  // Format as percentage
+        },
+        { headerName: 'Click Rate',
+          field: 'click_rate',
+          sortable: true,
+          filter: true,
+          flex: 1.5,
+          valueFormatter: params => (params.value * 100).toFixed(2) + '%',  // Format as percentage
+        },
         { headerName: 'Poc', field:'poc', sortable: true, filter: true, flex:1.5 }
       ],
       rowData: [],
@@ -92,6 +106,17 @@ export default {
       this.snackbar.color = color;
       this.snackbar.show = true;
     },
+
+    async updateCampaignRates(campaignId) {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/status/update-rates`, {
+          params: {campaignId: campaignId},
+        });
+        console.log(response.data); // Output success message
+      } catch (error) {
+        console.error('Error updating rates: ', error);
+      }
+    },
     async onGridReady(params) {
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi;
@@ -107,6 +132,12 @@ export default {
 
         this.rowData = response.data;
         params.api.sizeColumnsToFit();
+
+        // Automatically update rates for each campaign
+        for (const campaign of this.rowData) {
+          await this.updateCampaignRates(campaign.campaign_id);
+        }
+
       } catch (error) {
         console.error('Error fetching data: ', error);
         this.showSnackbar('Error fetching data', 'error');

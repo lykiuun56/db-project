@@ -698,9 +698,13 @@ export default {
         defaultColDef: { resizable: true },
         autoHeight: true,
         rowSelection: 'multiple',
-        // Enable multi-row selection via checkbox
         suppressRowClickSelection: true,
-        // Other grid options as needed
+        copyHeadersToClipboard:true,
+        copySelectedRows: true,
+        enableRangeSelection: true,      // Enable range selection for copying
+        enableCellTextSelection: true,   // Enable text selection within cells
+        suppressCopySingleCellRanges: true, // Allow copying single cell ranges
+
       };
     },
 
@@ -869,9 +873,8 @@ export default {
     //   }
     // },
 
-    async submitAddToDB(dataOrFile, isFile = false) {
+    async submitAddToDB(dataOrFile) {
       try {
-        if (isFile) {
           // If it's a file, handle the file submission
           const formData = new FormData();
           formData.append('file', dataOrFile); // Assuming `dataOrFile` is a file object
@@ -888,26 +891,6 @@ export default {
             console.error('Error adding file:', error);
             this.showSnackbar('Failed to add file.', 'error'); // Notify the user in case of an error
           });
-        } else {
-          // Handle the form submission for normal data
-          const requiredFields = ['handle_name', 'email'];
-          for (const field of requiredFields) {
-            if (!dataOrFile[field] || dataOrFile[field].trim() === '') {
-              this.showSnackbar(`Please fill out the required field: ${field.replace('_', ' ')}`, 'error');
-              return;
-            }
-          }
-
-          await axios.post(`${apiBaseUrl}/api/total/add`, dataOrFile)
-              .then(() => {
-                this.refreshGridData();  // Refresh grid data after successful add
-                this.showAddForm = false; // Close the form
-                this.showSnackbar('Entry added successfully.', 'success');
-              }).catch(error => {
-                console.error('Error adding data:', error);
-                this.showSnackbar('Failed to add entry.', 'error'); // Notify the user in case of an error
-              });
-        }
       } catch (error) {
         console.error('Unexpected error:', error);
         this.showSnackbar('An unexpected error occurred.', 'error');

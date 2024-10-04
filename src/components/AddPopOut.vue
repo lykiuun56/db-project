@@ -56,7 +56,7 @@
         <v-spacer></v-spacer>
         <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
         <template v-if="forTotalDatabase">
-          <v-btn color="blue darken-1" text @click="submitForm">Save</v-btn>
+          <!-- <v-btn color="blue darken-1" text @click="submitForm">Save</v-btn> -->
           <v-btn color="blue darken-1" text @click="submitSaveToDB">Save to DB</v-btn>
           <v-btn color="green darken-1" text @click="submitSaveToBoth">Save to Both</v-btn>
         </template>
@@ -148,25 +148,31 @@ export default {
         this.close();
       }
     },
-    // submitForm() {
+    // submitSaveToDB() {
     //   if (this.$refs.form.validate()) {
-    //     if (this.showFileUpload && this.selectedFile) {
-    //       this.submitFile();
-    //     } else {
-    //       this.$emit('save', { ...this.localFormData });
-    //       this.close();
+    //     const formData = new FormData();
+    //     formData.append('formData', JSON.stringify(this.localFormData));
+    //     if (this.selectedFile) {
+    //       formData.append('file', this.selectedFile);
     //     }
+    //     this.$emit('saveToDB', formData);  // Emitting the event with formData
+    //     this.close();
     //   }
     // },
     submitSaveToDB() {
-      if (this.$refs.form.validate()) {
+      if (this.showFileUpload && this.selectedFile) {
+        // Handle the file upload separately
         const formData = new FormData();
-        formData.append('formData', JSON.stringify(this.localFormData));
-        if (this.selectedFile) {
-          formData.append('file', this.selectedFile);
-        }
-        this.$emit('saveToDB', formData);  // Emitting the event with formData
+        formData.append('file', this.selectedFile);
+        this.$emit('saveToDB', formData, true); // Passing a flag to indicate it's a file
         this.close();
+      } else if (this.$refs.form.validate()) {
+        // Handle normal form submission
+        this.$emit('saveToDB', { ...this.localFormData }, false); // Passing a flag to indicate it's form data
+        this.close();
+      } else {
+        // If validation fails, do not close the form and show a message (you could add a snackbar or alert here).
+        console.error('Form validation failed.');
       }
     },
     submitSaveToBoth() {

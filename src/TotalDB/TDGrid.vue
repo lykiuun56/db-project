@@ -374,7 +374,8 @@
         @save ="submitAdd"
         @saveToDB="submitAddToDB"
         @saveToBoth="submitAddToBoth"
-        @saveFile="submitFileAdd">
+        @saveFile="submitFileAdd"
+        >
         <v-select
           v-model="formData.categories"
           :items="categoriesList"
@@ -850,6 +851,26 @@ export default {
       }
     },
 
+    async submitFileAdd(formData) {
+      try {
+        await axios.post(`${apiBaseUrl}/api/total/addByFile`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }).then(() => {
+          this.refreshGridData();  // Refresh grid data after successful file upload
+          this.showAddForm = false; // Close the form
+          this.showSnackbar('File added successfully.', 'success');
+        }).catch(error => {
+          console.error('Error uploading file:', error);
+          this.showSnackbar('Failed to upload file.', 'error'); // Notify the user in case of an error
+        });
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        this.showSnackbar('An unexpected error occurred.', 'error');
+      }
+    },
+
     // async submitFileAdd(formData) {
     //   try {
     //     await axios.post(`${apiBaseUrl}/api/total/addByFile`, formData, {
@@ -869,12 +890,56 @@ export default {
     //   }
     // },
 
+    // async submitAddToDB(dataOrFile, isFile = false) {
+    //   try {
+    //     if (isFile) {
+    //       // If it's a file, handle the file submission
+    //       const formData = new FormData();
+    //       formData.append('file', dataOrFile); // Assuming `dataOrFile` is a file object
+
+    //       await axios.post(`${apiBaseUrl}/api/total/addByFileToDB`, formData, {
+    //         headers: {
+    //           'Content-Type': 'multipart/form-data',
+    //         },
+    //       }).then(() => {
+    //         this.refreshGridData();  // Refresh grid data after successful add
+    //         this.showAddForm = false; // Close the form
+    //         this.showSnackbar('File added to DB successfully.', 'success');
+    //       }).catch(error => {
+    //         console.error('Error adding file:', error);
+    //         this.showSnackbar('Failed to add file.', 'error'); // Notify the user in case of an error
+    //       });
+    //     } else {
+    //       // Handle the form submission for normal data
+    //       const requiredFields = ['handle_name', 'email'];
+    //       for (const field of requiredFields) {
+    //         if (!dataOrFile[field] || dataOrFile[field].trim() === '') {
+    //           this.showSnackbar(`Please fill out the required field: ${field.replace('_', ' ')}`, 'error');
+    //           return;
+    //         }
+    //       }
+
+    //       await axios.post(`${apiBaseUrl}/api/total/add`, dataOrFile)
+    //           .then(() => {
+    //             this.refreshGridData();  // Refresh grid data after successful add
+    //             this.showAddForm = false; // Close the form
+    //             this.showSnackbar('Entry added successfully.', 'success');
+    //           }).catch(error => {
+    //             console.error('Error adding data:', error);
+    //             this.showSnackbar('Failed to add entry.', 'error'); // Notify the user in case of an error
+    //           });
+    //     }
+    //   } catch (error) {
+    //     console.error('Unexpected error:', error);
+    //     this.showSnackbar('An unexpected error occurred.', 'error');
+    //   }
+    // },
+
     async submitAddToDB(dataOrFile, isFile = false) {
       try {
         if (isFile) {
-          // If it's a file, handle the file submission
-          const formData = new FormData();
-          formData.append('file', dataOrFile); // Assuming `dataOrFile` is a file object
+          // Handle file submission
+          const formData = dataOrFile;
 
           await axios.post(`${apiBaseUrl}/api/total/addByFileToDB`, formData, {
             headers: {
@@ -886,10 +951,10 @@ export default {
             this.showSnackbar('File added to DB successfully.', 'success');
           }).catch(error => {
             console.error('Error adding file:', error);
-            this.showSnackbar('Failed to add file.', 'error'); // Notify the user in case of an error
+            this.showSnackbar('Failed to add file.', 'error');
           });
         } else {
-          // Handle the form submission for normal data
+          // Handle normal form submission
           const requiredFields = ['handle_name', 'email'];
           for (const field of requiredFields) {
             if (!dataOrFile[field] || dataOrFile[field].trim() === '') {
@@ -899,14 +964,14 @@ export default {
           }
 
           await axios.post(`${apiBaseUrl}/api/total/add`, dataOrFile)
-              .then(() => {
-                this.refreshGridData();  // Refresh grid data after successful add
-                this.showAddForm = false; // Close the form
-                this.showSnackbar('Entry added successfully.', 'success');
-              }).catch(error => {
-                console.error('Error adding data:', error);
-                this.showSnackbar('Failed to add entry.', 'error'); // Notify the user in case of an error
-              });
+            .then(() => {
+              this.refreshGridData();  // Refresh grid data after successful add
+              this.showAddForm = false; // Close the form
+              this.showSnackbar('Entry added successfully.', 'success');
+            }).catch(error => {
+              console.error('Error adding data:', error);
+              this.showSnackbar('Failed to add entry.', 'error');
+            });
         }
       } catch (error) {
         console.error('Unexpected error:', error);

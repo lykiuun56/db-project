@@ -12,11 +12,23 @@ export default createVuetify({
     defaultSet: 'mdi', // Ensure 'mdi' is used if using Material Design Icons
   },
   theme: {
+    defaultTheme: 'dark',
     themes: {
-      light: {
-        background: '#f5f5f5', // Set the global background color here if desired
+      dark: {
+        dark: true,
+        colors: {
+          primary: '#4700CF',
+          // ... other colors
+        }
       },
-    },
-  },
+      light: {
+        dark: false,
+        colors: {
+          primary: '#4700CF',
+          // ... other colors
+        }
+      }
+    }
+  }
 });
 

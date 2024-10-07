@@ -2,156 +2,136 @@
   <v-navigation-drawer
       app
       permanent
-      color="grey-darken-4"
+      class="modern-drawer"
       width="280"
   >
-    <v-list density="compact" nav>
-      <v-list-group value="database">
-        <template v-slot:activator="{ props }">
-          <v-list-item
-              v-bind="props"
-              prepend-icon="mdi-database"
-              title="Database"
-          ></v-list-item>
-        </template>
+    <div class="drawer-header">
+      <v-avatar color="primary" size="48">
+        <span class="text-h6 white--text">DB</span>
+      </v-avatar>
+      <h2 class="text-h6 ml-3">DataBase Pro</h2>
+    </div>
 
+    <v-list nav class="drawer-list">
+      <div v-for="(section, index) in menuSections" :key="index" class="menu-section">
+        <div class="section-title">{{ section.title }}</div>
         <v-list-item
-            @click="$router.push('/td-grid')"
-            title="Total Database Home"
-            prepend-icon="mdi-home-circle"
-        ></v-list-item>
-        <v-list-item
-            @click="$router.push('/cd-grid')"
-            title="Collaborated"
-            prepend-icon="mdi-account-group"
-        ></v-list-item>
-      </v-list-group>
-
-      <v-list-group value="management">
-        <template v-slot:activator="{ props }">
-          <v-list-item
-              v-bind="props"
-              prepend-icon="mdi-shield-account"
-              title="Management"
-          ></v-list-item>
-        </template>
-
-        <v-list-item
-            @click="$router.push('/md-grid')"
-            title="Agency Email"
-            prepend-icon="mdi-email"
-        ></v-list-item>
-        <v-list-item
-            @click="$router.push('/bl-grid')"
-            title="Black List"
-            prepend-icon="mdi-block-helper"
-        ></v-list-item>
-      </v-list-group>
-
-      <v-list-item
-          @click="$router.push('/remove-duplicate')"
-          prepend-icon="mdi-content-duplicate"
-          title="Remove Duplicate"
-      ></v-list-item>
-
-      <v-list-group value="Tik Tok">
-        <template v-slot:activator="{ props }">
-          <v-list-item
-              v-bind="props"
-              prepend-icon="mdi-music-note"
-              title="Tik Tok"
-          ></v-list-item>
-        </template>
-
-        <v-list-item
-            @click="$router.push('/tik-hash-tag')"
-            title="Hash Tag"
-            prepend-icon="mdi-tag"
-        ></v-list-item>
-        <v-list-item
-            @click="$router.push('/tik-search-name')"
-            title="Handle Name"
-            prepend-icon="mdi-alpha-n-box-outline"
-        ></v-list-item>
-      </v-list-group>
-
-      <v-list-item
-          @click="$router.push('/email-extra')"
-          prepend-icon="mdi-email-plus"
-          title="Email Extraction"
-      ></v-list-item>
-
-      <v-list-group value="projects">
-        <template v-slot:activator="{ props }">
-          <v-list-item
-              v-bind="props"
-              prepend-icon="mdi-briefcase"
-              title="Projects"
-          ></v-list-item>
-        </template>
-
-        <v-list-group value="total-projects">
-          <template v-slot:activator="{ props }">
-            <v-list-item
-                v-bind="props"
-                prepend-icon="mdi-view-grid"
-                title="Total project"
-            ></v-list-item>
+            v-for="item in section.items"
+            :key="item.title"
+            :to="item.route"
+            class="menu-item"
+            :class="{ 'sub-item': item.isSubItem }"
+        >
+          <template v-slot:prepend>
+            <v-icon :icon="item.icon" class="menu-icon" />
           </template>
-
-          <v-list-item
-              @click="$router.push('/tp-grid')"
-              title="View"
-              prepend-icon="mdi-grid-large"
-          ></v-list-item>
-          <v-list-item
-              @click="$router.push('/tp-search')"
-              title="Find"
-              prepend-icon="mdi-magnify"
-          ></v-list-item>
-        </v-list-group>
-
-        <v-list-group value="Collaborated-projects">
-          <template v-slot:activator="{ props }">
-            <v-list-item
-                v-bind="props"
-                prepend-icon="mdi-account-group"
-                title="Collaborated project"
-            ></v-list-item>
-          </template>
-
-          <v-list-item
-              @click="$router.push('/cp-grid')"
-              title="View"
-              prepend-icon="mdi-grid-large"
-          ></v-list-item>
-          <v-list-item
-              @click="$router.push('/cp-search')"
-              title="Find"
-              prepend-icon="mdi-magnify"
-          ></v-list-item>
-        </v-list-group>
-      </v-list-group>
+          <v-list-item-title>{{ item.title }}</v-list-item-title>
+        </v-list-item>
+      </div>
     </v-list>
   </v-navigation-drawer>
 </template>
-<script setup>
-// import { useRouter } from 'vue-router'
 
+<script setup>
+import { ref } from 'vue';
+
+const menuSections = ref([
+  {
+    title: 'Database',
+    items: [
+      { title: 'Total Database Home', icon: 'mdi-home-circle', route: '/td-grid' },
+      { title: 'Collaborated', icon: 'mdi-account-group', route: '/cd-grid' },
+    ],
+  },
+  {
+    title: 'Management',
+    items: [
+      { title: 'Agency Email', icon: 'mdi-email', route: '/md-grid' },
+      { title: 'Black List', icon: 'mdi-block-helper', route: '/bl-grid' },
+    ],
+  },
+  {
+    title: 'Tools',
+    items: [
+      { title: 'Remove Duplicate', icon: 'mdi-content-duplicate', route: '/remove-duplicate' },
+      { title: 'Email Extraction', icon: 'mdi-email-plus', route: '/email-extra' },
+    ],
+  },
+  {
+    title: 'TikTok',
+    items: [
+      { title: 'Hash Tag', icon: 'mdi-tag', route: '/tik-hash-tag' },
+      { title: 'Handle Name', icon: 'mdi-alpha-n-box-outline', route: '/tik-search-name' },
+    ],
+  },
+  {
+    title: 'Projects',
+    items: [
+      { title: 'Total Projects', icon: 'mdi-view-grid', route: '/tp-grid' },
+      { title: 'View', icon: 'mdi-grid-large', route: '/tp-grid', isSubItem: true },
+      { title: 'Find', icon: 'mdi-magnify', route: '/tp-search', isSubItem: true },
+      { title: 'Collaborated Projects', icon: 'mdi-account-group', route: '/cp-grid' },
+      { title: 'View', icon: 'mdi-grid-large', route: '/cp-grid', isSubItem: true },
+      { title: 'Find', icon: 'mdi-magnify', route: '/cp-search', isSubItem: true },
+    ],
+  },
+]);
 </script>
 
 <style scoped>
-.v-list-item__prepend > .v-icon {
-  margin-inline-end: 8px;
+.modern-drawer {
+  background-color: #1a1a2e;
+  color: #e0e0e0;
 }
 
-.v-list-group__items .v-list-item {
-  padding-inline-start: 16px;
+.drawer-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background-color: #16213e;
 }
 
-/* Ensure all text is visible */
-.v-list-item__content {
-  white-space: normal;
-  overflow: visible;
+.drawer-list {
+  padding: 16px 0;
+}
+
+.menu-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #0f3460;
+  margin: 0 16px 8px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #0f3460;
+}
+
+.menu-item {
+  border-radius: 8px;
+  margin: 4px 8px;
+  transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menu-icon {
+  color: #e94560;
+  margin-right: 12px;
+}
+
+.v-list-item-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.sub-item {
+  padding-left: 48px;
+  font-size: 0.85rem;
+  opacity: 0.8;
 }
 </style>

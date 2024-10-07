@@ -4,7 +4,7 @@
         <v-card-title>
           <span class="text-h5">{{ title }}</span>
         </v-card-title>
-  
+
         <v-card-text>
           <v-form ref="form" v-model="valid">
             <v-row>

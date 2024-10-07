@@ -488,15 +488,16 @@ export default {
 
     getColumnDefs() {
       return [
-        {
-          headerName: 'ID',
-          field: 'id',
-          sortable: true,
-          filter: true,
-          checkboxSelection: true,
-          headerCheckboxSelection: true
-        },
-        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        // {
+        //   headerName: 'ID',
+        //   field: 'id',
+        //   sortable: true,
+        //   filter: true,
+        //   checkboxSelection: true,
+        //   headerCheckboxSelection: true
+        // },
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true, checkboxSelection: true,
+          headerCheckboxSelection: true},
         {headerName: 'Tiktok URL', field: 'tiktok_url', sortable: true, filter: true, width: 300},
         {headerName: 'Followers', field: 'followers', sortable: true, filter: true},
         {headerName: 'Full Name', field: 'full_name', sortable: true, filter: true},
@@ -604,6 +605,7 @@ export default {
       try {
         const response = await axios.get(`${apiBaseUrl}/api/collaborated/all`);
         this.rowData = response.data;
+        this.fullRowData = response.data; // Update fullRowData as well
 
         this.gridApi.setDomLayout('autoHeight');
         this.autoSizeColumns();
@@ -968,7 +970,7 @@ export default {
 
     resetView() {
       this.rowData = this.fullRowData;
-      this.gridApi.setRowData(this.rowData);
+      this.gridApi.applyTransaction({ update: this.rowData });
       // Optionally, clear filters and selections
       this.gridApi.setFilterModel(null);
       this.gridApi.deselectAll();

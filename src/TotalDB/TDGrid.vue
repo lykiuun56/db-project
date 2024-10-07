@@ -653,20 +653,22 @@ export default {
 
     getColumnDefs() {
       return [
-        {
-          headerName: 'ID',
-          field: 'id',
-          sortable: true,
-          filter: 'agNumberColumnFilter', // Number filter for ID
-          checkboxSelection: true,
-          headerCheckboxSelection: true,
-          width: 100,
-        },
+        // {
+        //   headerName: 'ID',
+        //   field: 'id',
+        //   sortable: true,
+        //   filter: 'agNumberColumnFilter', // Number filter for ID
+        //   checkboxSelection: true,
+        //   headerCheckboxSelection: true,
+        //   width: 100,
+        // },
         {
           headerName: 'Handle Name',
           field: 'handle_name',
           sortable: true,
           filter: 'agTextColumnFilter', // Text filter
+          checkboxSelection: true,
+          headerCheckboxSelection: true,
         },
         {
           headerName: 'Followers',
@@ -1178,7 +1180,7 @@ export default {
 
     resetView() {
       this.rowData = this.fullRowData;
-      this.gridApi.setRowData(this.rowData);
+      this.gridApi.applyTransaction({ update: this.rowData });
       // Optionally, clear filters and selections
       this.gridApi.setFilterModel(null);
       this.gridApi.deselectAll();

@@ -131,8 +131,8 @@ export default {
   methods: {
     getColumnDefs() {
       return [
-        {headerName: 'ID', field: 'id', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
-        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        // {headerName: 'ID', field: 'id', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
+        {headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
         {headerName: 'Followers', field: 'followers', sortable: true, filter: true},
         {headerName: 'Email', field: 'email', sortable: true, filter: true},
         {

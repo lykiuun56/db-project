@@ -221,7 +221,7 @@ export default {
         emailEnding: '',
       },
       fields: [
-        {name: 'id', label: 'ID', required: true},
+        // {name: 'id', label: 'ID', required: true},
         {name: 'emailEnding', label: 'Email Ending', required: true},
       ],
       columnDefs: this.getColumnDefs(),
@@ -241,29 +241,29 @@ export default {
   methods: {
     getColumnDefs() {
       return [
-        {
-          headerName: 'ID',
-          field: 'id',
-          sortable: true,
-          filter: true,
-          checkboxSelection: true,
-          headerCheckboxSelection: true
-        },
-        {headerName: 'Email Ending', field: 'emailEnding', sortable: true, filter: true},
+        // {
+        //   headerName: 'ID',
+        //   field: 'id',
+        //   sortable: true,
+        //   filter: true,
+        //   checkboxSelection: true,
+        //   headerCheckboxSelection: true
+        // },
+        {headerName: 'Email Ending', field: 'emailEnding', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
       ];
     },
     getMatchingColumnDefs() {
       return [
-        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true },
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
+        // { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true, headerCheckboxSelection: true },
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true },
         { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
         { headerName: 'Email', field: 'email', sortable: true, filter: true },
       ];
     },
     getFindingColumnDefs() {
       return [
-        { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true },
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true },
+        // { headerName: 'ID', field: 'id', sortable: true, filter: true, checkboxSelection: true },
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true },
         { headerName: 'Email', field: 'email', sortable: true, filter: true },
         { headerName: 'Followers', field: 'followers', sortable: true, filter: true },
         { headerName: 'Is Blocked',

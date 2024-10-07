@@ -62,7 +62,7 @@
         </template>
         <template v-if="forCollaboratedDatabase">
           <v-btn color="blue darken-1" text @click="submitForm">Save</v-btn>
-          <v-btn color="green darken-1" text @click="submitSaveToBoth">Save to Both</v-btn>
+          <v-btn color="green darken-1" text @click="submitSaveToBoth">Add to Mailchimp</v-btn>
         </template>
         <v-btn v-else color="blue darken-1" text @click="submitForm">Save</v-btn>
       </v-card-actions>

@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12">
         <h1 style="color: white" >Total Project</h1>
-        <v-btn color="#4700cf" @click="exportToExcel">Export to Excel</v-btn> <!-- Button to trigger export -->
+        <v-btn color="#4700cf" @click="exportAllToExcel">Export to Excel</v-btn> <!-- Button to trigger export -->
       </v-col>
     </v-row>
     <v-row>
@@ -26,6 +26,7 @@
 import { apiBaseUrl } from '@/config';
 import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
+import {exportToExcel} from "@/utils/exportUtils";
 
 export default {
   name: 'TotalProjectGrid',
@@ -55,6 +56,8 @@ export default {
   },
   methods: {
     async onGridReady(params) {
+      this.gridApi = params.api;
+      this.gridColumnApi = params.columnApi;
       try {
         const response = await axios.get(`${apiBaseUrl}/api/total_projects/all`);
         this.rowData = response.data;
@@ -85,38 +88,15 @@ export default {
         return ''; // Return an empty string for invalid dates
       }
     },
-    async exportToExcel() {
-      try {
-        const selectedNodes = this.$refs.agGrid.gridApi.getSelectedNodes();
-        const selectedIds = selectedNodes.map(node => node.data.id); // Assuming 'id' is your unique identifier
-        if (selectedIds.length === 0) {
-          alert('Please select at least one row to export.');
-          return;
-        }
+    exportAllToExcel() {
+      // exportToExcel(this.rowData, "collaborated_database_all");
+      const allDisplayedData = [];
+      this.gridApi.forEachNodeAfterFilterAndSort((node) => {
+        allDisplayedData.push(node.data);
+      });
 
-        const projectName = 'YourProjectName'; // Replace with actual project name or make it dynamic
-
-        const response = await axios.get(`${apiBaseUrl}/api/export`, {
-          params: {
-            projectName: projectName,
-            userIds: selectedIds
-          },
-          responseType: 'blob' // Important: so that the browser can interpret the response as a file
-        });
-
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'exported_users.xlsx'); // or any file name you prefer
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-      } catch (error) {
-        console.error('Error exporting data:', error);
-        alert('Failed to export data.');
-      }
-    }
+      exportToExcel(allDisplayedData, "Total_Project_filtered");
+    },
   }
 };
 </script>

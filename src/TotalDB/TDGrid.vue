@@ -383,6 +383,13 @@
           required
         />
     </add-pop-out>
+      <persistent-alert
+          :show="alert.show"
+          :message="alert.message"
+          :type="alert.type"
+          :dismissible="alert.dismissible"
+          @dismiss="dismissAlert"
+      />
   </v-container>
   </div>
 </template>
@@ -397,6 +404,7 @@ import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 import AddPopOut from '@/components/AddPopOut.vue';
 import templateFile from '@/assets/td_template.xlsx';
 import {mapState} from "vuex";
+import PersistentAlert from "@/components/PersistentAlert.vue";
 
 export default {
   name: 'TotalDatabaseGrid',
@@ -404,6 +412,7 @@ export default {
     EditPopOut,
     AgGridVue,
     AddPopOut,
+    PersistentAlert,
   },
   computed: {
     ...mapState({
@@ -467,7 +476,11 @@ export default {
       isScheduledCampaignsDialogVisible: false,
       campaignsList: [], // To store list of campaigns with subject_line and id
       selectedCampaign: null, // Store the selected campaign's id
-
+      alert: {
+        show: false,
+        message: '',
+        type: 'info',
+      },
     };
   },
   created() {
@@ -479,10 +492,15 @@ export default {
   //   this.fetchMailchimpTemplates();
   // },
   methods: {
-    showSnackbar(message, color = 'success') {
-      this.snackbar.message = message;
-      this.snackbar.color = color;
-      this.snackbar.show = true;
+    showAlert(message, type = 'info') {
+      this.alert = {
+        show: true,
+        message,
+        type,
+      };
+    },
+    dismissAlert() {
+      this.alert.show = false;
     },
     // Fetch Mailchimp templates for dropdown
     async fetchMailchimpTemplates() {
@@ -531,11 +549,11 @@ export default {
           poc: this.userPoc,
           projectName : this.mailchimpProjectName,
         });
-        this.showSnackbar('Tag successfully scheduled.');
+        this.showAlert('Tag successfully scheduled.');
         this.closeMailchimpForm();
       } catch (error) {
         console.error('Error sending Mailchimp Campaign:', error);
-        this.showSnackbar('Failed to send Campaign Info.');
+        this.showAlert('Failed to send Campaign Info.');
       }
     },
 
@@ -549,7 +567,7 @@ export default {
         this.tagProjectName = '';
         this.isTagDialogVisible = true; // Show the dialog
       } else {
-        this.showSnackbar('Please select at least one row to add a Mailchimp tag.');
+        this.showAlert('Please select at least one row to add a Mailchimp tag.');
       }
     },
     closeTagForm() {
@@ -559,7 +577,7 @@ export default {
       try {
         // Ensure the required fields are provided
         if (!this.tagCategories || !this.tagPoc || !this.tagProjectName) {
-          this.showSnackbar('Please fill out all fields.');
+          this.showAlert('Please fill out all fields.');
           return;
         }
 
@@ -578,15 +596,15 @@ export default {
         const response = await axios.post(`${apiBaseUrl}/api/total/tag`, payload);
 
         if (response.data) {
-          this.showSnackbar('Tags added successfully.');
+          this.showAlert('Tags added successfully.');
           this.closeTagForm();
           this.refreshGridData();
         } else {
-          this.showSnackbar('Failed to add tags.');
+          this.showAlert('Failed to add tags.');
         }
       } catch (error) {
         console.error('Error submitting Mailchimp tags:', error);
-        this.showSnackbar('Failed to submit tags.');
+        this.showAlert('Failed to submit tags.');
       }
     },
 
@@ -599,41 +617,41 @@ export default {
           this.campaignsList = response.data; // response.data is now a list of subject lines
           this.isScheduledCampaignsDialogVisible = true; // Open the dialog
         } else {
-          this.showSnackbar('No scheduled campaigns found.');
+          this.showAlert('No scheduled campaigns found.');
         }
       } catch (error) {
         console.error('Error fetching scheduled campaigns:', error);
-        this.showSnackbar('Failed to fetch scheduled campaigns.');
+        this.showAlert('Failed to fetch scheduled campaigns.');
       }
     },
 
     async unscheduleCampaign() {
       if (!this.selectedCampaign) {
-        this.showSnackbar('Please select a campaign to unschedule.');
+        this.showAlert('Please select a campaign to unschedule.');
         return;
       }
       try {
         await axios.post(`${apiBaseUrl}/api/total/campaigns/unschedule`, this.selectedCampaign);
-        this.showSnackbar('Campaign unscheduled successfully.');
+        this.showAlert('Campaign unscheduled successfully.');
         this.closeScheduledCampaignsDialog();
       } catch (error) {
         console.error('Error unscheduling campaign:', error);
-        this.showSnackbar('Failed to unschedule the campaign.');
+        this.showAlert('Failed to unschedule the campaign.');
       }
     },
 
     async deleteCampaign() {
       if (!this.selectedCampaign) {
-        this.showSnackbar('Please select a campaign to delete.');
+        this.showAlert('Please select a campaign to delete.');
         return;
       }
       try {
         await axios.delete(`${apiBaseUrl}/api/total/campaigns/delete`, { data: this.selectedCampaign });
-        this.showSnackbar('Campaign deleted successfully.');
+        this.showAlert('Campaign deleted successfully.');
         this.closeScheduledCampaignsDialog();
       } catch (error) {
         console.error('Error deleting campaign:', error);
-        this.showSnackbar('Failed to delete the campaign.');
+        this.showAlert('Failed to delete the campaign.');
       }
     },
 
@@ -730,7 +748,7 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching data:', error.response ? error.response.data : error.message);
-        this.showSnackbar('Failed to fetch data from the server.', 'error');
+        this.showAlert('Failed to fetch data from the server.', 'error');
       }
     },
 
@@ -759,10 +777,10 @@ export default {
       try {
         await axios.put(`${apiBaseUrl}/api/total/update/${updatedData.id}`, updatedData);
         this.refreshGridData();
-        this.showSnackbar('Record updated successfully.', 'success');
+        this.showAlert('Record updated successfully.', 'success');
       } catch (error) {
         console.error('Error updating data:', error);
-        this.showSnackbar('Failed to update the record.', 'error');
+        this.showAlert('Failed to update the record.', 'error');
       } finally {
         this.isEditDialogVisible = false;
       }
@@ -775,7 +793,7 @@ export default {
         this.fullRowData = response.data; // Update fullRowData as well
       } catch (error) {
         console.error('Error refreshing data:', error);
-        this.showSnackbar('Failed to refresh the data.', 'error');
+        this.showAlert('Failed to refresh the data.', 'error');
       }
     },
 
@@ -803,7 +821,7 @@ export default {
       const selectedData = selectedNodes.map(node => node.data);
 
       if (selectedData.length === 0) {
-        this.showSnackbar('No rows selected for deletion.', 'warning');
+        this.showAlert('No rows selected for deletion.', 'warning');
         return;
       }
 
@@ -819,12 +837,12 @@ export default {
           }
         } catch (error) {
           console.error(`Error deleting ID ${data.id}:`, error);
-          this.showSnackbar(`Failed to delete ID ${data.id}.`, 'error');
+          this.showAlert(`Failed to delete ID ${data.id}.`, 'error');
         }
       }
 
       await this.refreshGridData();
-      this.showSnackbar('Selected records have been deleted.', 'success');
+      this.showAlert('Selected records have been deleted.', 'success');
     },
 
     async submitAdd(data) {
@@ -833,7 +851,7 @@ export default {
         const requiredFields = ['handle_name', 'email'];
         for (const field of requiredFields) {
           if (!data[field] || data[field].trim() === '') {
-            this.showSnackbar(`Please fill out the required field: ${field.replace('_', ' ')}`, 'error');
+            this.showAlert(`Please fill out the required field: ${field.replace('_', ' ')}`, 'error');
             return;
           }
         }
@@ -841,15 +859,15 @@ export default {
             .then(() => {
               this.refreshGridData();  // Refresh grid data after successful add
               this.showAddForm = false; // Close the form
-              this.showSnackbar('Entry added successfully.', 'success');
+              this.showAlert('Entry added successfully.', 'success');
             })
             .catch(error => {
               console.error('Error adding data:', error);
-              this.showSnackbar('Failed to add entry.', 'error'); // Notify the user in case of an error
+              this.showAlert('Failed to add entry.', 'error'); // Notify the user in case of an error
             });
       } catch (error) {
         console.error('Unexpected error:', error);
-        this.showSnackbar('An unexpected error occurred.', 'error');
+        this.showAlert('An unexpected error occurred.', 'error');
       }
     },
 
@@ -862,14 +880,14 @@ export default {
         }).then(() => {
           this.refreshGridData();  // Refresh grid data after successful file upload
           this.showAddForm = false; // Close the form
-          this.showSnackbar('File added successfully.', 'success');
+          this.showAlert('File added successfully.', 'success');
         }).catch(error => {
           console.error('Error uploading file:', error);
-          this.showSnackbar('Failed to upload file.', 'error'); // Notify the user in case of an error
+          this.showAlert('Failed to upload file.', 'error'); // Notify the user in case of an error
         });
       } catch (error) {
         console.error('Unexpected error:', error);
-        this.showSnackbar('An unexpected error occurred.', 'error');
+        this.showAlert('An unexpected error occurred.', 'error');
       }
     },
 
@@ -950,17 +968,17 @@ export default {
           }).then(() => {
             this.refreshGridData();  // Refresh grid data after successful add
             this.showAddForm = false; // Close the form
-            this.showSnackbar('File added to DB successfully.', 'success');
+            this.showAlert('File added to DB successfully.', 'success');
           }).catch(error => {
             console.error('Error adding file:', error);
-            this.showSnackbar('Failed to add file.', 'error');
+            this.showAlert('Failed to add file.', 'error');
           });
         } else {
           // Handle normal form submission
           const requiredFields = ['handle_name', 'email'];
           for (const field of requiredFields) {
             if (!dataOrFile[field] || dataOrFile[field].trim() === '') {
-              this.showSnackbar(`Please fill out the required field: ${field.replace('_', ' ')}`, 'error');
+              this.showAlert(`Please fill out the required field: ${field.replace('_', ' ')}`, 'error');
               return;
             }
           }
@@ -969,15 +987,15 @@ export default {
             .then(() => {
               this.refreshGridData();  // Refresh grid data after successful add
               this.showAddForm = false; // Close the form
-              this.showSnackbar('Entry added successfully.', 'success');
+              this.showAlert('Entry added successfully.', 'success');
             }).catch(error => {
               console.error('Error adding data:', error);
-              this.showSnackbar('Failed to add entry.', 'error');
+              this.showAlert('Failed to add entry.', 'error');
             });
         }
       } catch (error) {
         console.error('Unexpected error:', error);
-        this.showSnackbar('An unexpected error occurred.', 'error');
+        this.showAlert('An unexpected error occurred.', 'error');
       }
     },
 
@@ -993,11 +1011,11 @@ export default {
           console.log('Data Added to Both DB and Mailchimp');
         }).catch(error => {
           console.error('Error adding data:', error);
-          this.showSnackbar('Failed to add entry.');
+          this.showAlert('Failed to add entry.');
         });
       } catch (error) {
         console.error('Unexpected error:', error);
-        this.showSnackbar('An unexpected error occurred.', 'error');
+        this.showAlert('An unexpected error occurred.', 'error');
       }
     },
 
@@ -1032,12 +1050,12 @@ export default {
           }
         } catch (error) {
           console.error(`Error processing ID ${data.id}:`, error);
-          this.showSnackbar(`Failed to process ID ${data.id}.`, 'error');
+          this.showAlert(`Failed to process ID ${data.id}.`, 'error');
         }
       }
       // Optionally refresh the grid or indicate success to the user
       await this.refreshGridData();
-      this.showSnackbar('Selected users have been processed.', 'success');
+      this.showAlert('Selected users have been processed.', 'success');
     },
 
     onRowSelected(event) {
@@ -1051,9 +1069,9 @@ export default {
         this.selectedRow = selectedNodes[0].data;
         this.isCBDDialogVisible = true;
       } else if (selectedNodes.length > 1) {
-        this.showSnackbar('Please select only one row to write to CBD.', 'warning');
+        this.showAlert('Please select only one row to write to CBD.', 'warning');
       } else {
-        this.showSnackbar('Please select a row first.', 'warning');
+        this.showAlert('Please select a row first.', 'warning');
       }
     },
 
@@ -1070,10 +1088,10 @@ export default {
           projectName: this.projectName,
           categories: this.categories
         });
-        this.showSnackbar('Successfully written to CollaboratedDB.', 'success');
+        this.showAlert('Successfully written to CollaboratedDB.', 'success');
       } catch (error) {
         console.error('Error writing to CollaboratedDB:', error);
-        this.showSnackbar('Failed to write to CollaboratedDB.', 'error');
+        this.showAlert('Failed to write to CollaboratedDB.', 'error');
       } finally {
         this.closeCBDForm();
       }
@@ -1086,12 +1104,12 @@ export default {
 
       // Input Validation
       if (isNaN(numRows) || numRows <= 0) {
-        this.showSnackbar('Please enter a valid positive integer for the number of creators.', 'error');
+        this.showAlert('Please enter a valid positive integer for the number of creators.', 'error');
         return;
       }
 
       if (project_name === '') {
-        this.showSnackbar('Please enter a valid project name.', 'error');
+        this.showAlert('Please enter a valid project name.', 'error');
         return;
       }
 
@@ -1115,13 +1133,13 @@ export default {
         });
 
         if (eligibleNodes.length === 0) {
-          this.showSnackbar('No eligible users available for selection after excluding.', 'error');
+          this.showAlert('No eligible users available for selection after excluding.', 'error');
           this.closeSelectRandomDialog();
           return;
         }
 
         if (numRows > eligibleNodes.length) {
-          this.showSnackbar(`Only ${eligibleNodes.length} eligible rows are available after excluding.`, 'warning');
+          this.showAlert(`Only ${eligibleNodes.length} eligible rows are available after excluding.`, 'warning');
           this.selectRandomNumber = eligibleNodes.length; // Adjust to maximum available
         }
 
@@ -1153,13 +1171,13 @@ export default {
         // Refresh the grid
         // this.gridApi.setRowData(this.rowData);
 
-        this.showSnackbar(`Selected ${finalNumRows} random creators excluding those already assigned to "${project_name}".`, 'success');
+        this.showAlert(`Selected ${finalNumRows} random creators excluding those already assigned to "${project_name}".`, 'success');
 
         // Close the dialog
         this.closeSelectRandomDialog();
       } catch (error) {
         console.error('Error during random selection:', error);
-        this.showSnackbar('Failed to perform random selection. Please try again.', 'error');
+        this.showAlert('Failed to perform random selection. Please try again.', 'error');
       } finally {
         this.isLoading = false; // Hide loading indicator
       }
@@ -1184,7 +1202,7 @@ export default {
       // Optionally, clear filters and selections
       this.gridApi.setFilterModel(null);
       this.gridApi.deselectAll();
-      this.showSnackbar('View has been reset.', 'info');
+      this.showAlert('View has been reset.', 'info');
     }
   },
 };

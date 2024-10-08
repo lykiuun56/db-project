@@ -2,19 +2,12 @@
   <v-navigation-drawer
       app
       permanent
-      class="modern-drawer"
+      class="modern-sidebar"
       width="280"
   >
-    <div class="drawer-header">
-      <v-avatar color="primary" size="48">
-        <span class="text-h6 white--text">DB</span>
-      </v-avatar>
-      <h2 class="text-h6 ml-3">DataBase Pro</h2>
-    </div>
-
-    <v-list nav class="drawer-list">
+    <v-list nav class="sidebar-list">
       <div v-for="(section, index) in menuSections" :key="index" class="menu-section">
-        <div class="section-title">{{ section.title }}</div>
+        <v-list-subheader class="section-title">{{ section.title }}</v-list-subheader>
         <v-list-item
             v-for="item in section.items"
             :key="item.title"
@@ -79,19 +72,12 @@ const menuSections = ref([
 </script>
 
 <style scoped>
-.modern-drawer {
-  background-color: #1a1a2e;
+.modern-sidebar {
+  background-color: #121212;
   color: #e0e0e0;
 }
 
-.drawer-header {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  background-color: #16213e;
-}
-
-.drawer-list {
+.sidebar-list {
   padding: 16px 0;
 }
 
@@ -103,7 +89,7 @@ const menuSections = ref([
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: #0f3460;
+  color: #e0e0e0;
   margin: 0 16px 8px;
   padding-bottom: 4px;
   border-bottom: 2px solid #0f3460;
@@ -120,7 +106,7 @@ const menuSections = ref([
 }
 
 .menu-icon {
-  color: #e94560;
+  color: #4700cf;
   margin-right: 12px;
 }
 

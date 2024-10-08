@@ -62,7 +62,7 @@ export default {
     return {
       columnDefs: [
         // { headerName: 'Campaign Id', field: 'campaign_id', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
-        { headerName: 'Campaign Name', field: 'campaign_name', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
+        { headerName: 'Project Name', field: 'project_Name', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
         { headerName: 'Emails Sent', field: 'emails_sent', sortable: true, filter: true},
 
         { headerName: 'Open Rate',

@@ -1,40 +1,23 @@
 <template>
   <v-app class="app-wrapper">
-    <!-- Navigation Drawer for Sidebar (visible if logged in and sidebar is not hidden) -->
-    <v-navigation-drawer
-        v-model="showSidebar"
-        app
-        v-if="isLoggedIn"
-        :temporary="true"
-        :permanent="false"
-        color="grey-darken-3"
-        width="240"
-        class="pa-0"
-        style="top: 64px;"
-    >
-      <AppSidebar />
-    </v-navigation-drawer>
-
     <!-- Main App Bar (visible if logged in) -->
     <v-app-bar
         app
         :elevation="10"
         color="#121212"
         height="64"
+        class="px-4"
         v-if="isLoggedIn"
     >
-      <!-- Toggle sidebar button -->
-      <v-app-bar-nav-icon @click="toggleSidebar" color="white"></v-app-bar-nav-icon>
-
       <!-- App title or logo -->
       <v-app-bar-title class="text-h5 font-weight-bold color:#121212">
-        <img src="@/assets/log1.png" alt="Puff-Media Logo" style="height: 120px; width: 120px; object-fit: contain;">
+        <img src="@/assets/log1.png" alt="Puff-Media Logo" style="height: 120px; width: auto; object-fit: contain;">
       </v-app-bar-title>
 
       <v-spacer></v-spacer>
 
       <!-- Navigation Menu -->
-      <v-toolbar-items class="hidden-sm-and-down">
+      <v-toolbar-items>
         <v-btn
             v-for="item in menuItems"
             :key="item.title"
@@ -46,28 +29,6 @@
           {{ item.title }}
         </v-btn>
       </v-toolbar-items>
-
-      <!-- Mobile menu -->
-      <v-menu bottom left v-if="isMobile">
-        <template v-slot:activator="{ props }">
-          <v-btn icon v-bind="props" color="white">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-
-        <v-list>
-          <v-list-item
-              v-for="item in menuItems"
-              :key="item.title"
-              @click="navigateTo(item.route)"
-          >
-            <v-list-item-title>
-              <v-icon start>{{ item.icon }}</v-icon>
-              {{ item.title }}
-            </v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
 
       <!-- User menu -->
       <v-menu bottom left>
@@ -82,13 +43,13 @@
         <v-list>
           <v-list-item @click="navigateTo('/profile')">
             <v-list-item-title>
-              <v-icon start color ="#4700CF">mdi-account</v-icon>
+              <v-icon start color="#4700CF">mdi-account</v-icon>
               Profile
             </v-list-item-title>
           </v-list-item>
           <v-list-item @click="logout">
             <v-list-item-title>
-              <v-icon start color = "red">mdi-logout</v-icon>
+              <v-icon start color="red">mdi-logout</v-icon>
               Logout
             </v-list-item-title>
           </v-list-item>
@@ -96,52 +57,35 @@
       </v-menu>
     </v-app-bar>
 
-    <!-- Main Content Area -->
+    <!-- Main Content Area with Sidebar -->
     <v-main style="background:#121212">
-      <v-container fluid class="fill-height pa-0">
-        <!-- Display Login Form if not logged in, else show routed views -->
-        <LoginForm v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
-        <router-view v-else></router-view>
+      <v-container fluid class="fill-height pa-0 d-flex">
+        <!-- Sidebar (visible if logged in) -->
+        <AppSidebar v-if="isLoggedIn" />
+
+        <!-- Router View / Login Form -->
+        <v-container fluid class="pa-4 flex-grow-1">
+          <LoginForm v-if="!isLoggedIn" @login-success="handleLoginSuccess" />
+          <router-view v-else></router-view>
+        </v-container>
       </v-container>
     </v-main>
-
-    <!-- Footer -->
-<!--    <v-footer app color="primary" class="px-4 py-3" :relative="true">-->
-<!--      <span class="text-white">&copy; {{ new Date().getFullYear() }} Puff-Media</span>-->
-<!--      <v-spacer></v-spacer>-->
-<!--      <v-btn-->
-<!--          v-for="icon in socialIcons"-->
-<!--          :key="icon"-->
-<!--          icon-->
-<!--          class="mx-1"-->
-<!--          color="white"-->
-<!--      >-->
-<!--        <v-icon>{{ icon }}</v-icon>-->
-<!--      </v-btn>-->
-<!--    </v-footer>-->
   </v-app>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useDisplay } from 'vuetify'
 import AppSidebar from './components/AppSidebar.vue'
 import LoginForm from './components/LoginForm.vue'
 
 const router = useRouter()
-const { mobile } = useDisplay()
 const isLoggedIn = ref(false)
-const showSidebar = ref(false)
-
-const isMobile = computed(() => mobile.value)
 
 const menuItems = [
   { title: 'Create Wishlist', icon: 'mdi-heart-plus', route: '/create-wishlist' },
   { title: 'View Wishlist', icon: 'mdi-heart', route: '/view-wishlist' },
 ]
-
-// const socialIcons = ['mdi-facebook', 'mdi-twitter', 'mdi-instagram']
 
 onMounted(() => {
   // Check if user is logged in (e.g., by checking for a token in localStorage)
@@ -163,10 +107,6 @@ const logout = () => {
   isLoggedIn.value = false
   router.push('/login')
 }
-
-const toggleSidebar = () => {
-  showSidebar.value = !showSidebar.value
-}
 </script>
 
 <style>
@@ -180,18 +120,11 @@ const toggleSidebar = () => {
 }
 
 .v-main {
-  background-color: #f5f5f5;
+  background-color: #121212;
 }
 
-.v-navigation-drawer {
-  top: 64px !important;
-  margin-top: 0 !important; /* Remove any extra margin */
-  padding-top: 0 !important; /* Remove any extra padding */
-}
-
-#app{
-  background-color: #000000; /* Set your desired color */
-
+#app {
+  background-color: #000000;
 }
 
 html, body {
@@ -204,9 +137,4 @@ html, body {
   background-color: #121212;
   min-height: 100vh;
 }
-
-
-
-
-
 </style>

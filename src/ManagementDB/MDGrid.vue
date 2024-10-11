@@ -191,6 +191,13 @@
         @close="showAddForm = false"
         @save="submitAdd"
     />
+    <persistent-alert
+        :show="alert.show"
+        :message="alert.message"
+        :type="alert.type"
+        :dismissible="alert.dismissible"
+        @dismiss="dismissAlert"
+    />
   </v-container>
 </template>
 
@@ -202,11 +209,13 @@ import EditPopOut from "@/components/EditPopOut.vue";
 import AddPopOut from "@/components/AddPopOut.vue";
 import {exportToExcel} from "@/utils/exportUtils";
 import {deleteRecord, removeRecordFromGrid} from "@/utils/deleteUtils";
+import PersistentAlert from "@/components/PersistentAlert.vue";
 // import templateFile from "@/assets/td_template.xlsx";
 
 export default {
   name: 'ManagementGrid',
   components: {
+    PersistentAlert,
     AddPopOut,
     EditPopOut,
     AgGridVue,
@@ -235,10 +244,25 @@ export default {
       emailColumnDefs:this.getFindingColumnDefs(),
       emailGridOptions:this.getGridOptions(),
       emailDomain: '',
-      findingEmails: []
+      findingEmails: [],
+      alert: {
+        show: false,
+        message: '',
+        type: 'info',
+      },
     };
   },
   methods: {
+    showAlert(message, type = 'info') {
+      this.alert = {
+        show: true,
+        message,
+        type,
+      };
+    },
+    dismissAlert() {
+      this.alert.show = false;
+    },
     getColumnDefs() {
       return [
         // {
@@ -426,7 +450,7 @@ export default {
         const requiredFields = ['emailEnding'];
         for (const field of requiredFields) {
           if (!data[field] || data[field].trim() === '') {
-            alert(`Please fill out the required field: ${field.replace('_', ' ')}`);
+            this.showAlert(`Please fill out the required field: ${field.replace('_', ' ')}`);
             return;
           }
         }
@@ -437,7 +461,7 @@ export default {
             })
             .catch(error => {
               console.error('Error adding data:', error);
-              alert('Failed to add entry.'); // Notify the user in case of an error
+              this.showAlert('Failed to add entry.'); // Notify the user in case of an error
             });
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -446,7 +470,7 @@ export default {
     async findMatchingEmails() {
       const selectedNodes = this.gridApi.getSelectedNodes();
       if (selectedNodes.length === 0) {
-        alert('Please select a row first.');
+        this.showAlert('Please select a row first.');
         return;
       }
 
@@ -468,7 +492,7 @@ export default {
 
     async performEmailDomainSearch() {
       if (!this.emailDomain) {
-        alert('Please enter an email domain to search.');
+        this.showAlert('Please enter an email domain to search.');
         return;
       }
       try {
@@ -478,7 +502,7 @@ export default {
         this.findingEmails = response.data;
       } catch (error) {
         console.error('Error finding matching emails:', error);
-        alert('Error finding matching emails. Please try again.');
+        this.showAlert('Error finding matching emails. Please try again.');
       }
     },
     resetView() {

@@ -1,5 +1,4 @@
 <template>
-  <div class="total-database-wrapper">
     <v-container fluid class="pa-0">
     <v-row>
       <v-col cols="12"  >
@@ -391,7 +390,6 @@
           @dismiss="dismissAlert"
       />
   </v-container>
-  </div>
 </template>
 
 <script>
@@ -535,7 +533,7 @@ export default {
     // Submit the Mailchimp email form
     async submitMailchimpForm() {
       if (!this.scheduledTime || !this.selectedTag|| !this.mailchimpSubject || !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply) {
-        this.showSnackbar('Please fill in all the required fields.');
+        this.showAlert('Please fill in all the required fields.');
         return;
       }
       try {
@@ -1100,7 +1098,7 @@ export default {
     // Select Random Creators: Updated with Project Name Exclusion
     async submitSelectRandomForm() {
       const numRows = parseInt(this.selectRandomNumber);
-      const project_name = this.selectRandomProjectName.trim();
+      const projectName = this.selectRandomProjectName.trim();
 
       // Input Validation
       if (isNaN(numRows) || numRows <= 0) {
@@ -1108,7 +1106,7 @@ export default {
         return;
       }
 
-      if (project_name === '') {
+      if (projectName === '') {
         this.showAlert('Please enter a valid project name.', 'error');
         return;
       }
@@ -1116,62 +1114,29 @@ export default {
       try {
         this.isLoading = true; // Show loading indicator
 
-        // Fetch user IDs who already have the specified project name
-        const response = await axios.get(`${apiBaseUrl}/api/total_projects/users-with-project`, {
-          params: { project_name },
+        // Fetch random eligible rows from the backend
+        const response = await axios.post(`${apiBaseUrl}/api/total_projects/eligible-random`, {
+          projectName,
+          numRows,
         });
 
-        const excludedUserIds = response.data; // Assuming it's an array of user IDs
-        console.log('Excluded User IDs:', excludedUserIds);
+        const selectedRows = response.data; // Assuming it's an array of selected rows
+        console.log('Selected Rows:', selectedRows);
 
-        // Collect displayed nodes excluding the excluded users
-        const eligibleNodes = [];
-        this.gridApi.forEachNodeAfterFilterAndSort((node) => {
-          if (!excludedUserIds.includes(node.data.id)) { // Adjust 'id' if different
-            eligibleNodes.push(node);
-          }
-        });
-
-        if (eligibleNodes.length === 0) {
+        if (selectedRows.length === 0) {
           this.showAlert('No eligible users available for selection after excluding.', 'error');
           this.closeSelectRandomDialog();
           return;
         }
 
-        if (numRows > eligibleNodes.length) {
-          this.showAlert(`Only ${eligibleNodes.length} eligible rows are available after excluding.`, 'warning');
-          this.selectRandomNumber = eligibleNodes.length; // Adjust to maximum available
-        }
-
-        const finalNumRows = Math.min(numRows, eligibleNodes.length);
-
-        // Shuffle the eligible nodes using Fisher-Yates algorithm
-        for (let i = eligibleNodes.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [eligibleNodes[i], eligibleNodes[j]] = [eligibleNodes[j], eligibleNodes[i]];
-        }
-
-        // Select the desired number of nodes
-        const nodesToSelect = eligibleNodes.slice(0, finalNumRows);
-
         // Deselect all previously selected nodes
         this.gridApi.deselectAll();
 
-        // Select the new nodes
-        nodesToSelect.forEach((node) => node.setSelected(true));
+        // Update rowData and refresh grid with selected rows
+        this.rowData = selectedRows;
+        this.gridApi.applyTransaction({ update: this.rowData });
 
-        // Optionally, scroll to the first selected node
-        if (nodesToSelect.length > 0) {
-          this.gridApi.ensureIndexVisible(nodesToSelect[0].rowIndex, 'top');
-        }
-
-        // Select the nodes
-        this.rowData = nodesToSelect.map(node => node.data);
-
-        // Refresh the grid
-        // this.gridApi.setRowData(this.rowData);
-
-        this.showAlert(`Selected ${finalNumRows} random creators excluding those already assigned to "${project_name}".`, 'success');
+        this.showAlert(`Selected ${selectedRows.length} random creators excluding those already assigned to "${projectName}".`, 'success');
 
         // Close the dialog
         this.closeSelectRandomDialog();

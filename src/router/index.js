@@ -62,6 +62,7 @@ import ViewWishlist from "@/WishList/ViewWishlist.vue";
 import WishlistDetail from '@/WishList/WishlistDetail.vue';
 
 import UserEmailStatus from '@/EmailStatus/ESGrid.vue';
+import LiveStatus from '@/LiveStatus/LSGrid.vue'
 
 
 
@@ -307,11 +308,17 @@ const routes = [
         props: true // This allows route params to be passed as props
       },
       {
-        path: '/profile',
+        path: '/email-status',
         name: UserEmailStatus,
         component: UserEmailStatus,
         props: true
       },
+      {
+        path:'/live-status',
+        name:LiveStatus,
+        component:LiveStatus,
+        props:true
+      }
     ]
   },
 

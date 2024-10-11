@@ -30,7 +30,13 @@
 
     <!-- Loading Indicator -->
     <v-progress-linear v-if="isLoading" indeterminate color="primary"></v-progress-linear>
-
+    <persistent-alert
+        :show="alert.show"
+        :message="alert.message"
+        :type="alert.type"
+        :dismissible="alert.dismissible"
+        @dismiss="dismissAlert"
+    />
 
 
   </v-container>
@@ -45,11 +51,13 @@ import { apiBaseUrl } from '@/config';
 import axios from 'axios';
 import {AgGridVue} from "ag-grid-vue3";
 import { mapState } from 'vuex';
+import PersistentAlert from "@/components/PersistentAlert.vue";
 
 
 export default {
   name: 'EmailStatusGrid',
   components: {
+    PersistentAlert,
     AgGridVue,
   },
   computed: {
@@ -98,6 +106,11 @@ export default {
         color: 'success', // or 'error', etc.
       },
       isLoading: false, // Loading state
+      alert: {
+        show: false,
+        message: '',
+        type: 'info',
+      },
     };
     },
   methods: {
@@ -105,6 +118,16 @@ export default {
       this.snackbar.message = message;
       this.snackbar.color = color;
       this.snackbar.show = true;
+    },
+    showAlert(message, type = 'info') {
+      this.alert = {
+        show: true,
+        message,
+        type,
+      };
+    },
+    dismissAlert() {
+      this.alert.show = false;
     },
 
     async updateCampaignRates(campaignId) {
@@ -140,7 +163,7 @@ export default {
 
       } catch (error) {
         console.error('Error fetching data: ', error);
-        this.showSnackbar('Error fetching data', 'error');
+        this.showAlert('Error fetching data', 'error');
       } finally {
         this.isLoading = false;
       }

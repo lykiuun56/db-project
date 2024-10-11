@@ -84,6 +84,14 @@
         @save="submitAdd"
         @saveFile="submitFileAdd"
     />
+    <persistent-alert
+        :show="alert.show"
+        :message="alert.message"
+        :type="alert.type"
+        :dismissible="alert.dismissible"
+        @dismiss="dismissAlert"
+    />
+
   </v-container>
 </template>
 
@@ -96,10 +104,12 @@ import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 import AddPopOut from "@/components/AddPopOut.vue";
 import templateFile from "@/assets/td_template.xlsx";
+import PersistentAlert from "@/components/PersistentAlert.vue";
 
 export default {
   name: 'BlackListGrid',
   components: {
+    PersistentAlert,
     AddPopOut,
     EditPopOut,
     AgGridVue,
@@ -126,9 +136,24 @@ export default {
       gridOptions: this.getGridOptions(),
       selectedRow: null,
       isEditDialogVisible: false,
+      alert: {
+        show: false,
+        message: '',
+        type: 'info',
+      },
     };
   },
   methods: {
+    showAlert(message, type = 'info') {
+      this.alert = {
+        show: true,
+        message,
+        type,
+      };
+    },
+    dismissAlert() {
+      this.alert.show = false;
+    },
     getColumnDefs() {
       return [
         // {headerName: 'ID', field: 'id', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
@@ -233,7 +258,7 @@ export default {
         const requiredFields = ['handle_name', 'email'];
         for (const field of requiredFields) {
           if (!data[field] || data[field].trim() === '') {
-            alert(`Please fill out the required field: ${field.replace('_', ' ')}`);
+            this.showAlert(`Please fill out the required field: ${field.replace('_', ' ')}`);
             return;
           }
         }
@@ -244,7 +269,7 @@ export default {
             })
             .catch(error => {
               console.error('Error adding data:', error);
-              alert('Failed to add entry.'); // Notify the user in case of an error
+              this.showAlert('Failed to add entry.'); // Notify the user in case of an error
             });
       } catch (error) {
         console.error('Unexpected error:', error);

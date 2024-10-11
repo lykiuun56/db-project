@@ -2,8 +2,35 @@
   <v-container fluid>
     <v-row>
       <v-col cols="12">
-        <h1 style="color: white" >Total Project</h1>
-        <v-btn color="#4700cf" @click="exportAllToExcel">Export to Excel</v-btn> <!-- Button to trigger export -->
+        <h1 style="color: white">Total Project</h1>
+      </v-col>
+
+      <v-col cols="auto">
+        <v-menu>
+          <template v-slot:activator="{ props }">
+            <v-btn color="#4700cf" v-bind="props">
+              Export Options
+              <v-icon right>mdi-chevron-down</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="exportAllToExcel">
+              <v-list-item-title>Export All</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="exportSelectedToExcel">
+              <v-list-item-title>Export Selected</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
+
+
+
+      <v-col cols="auto">
+        <v-btn color="#00b19e" @click="showSimpleSearchDialog" class="elevation-2">
+          <v-icon left>mdi-magnify</v-icon>
+          Simple Search
+        </v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -19,6 +46,39 @@
         ></ag-grid-vue>
       </v-col>
     </v-row>
+
+
+    <!-- Simple Search Dialog -->
+    <v-dialog v-model="searchDialog" persistent max-width="500px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Simple Search</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                    label="Handle Name"
+                    v-model="searchHandleName"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                    label="Email"
+                    v-model="searchEmail"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="performSearch">Search</v-btn>
+          <v-btn color="grey" @click="closeSearchDialog">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -52,6 +112,10 @@ export default {
         },
         autoHeight: true,
       },
+      selectedRow: null,
+      searchDialog: false,
+      searchHandleName: '',
+      searchEmail: '',
     };
   },
   methods: {
@@ -89,15 +153,47 @@ export default {
       }
     },
     exportAllToExcel() {
-      // exportToExcel(this.rowData, "collaborated_database_all");
       const allDisplayedData = [];
       this.gridApi.forEachNodeAfterFilterAndSort((node) => {
         allDisplayedData.push(node.data);
       });
 
-      exportToExcel(allDisplayedData, "Total_Project_filtered");
+      exportToExcel(allDisplayedData, 'Total_project_filtered');
     },
-  }
+    exportSelectedToExcel() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const selectedData = selectedNodes.map((node) => node.data);
+      exportToExcel(selectedData, 'Total_project_selected');
+    },
+    // Methods for the Simple Search Dialog
+    showSimpleSearchDialog() {
+      // Reset search fields when dialog is opened
+      this.searchHandleName = '';
+      this.searchEmail = '';
+      this.searchDialog = true;
+    },
+    closeSearchDialog() {
+      this.searchDialog = false;
+    },
+    performSearch() {
+      const filterModel = {};
+      if (this.searchHandleName) {
+        filterModel.handle_name = {
+          type: 'contains',
+          filter: this.searchHandleName,
+        };
+      }
+      if (this.searchEmail) {
+        filterModel.email = {
+          type: 'contains',
+          filter: this.searchEmail,
+        };
+      }
+      this.gridApi.setFilterModel(filterModel);
+      this.gridApi.onFilterChanged();
+      this.closeSearchDialog();
+    },
+  },
 };
 </script>
 

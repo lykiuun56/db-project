@@ -304,6 +304,14 @@
       </v-card>
     </v-dialog>
 
+    <persistent-alert
+        :show="alert.show"
+        :message="alert.message"
+        :type="alert.type"
+        :dismissible="alert.dismissible"
+        @dismiss="dismissAlert"
+    />
+
   </v-container>
 </template>
 
@@ -317,14 +325,15 @@ import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 import templateFile from '@/assets/cbd_template.xlsx';
 import { mapGetters} from "vuex";
+import PersistentAlert from "@/components/PersistentAlert.vue";
 
 export default {
   name: 'CollaboratedDatabaseGrid',
   components: {
+    PersistentAlert,
     AgGridVue,
     EditPopOut,
     AddPopOut,
-
   },
   data() {
     return {
@@ -394,7 +403,11 @@ export default {
       tagCategories: '',
       tagPoc: '',
       tagProjectName: '',
-
+      alert: {
+        show: false,
+        message: '',
+        type: 'info',
+      },
     };
   },
   created() {
@@ -409,6 +422,16 @@ export default {
   },
 
   methods: {
+    showAlert(message, type = 'info') {
+      this.alert = {
+        show: true,
+        message,
+        type,
+      };
+    },
+    dismissAlert() {
+      this.alert.show = false;
+    },
 
     showSnackbar(message, color = 'success') {
       this.snackbar.message = message;
@@ -429,7 +452,7 @@ export default {
     showWishlistDialog() {
       const selectedNodes = this.gridApi.getSelectedNodes();
       if (selectedNodes.length === 0) {
-        this.showSnackbar("Please select at least one row to add to the wishlist.");
+        this.showAlert("Please select at least one row to add to the wishlist.");
         return;
       }
       this.isWishlistDialogVisible = true;
@@ -437,7 +460,7 @@ export default {
 
     async confirmAddToWishlist() {
       if (!this.selectedWishlistId) {
-        this.showSnackbar("Please select a wishlist.");
+        this.showAlert("Please select a wishlist.");
         return;
       }
 
@@ -445,17 +468,17 @@ export default {
       const creatorIds = selectedNodes.map(node => node.data.id);
 
       if (creatorIds.length === 0) {
-        this.showSnackbar("No creators selected.");
+        this.showAlert("No creators selected.");
         return;
       }
 
       try {
         await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, creatorIds);
-        this.showSnackbar(`Successfully added ${creatorIds.length} creators to the wishlist!`);
+        this.showAlert(`Successfully added ${creatorIds.length} creators to the wishlist!`);
         this.refreshGridData();
       } catch (error) {
         console.error('Error adding selected creators to wishlist:', error);
-        this.showSnackbar('Failed to add selected creators to the wishlist.');
+        this.showAlert('Failed to add selected creators to the wishlist.');
       } finally {
         this.isWishlistDialogVisible = false;
         this.selectedWishlistId = null;
@@ -465,7 +488,7 @@ export default {
     async fetchUserWishlists() {
       if (!this.getUserId) {
         console.error('User ID is not available.');
-        this.showSnackbar('User ID is not available. Please log in again.');
+        this.showAlert('User ID is not available. Please log in again.');
         return;
       }
       try {
@@ -577,12 +600,12 @@ export default {
     // Method to add a single creator to the selected wishlist
     async addToWishlist(rowData) {
       if (!this.getUserId) {
-        this.showSnackbar('User ID is not available.');
+        this.showAlert('User ID is not available.');
         return;
       }
 
       if (!this.selectedWishlistId) {
-        this.showSnackbar('Please select a wishlist first.');
+        this.showAlert('Please select a wishlist first.');
         return;
       }
 
@@ -590,10 +613,10 @@ export default {
 
       try {
         await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, [creatorId]);
-        this.showSnackbar('Successfully added to wishlist!');
+        this.showAlert('Successfully added to wishlist!');
       } catch (error) {
         console.error('Error adding to wishlist', error);
-        this.showSnackbar('Failed to add to wishlist.');
+        this.showAlert('Failed to add to wishlist.');
       }
     },
 
@@ -685,7 +708,7 @@ export default {
         const requiredFields = ['project_name', 'poc', 'handle_name', 'email'];
         for (const field of requiredFields) {
           if (!data[field] || data[field].trim() === '') {
-            this.showSnackbar(`Please fill out the required field: ${field.replace('_', ' ')}`);
+            this.showAlert(`Please fill out the required field: ${field.replace('_', ' ')}`);
             return;
           }
         }
@@ -705,7 +728,7 @@ export default {
             })
             .catch(error => {
               console.error('Error adding data:', error);
-              this.showSnackbar('Failed to add entry.'); // Notify the user in case of an error
+              this.showAlert('Failed to add entry.'); // Notify the user in case of an error
             });
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -723,7 +746,7 @@ export default {
           this.showAddForm = false; // Close the form
         }).catch(error => {
           console.error('Error uploading file:', error);
-          this.showSnackbar('Failed to upload file.');
+          this.showAlert('Failed to upload file.');
         });
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -739,14 +762,14 @@ export default {
         }).then(() => {
           this.refreshGridData(); // Refresh grid data after successful file upload
           this.showAddForm = false; // Close the form
-          this.showSnackbar('File uploaded and data added successfully to Mailchimp and Database.', 'success');
+          this.showAlert('File uploaded and data added successfully to Mailchimp and Database.', 'success');
         }).catch(error => {
           console.error('Error uploading file:', error);
-          this.showSnackbar('Failed to upload file.', 'error');
+          this.showAlert('Failed to upload file.', 'error');
         });
       } catch (error) {
         console.error('Unexpected error:', error);
-        this.showSnackbar('An unexpected error occurred.', 'error');
+        this.showAlert('An unexpected error occurred.', 'error');
       }
     },
 
@@ -761,7 +784,7 @@ export default {
     selectRandomRows() {
       const numberOfRows = parseInt(prompt('Enter the number of rows to select:', '2000'));
       if (isNaN(numberOfRows) || numberOfRows <= 0) {
-        this.showSnackbar('Please enter a valid positive integer.');
+        this.showAlert('Please enter a valid positive integer.');
         return;
       }
 
@@ -786,7 +809,7 @@ export default {
     },
     async addSelectedToWishlist() {
       if (!this.selectedWishlistId) {
-        this.showSnackbar('Please select a wishlist to add creators.');
+        this.showAlert('Please select a wishlist to add creators.');
         return;
       }
 
@@ -795,7 +818,7 @@ export default {
       const creatorIds = selectedData.map(data => data.id);
 
       if (creatorIds.length === 0) {
-        this.showSnackbar('Please select at least one creator to add.');
+        this.showAlert('Please select at least one creator to add.');
         return;
       }
 
@@ -805,11 +828,11 @@ export default {
 
       try {
         await axios.post(`${apiBaseUrl}/api/wishlists/${this.selectedWishlistId}/addCreators`, creatorIds);
-        this.showSnackbar('Successfully added selected creators to the wishlist!');
+        this.showAlert('Successfully added selected creators to the wishlist!');
         this.refreshGridData(); // Optionally refresh data
       } catch (error) {
         console.error('Error adding selected creators to wishlist:', error);
-        this.showSnackbar('Failed to add selected creators to the wishlist.');
+        this.showAlert('Failed to add selected creators to the wishlist.');
       }
     },
 
@@ -824,7 +847,7 @@ export default {
     // Submit the Mailchimp email form
     async submitMailchimpForm() {
       if (!this.scheduledTime || !this.selectedTag|| !this.mailchimpSubject || !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply) {
-        this.showSnackbar('Please fill in all the required fields.');
+        this.showAlert('Please fill in all the required fields.');
         return;
       }
       try {
@@ -837,11 +860,11 @@ export default {
           scheduledTime: this.scheduledTime
         });
 
-        this.showSnackbar('Tag successfully scheduled.');
+        this.showAlert('Tag successfully scheduled.');
         this.closeMailchimpForm();
       } catch (error) {
         console.error('Error sending Mailchimp Campaign:', error);
-        this.showSnackbar('Failed to send Campaign Info.');
+        this.showAlert('Failed to send Campaign Info.');
       }
     },
 
@@ -855,7 +878,7 @@ export default {
         this.tagProjectName = '';
         this.isTagDialogVisible = true; // Show the dialog
       } else {
-        this.showSnackbar('Please select at least one row to add a Mailchimp tag.');
+        this.showAlert('Please select at least one row to add a Mailchimp tag.');
       }
     },
     closeTagForm() {
@@ -865,7 +888,7 @@ export default {
       try {
         // Ensure the required fields are provided
         if (!this.tagCategories || !this.tagPoc || !this.tagProjectName) {
-          this.showSnackbar('Please fill out all fields.');
+          this.showAlert('Please fill out all fields.');
           return;
         }
 
@@ -884,15 +907,15 @@ export default {
         const response = await axios.post(`${apiBaseUrl}/api/total/tag`, payload);
 
         if (response.data) {
-          this.showSnackbar('Tags added successfully.');
+          this.showAlert('Tags added successfully.');
           this.closeTagForm();
           this.refreshGridData();
         } else {
-          this.showSnackbar('Failed to add tags.');
+          this.showAlert('Failed to add tags.');
         }
       } catch (error) {
         console.error('Error submitting Mailchimp tags:', error);
-        this.showSnackbar('Failed to submit tags.');
+        this.showAlert('Failed to submit tags.');
       }
     },
 
@@ -905,41 +928,41 @@ export default {
           this.campaignsList = response.data; // response.data is now a list of subject lines
           this.isScheduledCampaignsDialogVisible = true; // Open the dialog
         } else {
-          this.showSnackbar('No scheduled campaigns found.');
+          this.showAlert('No scheduled campaigns found.');
         }
       } catch (error) {
         console.error('Error fetching scheduled campaigns:', error);
-        this.showSnackbar('Failed to fetch scheduled campaigns.');
+        this.showAlert('Failed to fetch scheduled campaigns.');
       }
     },
 
     async unscheduleCampaign() {
       if (!this.selectedCampaign) {
-        this.showSnackbar('Please select a campaign to unschedule.');
+        this.showAlert('Please select a campaign to unschedule.');
         return;
       }
       try {
         await axios.post(`${apiBaseUrl}/api/total/campaigns/unschedule`, this.selectedCampaign);
-        this.showSnackbar('Campaign unscheduled successfully.');
+        this.showAlert('Campaign unscheduled successfully.');
         this.closeScheduledCampaignsDialog();
       } catch (error) {
         console.error('Error unscheduling campaign:', error);
-        this.showSnackbar('Failed to unschedule the campaign.');
+        this.showAlert('Failed to unschedule the campaign.');
       }
     },
 
     async deleteCampaign() {
       if (!this.selectedCampaign) {
-        this.showSnackbar('Please select a campaign to delete.');
+        this.showAlert('Please select a campaign to delete.');
         return;
       }
       try {
         await axios.delete(`${apiBaseUrl}/api/total/campaigns/delete`, { data: this.selectedCampaign });
-        this.showSnackbar('Campaign deleted successfully.');
+        this.showAlert('Campaign deleted successfully.');
         this.closeScheduledCampaignsDialog();
       } catch (error) {
         console.error('Error deleting campaign:', error);
-        this.showSnackbar('Failed to delete the campaign.');
+        this.showAlert('Failed to delete the campaign.');
       }
     },
 
@@ -974,7 +997,7 @@ export default {
       // Optionally, clear filters and selections
       this.gridApi.setFilterModel(null);
       this.gridApi.deselectAll();
-      this.showSnackbar('View has been reset.', 'info');
+      this.showAlert('View has been reset.', 'info');
     }
   },
   mounted() {

@@ -25,7 +25,47 @@
         </v-menu>
       </v-col>
 
+      <!-- Simple Search Button -->
+      <v-col cols="auto">
+        <v-btn color="#00b19e" @click="showSimpleSearchDialog" class="elevation-2">
+          <v-icon left>mdi-magnify</v-icon>
+          Simple Search
+        </v-btn>
+      </v-col>
+
+      <!-- Simple Search Dialog -->
+      <v-dialog v-model="searchDialog" persistent max-width="500px">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Simple Search</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field
+                      label="Handle Name"
+                      v-model="searchHandleName"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                      label="Email"
+                      v-model="searchEmail"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click="performSearch">Search</v-btn>
+            <v-btn color="grey" @click="closeSearchDialog">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-row>
+
     <v-row>
       <v-col cols="12">
         <ag-grid-vue
@@ -37,7 +77,6 @@
             @grid-ready="onGridReady"
             :domLayout="'autoHeight'"
             rowSelection="multiple"
-
         ></ag-grid-vue>
       </v-col>
     </v-row>
@@ -50,7 +89,6 @@ import { AgGridVue } from 'ag-grid-vue3';
 import axios from 'axios';
 import { exportToExcel } from '@/utils/exportUtils';
 
-
 export default {
   name: 'CollaboratedProjectGrid',
   components: {
@@ -59,12 +97,24 @@ export default {
   data() {
     return {
       columnDefs: [
-        // {headerName: 'Id', field: 'id', sortable: true, filer: true},
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
+        {
+          headerName: 'Handle Name',
+          field: 'handle_name',
+          sortable: true,
+          filter: true,
+          checkboxSelection: true,
+          headerCheckboxSelection: true,
+        },
         { headerName: 'Email', field: 'email', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'Project Name', field: 'project_name', sortable: true, filter: true, flex: 1.5 },
-        { headerName: 'collaborated Times', field:'collaborated_times', sortable: true, filter: true, flex:1.5 }
+        {
+          headerName: 'Collaborated Times',
+          field: 'collaborated_times',
+          sortable: true,
+          filter: true,
+          flex: 1.5,
+        },
       ],
       rowData: [],
       gridOptions: {
@@ -72,12 +122,15 @@ export default {
         paginationPageSize: 10,
         defaultColDef: {
           resizable: true,
+          filter: true, // Ensure filtering is enabled
         },
         autoHeight: true,
-
       },
       selectedRow: null,
-
+      // Dialog control
+      searchDialog: false,
+      searchHandleName: '',
+      searchEmail: '',
     };
   },
   methods: {
@@ -89,34 +142,53 @@ export default {
 
         this.rowData = response.data;
         console.log(response.data);
-        params.api.sizeColumnsToFit();  // Ensure columns fit the grid width
+        params.api.sizeColumnsToFit(); // Ensure columns fit the grid width
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     },
-    // dateFormatter(params) {
-    //   const date = new Date(params.value);
-    //   if (!isNaN(date.getTime())) {
-    //     // Customize the date format as needed
-    //     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    //   } else {
-    //     return ''; // or some other placeholder
-    //   }
-    // },
     exportAllToExcel() {
       const allDisplayedData = [];
       this.gridApi.forEachNodeAfterFilterAndSort((node) => {
         allDisplayedData.push(node.data);
       });
 
-      exportToExcel(allDisplayedData, "collaborated_project_filtered");
+      exportToExcel(allDisplayedData, 'collaborated_project_filtered');
     },
     exportSelectedToExcel() {
       const selectedNodes = this.gridApi.getSelectedNodes();
-      const selectedData = selectedNodes.map(node => node.data);
-      exportToExcel(selectedData, "collaborated_project_selected");
+      const selectedData = selectedNodes.map((node) => node.data);
+      exportToExcel(selectedData, 'collaborated_project_selected');
     },
-  }
+    // Methods for the Simple Search Dialog
+    showSimpleSearchDialog() {
+      // Reset search fields when dialog is opened
+      this.searchHandleName = '';
+      this.searchEmail = '';
+      this.searchDialog = true;
+    },
+    closeSearchDialog() {
+      this.searchDialog = false;
+    },
+    performSearch() {
+      const filterModel = {};
+      if (this.searchHandleName) {
+        filterModel.handle_name = {
+          type: 'contains',
+          filter: this.searchHandleName,
+        };
+      }
+      if (this.searchEmail) {
+        filterModel.email = {
+          type: 'contains',
+          filter: this.searchEmail,
+        };
+      }
+      this.gridApi.setFilterModel(filterModel);
+      this.gridApi.onFilterChanged();
+      this.closeSearchDialog();
+    },
+  },
 };
 </script>
 

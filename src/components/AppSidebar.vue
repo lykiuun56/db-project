@@ -32,9 +32,16 @@ const menuSections = ref([
   {
     title: 'Database',
     items: [
-      { title: 'Total Database Home', icon: 'mdi-home-circle', route: '/td-grid' },
+      { title: 'Total Database', icon: 'mdi-home-circle', route: '/td-grid' },
       { title: 'Collaborated', icon: 'mdi-account-group', route: '/cd-grid' },
     ],
+  },
+  {
+    title: 'Projects',
+    items: [
+      { title: 'Total Projects', icon: 'mdi-view-grid', route: '/tp-grid' },
+      { title: 'Collaborated Projects', icon: 'mdi-account-group', route: '/cp-grid' },
+      ],
   },
   {
     title: 'Management',
@@ -58,16 +65,13 @@ const menuSections = ref([
     ],
   },
   {
-    title: 'Projects',
+    title: 'Status',
     items: [
-      { title: 'Total Projects', icon: 'mdi-view-grid', route: '/tp-grid' },
-      { title: 'View', icon: 'mdi-grid-large', route: '/tp-grid', isSubItem: true },
-      { title: 'Find', icon: 'mdi-magnify', route: '/tp-search', isSubItem: true },
-      { title: 'Collaborated Projects', icon: 'mdi-account-group', route: '/cp-grid' },
-      { title: 'View', icon: 'mdi-grid-large', route: '/cp-grid', isSubItem: true },
-      { title: 'Find', icon: 'mdi-magnify', route: '/cp-search', isSubItem: true },
+      {title: 'Email Status', icon: 'mdi-email',route: '/email-status'},
+      {title: 'Live Status', icon: 'mdi-live',route:'/live-status'},
     ],
-  },
+  }
+
 ]);
 </script>
 

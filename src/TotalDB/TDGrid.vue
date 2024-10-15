@@ -452,6 +452,7 @@ export default {
         { name: 'email', label: 'Email', required: true },
         { name: 'followers', label: 'Followers' },
         { name: 'categories', label: 'Categories', type: 'select', options: this.categoriesList },
+        { name: 'state', label: 'State'},
 
       ],
       columnDefs: this.getColumnDefs(),
@@ -707,6 +708,7 @@ export default {
           width: 100,
         },
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true},
+        { headerName: 'State', field: 'state', sortable: true, filter: true},
       ];
     },
 

@@ -145,20 +145,20 @@
                 <v-col cols="12" sm="6">
                   <v-text-field v-model="newLiveStatus.live_date" label="Live Date" type="datetime-local" />
                 </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                      label="View Change"
-                      v-model="newLiveStatus.view_change"
-                      type="number"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                      label="GMV Change"
-                      v-model="newLiveStatus.gmv_change"
-                      type="number"
-                  ></v-text-field>
-                </v-col>
+<!--                <v-col cols="12" sm="6">-->
+<!--                  <v-text-field-->
+<!--                      label="View Change"-->
+<!--                      v-model="newLiveStatus.view_change"-->
+<!--                      type="number"-->
+<!--                  ></v-text-field>-->
+<!--                </v-col>-->
+<!--                <v-col cols="12" sm="6">-->
+<!--                  <v-text-field-->
+<!--                      label="GMV Change"-->
+<!--                      v-model="newLiveStatus.gmv_change"-->
+<!--                      type="number"-->
+<!--                  ></v-text-field>-->
+<!--                </v-col>-->
               </v-row>
             </v-container>
           </v-form>
@@ -187,13 +187,6 @@ export default {
   data() {
     return {
       columnDefs: [
-        { headerName: 'Live Name', field: 'live_name', sortable: true, filter: true, editable: true, checkboxSelection: true, headerCheckboxSelection: true },
-        { headerName: 'Category', field: 'category', sortable: true, filter: true, editable: true },
-        { headerName: 'Live Account', field: 'live_account', sortable: true, filter: true, editable: true },
-        { headerName: 'Live Time', field: 'live_time', sortable: true, filter: true, editable: true },
-        { headerName: 'GMV', field: 'gmv', sortable: true, filter: true, editable: true },
-        { headerName: 'Total View', field: 'total_view', sortable: true, filter: true, editable: true },
-        { headerName: 'Live Holder', field: 'live_holder', sortable: true, filter: true, editable: true },
         {
           headerName: 'Live Date',
           field: 'live_date',
@@ -202,8 +195,15 @@ export default {
           editable: true,
           valueFormatter: this.dateFormatter,
         },
-        { headerName: 'View Change', field: 'view_change', sortable: true, filter: true, editable: true },
-        { headerName: 'GMV Change', field: 'gmv_change', sortable: true, filter: true, editable: true },
+        { headerName: 'Live Host', field: 'live_holder', sortable: true, filter: true, editable: true },
+        { headerName: 'Live Name', field: 'live_name', sortable: true, filter: true, editable: true, checkboxSelection: true, headerCheckboxSelection: true },
+        { headerName: 'Category', field: 'category', sortable: true, filter: true, editable: true },
+        { headerName: 'Live Account', field: 'live_account', sortable: true, filter: true, editable: true },
+        { headerName: 'Live Time', field: 'live_time', sortable: true, filter: true, editable: true },
+        { headerName: 'GMV', field: 'gmv', sortable: true, filter: true, editable: true },
+        { headerName: 'Total View', field: 'total_view', sortable: true, filter: true, editable: true },
+        { headerName: 'View Change', field: 'view_change', sortable: true, filter: true, editable: true, valueFormatter: this.percentageFormatter},
+        { headerName: 'GMV Change', field: 'gmv_change', sortable: true, filter: true, editable: true,valueFormatter: this.percentageFormatter},
       ],
       rowData: null,
       gridOptions: {
@@ -274,6 +274,18 @@ export default {
         });
       } else {
         return ''; // Return an empty string for invalid dates
+      }
+    },
+
+    percentageFormatter(params) {
+      const value = params.value;
+      if (value == null || value === '') {
+        return '0%';
+      }
+      if (value > 0) {
+        return '+' + (value).toFixed(2) + '%';
+      }else {
+        return (value).toFixed(2) + '%';
       }
     },
     exportAllToExcel() {

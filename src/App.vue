@@ -41,12 +41,6 @@
         </template>
 
         <v-list>
-          <v-list-item @click="navigateTo('/email-status')">
-            <v-list-item-title>
-              <v-icon start color="#4700CF">mdi-email</v-icon>
-              Email Status
-            </v-list-item-title>
-          </v-list-item>
           <v-list-item @click="logout">
             <v-list-item-title>
               <v-icon start color="red">mdi-logout</v-icon>

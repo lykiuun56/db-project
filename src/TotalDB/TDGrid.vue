@@ -720,6 +720,11 @@ export default {
         // Enable multi-row selection via checkbox
         suppressRowClickSelection: true,
         // Other grid options as needed
+        suppressHorizontalScroll: true,
+
+        onFirstDataRendered: params => {
+          params.api.sizeColumnsToFit(); // Auto-fit columns to available width
+        }
       };
     },
 
@@ -727,9 +732,7 @@ export default {
       // Ensure APIs are set properly
       this.gridApi = params.api;
       this.gridColumnApi = params.columnApi || this.gridApi; // Fallback to gridApi if gridColumnApi is undefined
-      console.log('Grid API:', this.gridApi);
-      console.log('Grid Column API:', this.gridColumnApi);
-      console.log('userPoc:', this.userPoc);
+
       try {
         const response = await axios.get(`${apiBaseUrl}/api/total/all`, { withCredentials: true });
         console.log('API Response Data:', response.data);

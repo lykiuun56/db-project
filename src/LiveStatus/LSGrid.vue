@@ -25,21 +25,15 @@
         </v-menu>
       </v-col>
 
-      <!-- Simple Search Button -->
-      <v-col cols="auto">
-        <v-btn color="#00b19e" @click="showSimpleSearchDialog" class="elevation-2">
-          <v-icon left>mdi-magnify</v-icon>
-          Simple Search
-        </v-btn>
-      </v-col>
-
       <!-- Add LiveStatus Button -->
       <v-col cols="auto">
-        <v-btn color="primary" @click="showAddDialog" class="elevation-2">
+        <v-btn color="#33007D" @click="showAddDialog" class="elevation-2">
           <v-icon left>mdi-plus</v-icon>
           Add LiveStatus
         </v-btn>
       </v-col>
+
+      <v-spacer></v-spacer>
 
       <!-- Delete Selected Button -->
       <v-col cols="auto">
@@ -211,6 +205,11 @@ export default {
         paginationPageSize: 10,
         defaultColDef: {
           resizable: true,
+          suppressHorizontalScroll: true,
+
+          onFirstDataRendered: params => {
+            params.api.sizeColumnsToFit(); // Auto-fit columns to available width
+          }
         },
         autoHeight: true,
         rowSelection: 'multiple',

@@ -27,7 +27,7 @@
 
 
       <v-col cols="auto">
-        <v-btn color="#00b19e" @click="showSimpleSearchDialog" class="elevation-2">
+        <v-btn color="#33007D" @click="showSimpleSearchDialog" class="elevation-2">
           <v-icon left>mdi-magnify</v-icon>
           Simple Search
         </v-btn>
@@ -97,7 +97,8 @@ export default {
     return {
       columnDefs: [
         // { headerName: 'Id', field: 'id', sortable: true, filer: true},
-        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true},
+        { headerName: 'Handle Name', field: 'handle_name', sortable: true, filter: true,checkboxSelection: true,
+          headerCheckboxSelection: true},
         { headerName: 'Email', field: 'email', sortable: true, filter: true, width: 200 },
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true, flex: 1.5 },
         { headerName: 'Project Name', field: 'project_name', sortable: true, filter: true, flex: 1.5 },

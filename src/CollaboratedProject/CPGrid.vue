@@ -27,7 +27,7 @@
 
       <!-- Simple Search Button -->
       <v-col cols="auto">
-        <v-btn color="#00b19e" @click="showSimpleSearchDialog" class="elevation-2">
+        <v-btn color="#33007D" @click="showSimpleSearchDialog" class="elevation-2">
           <v-icon left>mdi-magnify</v-icon>
           Simple Search
         </v-btn>

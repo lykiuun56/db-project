@@ -304,6 +304,11 @@ export default {
         defaultColDef: {resizable: true},
         autoHeight: true,
         rowSelection: 'multiple',
+        suppressHorizontalScroll: true,
+
+        onFirstDataRendered: params => {
+          params.api.sizeColumnsToFit(); // Auto-fit columns to available width
+        }
       };
     },
     async onGridReady(params) {

@@ -352,6 +352,8 @@ export default {
         notes: '',
         poc: '',
         project_name: '',
+        age: '',
+        sex: '',
       },
 
       fields: [
@@ -368,7 +370,9 @@ export default {
         { name: 'email', label: 'Email', required: true},
         { name: 'phone', label: 'Phone' },
         { name: 'notes', label: 'Notes' },
-        { name: 'linked', label: 'Linked'}
+        { name: 'linked', label: 'Linked'},
+        { name: 'sex', label: 'Sex'},
+        { name: 'age', label: 'Age'},
       ],
 
       categoriesList: [],
@@ -527,6 +531,8 @@ export default {
         {headerName: 'Full Address', field: 'full_address', sortable: true, filter: true},
         {headerName: 'Email', field: 'email', sortable: true, filter: true},
         {headerName: 'Phone', field: 'phone', sortable: true, filter: true},
+        {headerName: 'Sex', field: 'sex', sortable: true, filter: true},
+        {headerName: 'Age', field: 'age', sortable: true, filter: true},
         {headerName: 'Collaborated Time', field: 'collaborated_times', sortable: true, filter: true},
         {headerName: 'Notes', field: 'notes', sortable: true, filter: true},
         {headerName: 'POC', field: 'poc', sortable: true, filter: true},

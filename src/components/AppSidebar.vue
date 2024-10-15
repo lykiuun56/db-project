@@ -68,7 +68,7 @@ const menuSections = ref([
     title: 'Status',
     items: [
       {title: 'Email Status', icon: 'mdi-email',route: '/email-status'},
-      {title: 'Live Status', icon: 'mdi-live',route:'/live-status'},
+      {title: 'Live Status', icon: 'mdi-video',route:'/live-status'},
     ],
   }
 

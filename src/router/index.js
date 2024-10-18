@@ -66,6 +66,8 @@ import LiveStatus from '@/LiveStatus/LSGrid.vue'
 
 import WishlistManager from '@/WishList/WishlistManager.vue';
 
+import CampaignGrid from '@/CampaignDB/CampaignGrid.vue';
+
 
 
 
@@ -324,6 +326,11 @@ const routes = [
         path: '/wishlist-manager',
         name: 'WishlistManager',
         component: WishlistManager
+      },
+      {
+        path: '/campaign-grid',
+        name: 'CampaignGrid',
+        component: CampaignGrid
       }
     ]
   },

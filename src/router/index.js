@@ -64,6 +64,7 @@ import WishlistDetail from '@/WishList/WishlistDetail.vue';
 import UserEmailStatus from '@/EmailStatus/ESGrid.vue';
 import LiveStatus from '@/LiveStatus/LSGrid.vue'
 
+import WishlistManager from '@/WishList/WishlistManager.vue';
 
 
 
@@ -318,6 +319,11 @@ const routes = [
         name:LiveStatus,
         component:LiveStatus,
         props:true
+      },
+      {
+        path: '/wishlist-manager',
+        name: 'WishlistManager',
+        component: WishlistManager
       }
     ]
   },

@@ -70,7 +70,9 @@ const menuSections = ref([
       {title: 'Email Status', icon: 'mdi-email',route: '/email-status'},
       {title: 'Live Status', icon: 'mdi-video',route:'/live-status'},
     ],
-  }
+  },
+  
+
 
 ]);
 </script>

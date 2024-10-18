@@ -16,20 +16,6 @@
 
       <v-spacer></v-spacer>
 
-      <!-- Navigation Menu -->
-      <v-toolbar-items>
-        <v-btn
-            v-for="item in menuItems"
-            :key="item.title"
-            text
-            @click="navigateTo(item.route)"
-            class="text-white"
-        >
-          <v-icon start>{{ item.icon }}</v-icon>
-          {{ item.title }}
-        </v-btn>
-      </v-toolbar-items>
-
       <!-- User menu -->
       <v-menu bottom left>
         <template v-slot:activator="{ props }">
@@ -39,7 +25,14 @@
             </v-avatar>
           </v-btn>
         </template>
-
+        <v-list>
+          <v-list-item @click="navigateTo('/wishlist-manager')">
+            <v-list-item-title>
+              <v-icon start color="red">mdi-heart</v-icon>
+              Manage Wishlist
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
         <v-list>
           <v-list-item @click="logout">
             <v-list-item-title>
@@ -48,6 +41,7 @@
             </v-list-item-title>
           </v-list-item>
         </v-list>
+        
       </v-menu>
     </v-app-bar>
 
@@ -75,11 +69,6 @@ import LoginForm from './components/LoginForm.vue'
 
 const router = useRouter()
 const isLoggedIn = ref(false)
-
-const menuItems = [
-  { title: 'Create Wishlist', icon: 'mdi-heart-plus', route: '/create-wishlist' },
-  { title: 'View Wishlist', icon: 'mdi-heart', route: '/view-wishlist' },
-]
 
 onMounted(() => {
   // Check if user is logged in (e.g., by checking for a token in localStorage)

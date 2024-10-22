@@ -389,6 +389,22 @@
           :dismissible="alert.dismissible"
           @dismiss="dismissAlert"
       />
+
+      <!-- Add this progress bar component -->
+      <v-dialog v-model="showProgressBar" persistent max-width="300">
+        <v-card>
+          <v-card-text>
+            Uploading file...
+            <v-progress-linear
+              :value="uploadProgress"
+              color="primary"
+              height="25"
+            >
+              <strong>{{ Math.ceil(uploadProgress) }}%</strong>
+            </v-progress-linear>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
   </v-container>
 </template>
 
@@ -480,6 +496,10 @@ export default {
         message: '',
         type: 'info',
       },
+      showProgressBar: false,
+      uploadProgress: 0,
+      uploadedCount: 0,
+      totalUploadCount: 0,
     };
   },
   created() {
@@ -1003,25 +1023,67 @@ export default {
     },
 
     async submitAddToBoth(formData) {
+      this.showProgressBar = true;
+      this.uploadProgress = 0;
+      this.uploadedCount = 0;
+      this.totalUploadCount = 0;
+
+      // Simulate gradual progress for fast uploads
+      let simulatedProgress = 0;
+      const progressInterval = setInterval(() => {
+        simulatedProgress += 5;
+        this.uploadProgress = Math.min(simulatedProgress, 90);
+        if (simulatedProgress >= 90) clearInterval(progressInterval);
+      }, 100);
+
       try {
-        await axios.post(`${apiBaseUrl}/api/total/addByFile`, formData, {
+        const response = await axios.post(`${apiBaseUrl}/api/total/addByFile`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-        }).then(() => {
-          this.refreshGridData();  // Refresh grid data after successful add
-          this.showAddForm = false; // Close the form
-          console.log('Data Added to Both DB and Mailchimp');
-        }).catch(error => {
-          console.error('Error adding data:', error);
-          this.showAlert('Failed to add entry.');
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const actualProgress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              this.uploadProgress = Math.max(this.uploadProgress, Math.min(actualProgress, 90));
+            }
+          },
         });
+        
+        clearInterval(progressInterval);
+        this.uploadProgress = 95; // Show processing state
+        
+        // Simulate processing time
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        this.uploadProgress = 100;
+        
+        this.totalUploadCount = response.data.totalCount || 0;
+        this.uploadedCount = response.data.uploadedCount || 0;
+        
+        this.refreshGridData();
+        this.showAddForm = false;
+        
+        const duplicates = response.data.duplicates;
+        const blacklisted = response.data.blacklisted;
+        let message = `File processed successfully. ${this.uploadedCount} entries were added.`;
+        if (duplicates > 0) {
+          message += ` ${duplicates} duplicate entries were found and skipped.`;
+        }
+        if (blacklisted > 0) {
+          message += ` ${blacklisted} blacklisted emails were skipped.`;
+        }
+        this.showAlert(message, 'success');
       } catch (error) {
-        console.error('Unexpected error:', error);
-        this.showAlert('An unexpected error occurred.', 'error');
+        console.error('Error uploading file:', error);
+        this.showAlert('Failed to upload file.', 'error');
+      } finally {
+        clearInterval(progressInterval);
+        setTimeout(() => {
+          this.showProgressBar = false;
+          this.uploadProgress = 0; // Reset progress
+        }, 1000);
       }
     },
-
 
     downloadTemplate() {
       const link = document.createElement('a');
@@ -1263,3 +1325,5 @@ html, body {
 }
 
 </style>
+
+

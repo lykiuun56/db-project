@@ -15,6 +15,13 @@
                 >
                   {{ selectedCampaign ? selectedCampaign.name : 'Select Campaign' }}
                 </v-btn>
+                <v-btn
+                    icon
+                    color="primary"
+                    @click="showCreateCampaignDialog"
+                    class="ml-2"
+                ><v-icon>mdi-plus</v-icon>
+              </v-btn>
               </template>
               <v-list>
                 <v-list-item
@@ -24,26 +31,17 @@
                 >
                   <v-list-item-title>{{ campaign.name }}</v-list-item-title>
                 </v-list-item>
+                
               </v-list>
             </v-menu>
           </v-col>
+          
         </v-row>
         <v-spacer></v-spacer>
-        <v-container>
-          <v-card class="mb-4" max-width="222" hover>
-            <v-row no-gutters>
-              <v-col cols="12" class="pa-2">
-                <v-btn color="primary" @click="showCreateCampaignDialog" block>
-                  Create New Campaign
-                </v-btn>
-              </v-col>
-            </v-row>
-            
-          </v-card>
-        </v-container>
+        
         <v-row>
           <v-col cols="auto">
-            <v-btn color="primary" @click="showAddEntryDialog" :disabled="!selectedCampaign">
+            <v-btn color="primary" @click="openAddEntryDialog" :disabled="!selectedCampaign">
               Add Entry
             </v-btn>
           </v-col>
@@ -104,19 +102,13 @@
         </v-card>
 
         <v-card>
-          <v-card-title>POC</v-card-title>
+          <v-card-title>POC Completions</v-card-title>
           <v-card-text>
             <v-list>
-              <v-list-item v-for="(count, poc) in pocCompletions" :key="poc">
-                <v-list-item-title>{{ poc }}</v-list-item-title>
+              <v-list-item v-for="pocData in pocCompletions" :key="pocData.poc">
+                <v-list-item-title>{{ pocData.poc }}</v-list-item-title>
                 <v-list-item-subtitle>
-                  <v-progress-linear
-                    :model-value="count"
-                    color="primary"
-                    height="20"
-                  >
-                    <strong>{{ count }}</strong>
-                  </v-progress-linear>
+                  Completions: {{ pocData.completionCount }}
                 </v-list-item-subtitle>
               </v-list-item>
             </v-list>
@@ -124,6 +116,10 @@
         </v-card>
       </v-col>
     </v-row>
+    <add-entry-dialog
+      v-model="showAddEntryDialog"
+      @submit="handleAddEntry"
+    ></add-entry-dialog>
   </v-container>
 </template>
 
@@ -132,12 +128,14 @@ import { apiBaseUrl } from '@/config';
 import axios from 'axios';
 import { AgGridVue } from "ag-grid-vue3";
 import PersistentAlert from "@/components/PersistentAlert.vue";
+import AddEntryDialog from '@/components/AddEntryDialog.vue';
 
 export default {
   name: 'CampaignGrid',
   components: {
     PersistentAlert,
     AgGridVue,
+    AddEntryDialog,
   },
   data() {
     return {
@@ -180,11 +178,8 @@ export default {
       newCampaignName: '',
       menu: false,
       completionCount: 0,
-      pocCompletions: {
-        A: 0,
-        B: 0,
-        // Add more POCs as needed
-      },
+      pocCompletions: [],
+      showAddEntryDialog: false,
     };
   },
   methods: {
@@ -229,8 +224,8 @@ export default {
         console.log('Campaign data response:', response.data);
         this.rowData = response.data.entries || [];
         
-        // Update completion count and POC completions
-        this.updateCompletions(response.data);
+        // Fetch completion data
+        await this.fetchCompletionData(campaignId);
       } catch (error) {
         console.error('Error loading campaign data:', error);
         this.rowData = [];
@@ -239,10 +234,18 @@ export default {
       }
     },
 
-    updateCompletions(data) {
-      // Assuming the backend provides these values
-      this.completionCount = data.totalCompletion || 0;
-      this.pocCompletions = data.pocCompletions || {};
+    async fetchCompletionData(campaignId) {
+      try {
+        const [totalCompletion, pocCompletions] = await Promise.all([
+          axios.get(`${apiBaseUrl}/api/campaigns/${campaignId}/entries/getAllCompletion`),
+          axios.get(`${apiBaseUrl}/api/campaigns/${campaignId}/entries/getAllPocs/${campaignId}`)
+        ]);
+
+        this.completionCount = totalCompletion.data;
+        this.pocCompletions = pocCompletions.data;
+      } catch (error) {
+        console.error('Error fetching completion data:', error);
+      }
     },
 
     showCreateCampaignDialog() {
@@ -272,6 +275,38 @@ export default {
       this.selectedCampaign = campaign;
       this.loadCampaignData(campaign);
       this.menu = false;
+    },
+    openAddEntryDialog() {
+      if (!this.selectedCampaign) {
+        // Show an error message or alert if no campaign is selected
+        alert('Please select a campaign first');
+        return;
+      }
+      this.showAddEntryDialog = true;    },
+      async handleAddEntry(entry) {
+      if (!this.selectedCampaign) {
+        console.error('No campaign selected');
+        return;
+      }
+      const campaignId = this.selectedCampaign.id;
+
+      try {
+        const response = await axios.post(
+          `${apiBaseUrl}/api/campaigns/${campaignId}/entries/add`,
+          entry
+        );
+        console.log('Entry added successfully:', response.data);
+        
+        // Refresh the campaign data
+        await this.loadCampaignData(this.selectedCampaign);
+        
+        // Show a success message (you can use a toast notification library if you have one)
+        alert('Entry added successfully!');
+      } catch (error) {
+        console.error('Error adding entry:', error);
+        // Show an error message
+        alert('Failed to add entry. Please try again.');
+      }
     },
   }
 }

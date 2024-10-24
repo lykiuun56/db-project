@@ -21,7 +21,16 @@
                     @click="showCreateCampaignDialog"
                     class="ml-2"
                 ><v-icon>mdi-plus</v-icon>
-              </v-btn>
+                </v-btn>  
+                <v-btn
+                  icon
+                  color="error"
+                  @click="deleteCampaign"
+                  class="ml-2"
+                  :disabled="!selectedCampaign"
+                >
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
               </template>
               <v-list>
                 <v-list-item
@@ -41,9 +50,15 @@
         
         <v-row>
           <v-col cols="auto">
-            <v-btn color="primary" @click="openAddEntryDialog" :disabled="!selectedCampaign">
-              Add Entry
-            </v-btn>
+            <v-btn-group>
+              <v-btn color="primary" @click="openAddEntryDialog" :disabled="!selectedCampaign">
+                Add Entry
+              </v-btn>
+              <v-btn color="primary" @click="openFileUploadDialog" :disabled="!selectedCampaign">
+                <v-icon>mdi-file-upload</v-icon>
+                Upload Excel
+              </v-btn>
+            </v-btn-group>
           </v-col>
           <v-col cols="12">
             <ag-grid-vue
@@ -76,6 +91,7 @@
             <v-card-title>Create New Campaign</v-card-title>
             <v-card-text>
               <v-text-field v-model="newCampaignName" label="Campaign Name"></v-text-field>
+              <v-text-field v-model="Target" label="target"></v-text-field>
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -89,14 +105,16 @@
       <!-- New completion areas -->
       <v-col cols="12" md="4">
         <v-card class="mb-4">
-          <v-card-title style="color: red; font-size: 3.0em;" align="center">TARGET {{ completionCount }}/100</v-card-title>
+          <v-card-title style="color: red; font-size: 3.0em;" align="center">
+            TARGET {{ completionCount || 0 }}/{{ selectedCampaign?.target || 0 }}
+          </v-card-title>
           <v-card-text>
             <v-progress-linear
-              :model-value="(completionCount / 100) * 100"
+              :model-value="getCompletionPercentage"
               color="red"
               height="50"
             >
-              <strong>{{ completionCount }}%</strong>
+              <strong>{{ getCompletionPercentage }}%</strong>
             </v-progress-linear>
           </v-card-text>
         </v-card>
@@ -120,6 +138,74 @@
       v-model="showAddEntryDialog"
       @submit="handleAddEntry"
     ></add-entry-dialog>
+
+    <!-- Add this dialog for category input -->
+    <v-dialog v-model="categoryDialog.show" max-width="500px">
+      <v-card>
+        <v-card-title>Enter Category</v-card-title>
+        <v-card-text>
+          <v-select
+            v-model="categoryDialog.selectedCategory"
+            :items="categoryOptions"
+            label="Select Category"
+            required
+          ></v-select>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" @click="cancelCompletionUpdate">Cancel</v-btn>
+          <v-btn color="primary" @click="confirmCompletionUpdate">Confirm</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <edit-pop-out
+    v-model="showEditDialog"
+    :row-data="editEntry"
+    :non-editable-fields="['id', 'campaign_id']"
+    @close="closeEditDialog"
+    @save="handleEditEntry"
+  />
+
+    <!-- Add file upload dialog -->
+    <v-dialog v-model="showFileUploadDialog" max-width="500px">
+      <v-card>
+        <v-card-title>Upload Entries from Excel</v-card-title>
+        <v-card-text>
+          <v-alert
+            v-if="fileError"
+            type="error"
+            class="mb-4"
+            dismissible
+            @click="fileError = ''"
+          >
+            {{ fileError }}
+          </v-alert>
+          
+          <v-file-input
+            v-model="selectedFile"
+            accept=".xlsx,.xls"
+            label="Upload Excel File"
+            prepend-icon="mdi-file-excel"
+            :error-messages="fileError"
+            @change="handleFileChange"
+          ></v-file-input>
+
+        
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" @click="closeFileUploadDialog">Cancel</v-btn>
+          <v-btn 
+            color="primary" 
+            @click="uploadFile"
+            :loading="isUploading"
+            :disabled="isUploading || !selectedFile"
+          >
+            Upload
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -130,17 +216,30 @@ import { AgGridVue } from "ag-grid-vue3";
 import PersistentAlert from "@/components/PersistentAlert.vue";
 import AddEntryDialog from '@/components/AddEntryDialog.vue';
 
+import EditPopOut from '@/components/EditPopOut.vue';
 export default {
   name: 'CampaignGrid',
   components: {
     PersistentAlert,
     AgGridVue,
     AddEntryDialog,
+    EditPopOut,
   },
   data() {
     return {
       columnDefs: [
-        { headerName: 'Handle Name', field: 'handle_Name', sortable: true, filter: true,checkboxSelection: true,headerCheckboxSelection: true},
+        { 
+          headerName: 'Handle Name', 
+          field: 'handleName',  // Make sure this matches exactly with your API response
+          // or use valueGetter if the field name is different
+          valueGetter: (params) => {
+            return params.data.handleName || params.data.handle_name || '';
+          },
+          sortable: true, 
+          filter: true,
+          checkboxSelection: true,
+          headerCheckboxSelection: true
+        },
         { headerName: 'Email', field: 'email', sortable: true, filter: true,},
         { headerName: 'Tiktok Url', field: 'tiktokUrl', sortable: true, filter: true},
         { headerName: 'Status', field: 'status', sortable: true, filter: true,},
@@ -150,7 +249,18 @@ export default {
         { headerName: 'Attitude', field: 'attitude', sortable: true, filter: true,},
         { headerName: 'Price', field: 'price', sortable: true, filter: true,},
         { headerName: 'Note', field: 'note', sortable: true, filter: true,},
-        { headerName: 'Completion', field: 'completion', sortable: true, filter: true},
+        { 
+          headerName: 'Completion', 
+          field: 'completion', 
+          sortable: true, 
+          filter: true,
+          editable: true,
+          cellEditor: 'agSelectCellEditor',
+          cellEditorParams: {
+            values: ['true', 'false']
+          },
+          onCellValueChanged: params => this.handleCompletionChange(params)
+        },
         { headerName: 'Type', field: 'type', sortable: true, filter: true},
 
 
@@ -176,11 +286,57 @@ export default {
       selectedCampaign: null,
       createCampaignDialog: false,
       newCampaignName: '',
+      Target: 0,
       menu: false,
       completionCount: 0,
       pocCompletions: [],
       showAddEntryDialog: false,
+      categoryDialog: {
+        show: false,
+        selectedCategory: null,
+        pendingUpdate: null, // Will store the pending update data
+      },
+      categoryOptions: ['Electronics/3C',
+                          'Apparel Clothing',
+                          'Home & Living',
+                          'Beauty & Personal Care',
+                          'Toy & Games',
+                          'Health & Wellness',
+                          'Jewelry & Accessories',
+                          'Outdoor & Gardening',
+                          'Sports & Recreation',
+                          'Arts & Crafts',
+                          'Pets & Animal',
+                          'Food & Beverage',
+                          'Luggage & Baggs',
+                          'Automative & Motorcycle',
+                          'Mother & Baby',
+                          'Family & Couple',
+                          'Others',],
+      showEditDialog: false,
+      editEntry: {
+        id: null,
+        handleName: '',
+        email: '',
+        tiktokUrl: '',
+        status: '',
+        poc: '',
+        price: null,
+        note: '',
+        completion: false,
+        type: ''
+      }, // Add your category options here
+      showFileUploadDialog: false,
+      selectedFile: null,
+      fileError: '',
+      isUploading: false,
     };
+  },
+  computed: {
+    getCompletionPercentage() {
+      if (!this.selectedCampaign?.target || !this.completionCount) return 0;
+      return Math.round((this.completionCount / this.selectedCampaign.target) * 100);
+    }
   },
   methods: {
     showAlert(message, type = 'info') {
@@ -205,7 +361,8 @@ export default {
         const response = await axios.get(`${apiBaseUrl}/api/campaigns/list`);
         this.campaigns = response.data.map(campaign => ({
           id: campaign.id,
-          name: campaign.name
+          name: campaign.name,
+          target: campaign.target
         }));
       } catch (error) {
         console.error('Error fetching campaigns:', error);
@@ -222,10 +379,11 @@ export default {
       try {
         const response = await axios.get(`${apiBaseUrl}/api/campaigns/${campaignId}`);
         console.log('Campaign data response:', response.data);
-        this.rowData = response.data.entries || [];
-        
-        // Fetch completion data
-        await this.fetchCompletionData(campaignId);
+        // Add data transformation if needed
+        this.rowData = response.data.entries.map(entry => ({
+          ...entry,
+          handleName: entry.handleName || entry.handle_name || ''  // Ensure handleName is properly mapped
+        }));        await this.fetchCompletionData(campaignId);
       } catch (error) {
         console.error('Error loading campaign data:', error);
         this.rowData = [];
@@ -236,6 +394,7 @@ export default {
 
     async fetchCompletionData(campaignId) {
       try {
+        // Fetch both completion count and POC data
         const [totalCompletion, pocCompletions] = await Promise.all([
           axios.get(`${apiBaseUrl}/api/campaigns/${campaignId}/entries/getAllCompletion`),
           axios.get(`${apiBaseUrl}/api/campaigns/${campaignId}/entries/getAllPocs/${campaignId}`)
@@ -243,8 +402,15 @@ export default {
 
         this.completionCount = totalCompletion.data;
         this.pocCompletions = pocCompletions.data;
+        console.log('Completion data:', {
+          total: this.completionCount,
+          target: this.selectedCampaign?.target,
+          percentage: this.getCompletionPercentage
+        });
       } catch (error) {
         console.error('Error fetching completion data:', error);
+        this.completionCount = 0;
+        this.pocCompletions = [];
       }
     },
 
@@ -258,13 +424,22 @@ export default {
         return;
       }
 
+      if (!this.Target || this.Target <= 0) {
+        this.showAlert('Please enter a valid target number', 'error');
+        return;
+      }
+
       try {
         await axios.post(`${apiBaseUrl}/api/campaigns/create`, null, {
-          params: { name: this.newCampaignName.trim() }
+          params: { 
+            name: this.newCampaignName.trim(), 
+            target: parseInt(this.Target) 
+          }
         });
         this.showAlert('Campaign created successfully', 'success');
         this.createCampaignDialog = false;
         this.newCampaignName = '';
+        this.Target = 0;
         await this.fetchCampaigns();
       } catch (error) {
         console.error('Error creating campaign:', error);
@@ -282,8 +457,8 @@ export default {
         alert('Please select a campaign first');
         return;
       }
-      this.showAddEntryDialog = true;    },
-      async handleAddEntry(entry) {
+      this.showAddEntryDialog = true;},
+    async handleAddEntry(entry) {
       if (!this.selectedCampaign) {
         console.error('No campaign selected');
         return;
@@ -291,10 +466,23 @@ export default {
       const campaignId = this.selectedCampaign.id;
 
       try {
-        const response = await axios.post(
-          `${apiBaseUrl}/api/campaigns/${campaignId}/entries/add`,
-          entry
-        );
+        console.log('Entry data before sending:', entry);
+        const entryData = {
+          handleName: entry.handleName,  // Make sure it's camelCase
+          email: entry.email,
+      tiktokUrl: entry.tiktokUrl,
+      status: entry.status,
+      poc: entry.poc,
+      price: entry.price,
+      note: entry.note,
+      completion: entry.completion,
+      type: entry.type
+    };
+
+    const response = await axios.post(
+      `${apiBaseUrl}/api/campaigns/${campaignId}/entries/add`,
+      entryData  // Send the transformed data
+    );
         console.log('Entry added successfully:', response.data);
         
         // Refresh the campaign data
@@ -308,6 +496,263 @@ export default {
         alert('Failed to add entry. Please try again.');
       }
     },
+    async handleCompletionChange(params) {
+      const { data, newValue } = params;
+      if (!this.selectedCampaign) return;
+
+      // Store the pending update and show category dialog
+      this.categoryDialog.pendingUpdate = {
+        params,
+        data,
+        newValue
+      };
+      this.categoryDialog.selectedCategory = null;
+      this.categoryDialog.show = true;
+    },
+
+    cancelCompletionUpdate() {
+      if (this.categoryDialog.pendingUpdate) {
+        // Revert the cell value
+        this.categoryDialog.pendingUpdate.params.api.undoCellEditing();
+      }
+      this.categoryDialog.show = false;
+      this.categoryDialog.pendingUpdate = null;
+      this.categoryDialog.selectedCategory = null;
+    },
+
+    async confirmCompletionUpdate() {
+      if (!this.categoryDialog.selectedCategory || !this.categoryDialog.pendingUpdate) {
+        this.showAlert('Please select a category', 'error');
+        return;
+      }
+
+      const { data, newValue } = this.categoryDialog.pendingUpdate;
+
+      try {
+        this.isLoading = true;
+        await axios.put(
+          `${apiBaseUrl}/api/campaigns/${this.selectedCampaign.id}/entries/updateCompletion/${data.id}`,
+          {
+            ...data,
+            completion: newValue
+          },
+          {
+            params: {
+              categories: this.categoryDialog.selectedCategory
+            }
+          }
+        );
+
+        // Refresh completion data after update
+        await this.fetchCompletionData(this.selectedCampaign.id);
+        
+        this.showAlert('Completion status updated successfully', 'success');
+        this.categoryDialog.show = false;
+        this.categoryDialog.pendingUpdate = null;
+        this.categoryDialog.selectedCategory = null;
+      } catch (error) {
+        console.error('Error updating completion status:', error);
+        this.showAlert('Failed to update completion status', 'error');
+        
+        // Revert the cell value if the update failed
+        this.categoryDialog.pendingUpdate.params.api.undoCellEditing();
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    // Update the bulk update method to handle categories as well
+    async updateSelectedEntriesCompletion(completionValue) {
+      if (!this.selectedCampaign || !this.gridApi) return;
+
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      if (selectedNodes.length === 0) {
+        this.showAlert('Please select entries to update', 'warning');
+        return;
+      }
+
+      // Show category dialog for bulk update
+      this.categoryDialog.pendingUpdate = {
+        type: 'bulk',
+        nodes: selectedNodes,
+        completionValue
+      };
+      this.categoryDialog.selectedCategory = null;
+      this.categoryDialog.show = true;
+    },
+
+    // Add method to handle bulk updates with category
+    async processBulkCompletionUpdate() {
+      if (!this.categoryDialog.pendingUpdate || !this.categoryDialog.selectedCategory) return;
+
+      const { nodes, completionValue } = this.categoryDialog.pendingUpdate;
+
+      try {
+        this.isLoading = true;
+        const updatePromises = nodes.map(node => 
+          axios.put(
+            `${apiBaseUrl}/api/campaigns/${this.selectedCampaign.id}/entries/updateCompletion/${node.data.id}`,
+            {
+              ...node.data,
+              completion: completionValue
+            },
+            {
+              params: {
+                categories: this.categoryDialog.selectedCategory
+              }
+            }
+          )
+        );
+
+        await Promise.all(updatePromises);
+        
+        // Refresh the grid and completion data
+        await this.loadCampaignData(this.selectedCampaign);
+        
+        this.showAlert(`Updated completion status for ${nodes.length} entries`, 'success');
+        this.categoryDialog.show = false;
+        this.categoryDialog.pendingUpdate = null;
+        this.categoryDialog.selectedCategory = null;
+      } catch (error) {
+        console.error('Error updating completion status:', error);
+        this.showAlert('Failed to update completion status', 'error');
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    onRowDoubleClicked(params) {
+    const rowData = params.data;
+    console.log('Original row data:', rowData);
+    
+    this.editEntry = { 
+        ...rowData  // Copy all original data including campaign_id
+    };
+    
+    console.log('Edit entry data:', this.editEntry);
+    this.showEditDialog = true;
+},
+    // Close dialog and reset form
+    closeEditDialog() {
+    this.showEditDialog = false;
+    this.editEntry = {
+      id: null,
+      handleName: '',
+      email: '',
+      tiktokUrl: '',
+      status: '',
+      poc: '',
+      price: null,
+      note: '',
+      completion: false,
+      type: ''
+    };
+  },
+
+    // Handle edit submission
+    async handleEditEntry(updatedData) {
+    try {
+      this.isLoading = true;
+      
+      console.log('Updating entry with data:', updatedData);
+
+      await axios.put(
+        `${apiBaseUrl}/api/campaigns/${this.selectedCampaign.id}/entries/update/${updatedData.id}`,
+        updatedData
+      );
+
+      await this.loadCampaignData(this.selectedCampaign);
+      this.showAlert('Entry updated successfully!', 'success');
+      this.showEditDialog = false;
+    } catch (error) {
+      console.error('Error updating entry:', error);
+      this.showAlert(
+        `Failed to update entry: ${error.response?.data?.message || error.message}`,
+        'error'
+      );
+    } finally {
+      this.isLoading = false;
+    }
+  },
+
+    openFileUploadDialog() {
+      if (!this.selectedCampaign) {
+        this.showAlert('Please select a campaign first', 'error');
+        return;
+      }
+      this.showFileUploadDialog = true;
+    },
+
+    closeFileUploadDialog() {
+      this.showFileUploadDialog = false;
+      this.selectedFile = null;
+      this.fileError = '';
+    },
+
+    // handleFileChange(file) {
+    //   this.fileError = '';
+    //   if (file) {
+    //     const validTypes = [
+    //       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    //       'application/vnd.ms-excel'
+    //     ];
+    //     if (!validTypes.includes(file.type)) {
+    //       this.fileError = 'Please upload only Excel files (.xlsx or .xls)';
+    //       this.selectedFile = null;
+    //     }
+    //   }
+    // },
+
+    async uploadFile() {
+      if (!this.selectedFile || !this.selectedCampaign) return;
+
+      this.isUploading = true;
+      this.fileError = '';
+
+      try {
+        const formData = new FormData();
+        formData.append('file', this.selectedFile);
+
+        await axios.post(
+          `${apiBaseUrl}/api/campaigns/${this.selectedCampaign.id}/entries/addByFile`,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        );
+
+        this.showAlert('File uploaded successfully', 'success');
+        await this.loadCampaignData(this.selectedCampaign);
+        this.closeFileUploadDialog();
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        this.fileError = error.response?.data || 'Error uploading file';
+      } finally {
+        this.isUploading = false;
+      }
+    },
+
+    async deleteCampaign() {
+      if (!this.selectedCampaign) {
+        this.showAlert('Please select a campaign to delete', 'error');
+        return;
+      }
+
+      const confirmed = confirm(`Are you sure you want to delete the campaign: ${this.selectedCampaign.name}?`);
+      if (!confirmed) return;
+
+      try {
+        await axios.delete(`${apiBaseUrl}/api/campaigns/delete/${this.selectedCampaign.id}`);
+        this.showAlert('Campaign deleted successfully', 'success');
+        this.selectedCampaign = null;
+        await this.fetchCampaigns(); // Refresh the campaign list
+      } catch (error) {
+        console.error('Error deleting campaign:', error);
+        this.showAlert('Failed to delete campaign', 'error');
+      }
+    },
+
   }
 }
 </script>
@@ -333,5 +778,19 @@ export default {
   padding: 12px;
 }
 
+.v-btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.v-file-input {
+  margin-top: 20px;
+}
+
 /* ... other styles ... */
 </style>
+
+
+
+
+

@@ -68,6 +68,7 @@ import WishlistManager from '@/WishList/WishlistManager.vue';
 
 import CampaignGrid from '@/CampaignDB/CampaignGrid.vue';
 
+import Gmail from '@/Gmail/GmailApi.vue';
 
 
 
@@ -331,6 +332,11 @@ const routes = [
         path: '/campaign-grid',
         name: 'CampaignGrid',
         component: CampaignGrid
+      },
+      {
+        path: '/gmail-api',
+        name: 'GmailApi',
+        component: Gmail
       }
     ]
   },

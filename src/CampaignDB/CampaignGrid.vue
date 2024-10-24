@@ -52,11 +52,20 @@
           <v-col cols="auto">
             <v-btn-group>
               <v-btn color="primary" @click="openAddEntryDialog" :disabled="!selectedCampaign">
+                <v-icon>mdi-plus</v-icon>
                 Add Entry
               </v-btn>
               <v-btn color="primary" @click="openFileUploadDialog" :disabled="!selectedCampaign">
                 <v-icon>mdi-file-upload</v-icon>
                 Upload Excel
+              </v-btn>
+              <v-btn color = "primary" @click="deleteEntry" :disabled="!selectedCampaign">
+                <v-icon>mdi-delete</v-icon>
+                Delete
+              </v-btn>
+              <v-btn color = "primary" @click="blockSelected" :disabled="!selectedCampaign">
+                <v-icon>mdi-account-off</v-icon>
+                Block
               </v-btn>
             </v-btn-group>
           </v-col>
@@ -72,6 +81,7 @@
               :domLayout="'autoHeight'"
               rowSelection="multiple"
               @row-double-clicked="onRowDoubleClicked"
+              @selection-changed="onSelectionChanged"
             ></ag-grid-vue>
           </v-col>
         </v-row>
@@ -246,8 +256,8 @@ export default {
         { headerName: 'Poc', field: 'poc', sortable: true, filter: true,},
         { headerName: 'NYC Schedule Date', field: 'nycScheduleDate', sortable: true, filter: true,},
         { headerName: 'Video Link', field: 'videoLink', sortable: true, filter: true,},
-        { headerName: 'Attitude', field: 'attitude', sortable: true, filter: true,},
-        { headerName: 'Price', field: 'price', sortable: true, filter: true,},
+        { headerName: 'Coorperation Level', field: 'attitude', sortable: true, filter: true,},
+        { headerName: 'Rate', field: 'price', sortable: true, filter: true,},
         { headerName: 'Note', field: 'note', sortable: true, filter: true,},
         { 
           headerName: 'Completion', 
@@ -732,7 +742,9 @@ export default {
         this.isUploading = false;
       }
     },
-
+    onRowSelected(row) {
+      this.selectedRow = row.data;
+    },
     async deleteCampaign() {
       if (!this.selectedCampaign) {
         this.showAlert('Please select a campaign to delete', 'error');
@@ -752,7 +764,57 @@ export default {
         this.showAlert('Failed to delete campaign', 'error');
       }
     },
+    async deleteEntry() {
+    if (!this.selectedRow) {
+      this.showAlert('Please select an entry to delete', 'error');
+      return;
+    }
 
+    const confirmed = confirm(`Are you sure you want to delete the selected entry?`);
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${apiBaseUrl}/api/campaigns/${this.selectedCampaign.id}/entries/delete/${this.selectedRow.id}`);
+      this.showAlert('Entry deleted successfully', 'success');
+      await this.loadCampaignData(this.selectedCampaign); // Refresh the data
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      this.showAlert('Failed to delete entry', 'error');
+    }
+  },
+    onSelectionChanged() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      this.selectedRow = selectedNodes.length > 0 ? selectedNodes[0].data : null;
+    },
+    async blockSelected() {
+      // const selectedNodes = this.gridApi.getSelectedNodes();
+      const visibleSelectedData = [];
+      this.gridApi.forEachNodeAfterFilterAndSort((node) => {
+        if (node.isSelected()) {
+          visibleSelectedData.push(node.data);
+        }
+      });
+      for (const data of visibleSelectedData) {
+        try {
+          if (data.is_Blocked) {
+            // If the user is already blocked, delete them from the blacklist
+            await axios.delete(`${apiBaseUrl}/api/black_list/delete/${data.id}`);
+            console.log(`User with ID ${data.id} removed from blacklist.`);
+          } else {
+            // Otherwise, block the user
+            await axios.post(`${apiBaseUrl}/api/black_list/add/${data.id}`);
+            console.log(`User with ID ${data.id} blocked.`);
+          }
+        } catch (error) {
+          console.error(`Error processing ID ${data.id}:`, error);
+          this.showAlert(`Failed to process ID ${data.id}.`, 'error');
+        }
+      }
+      // Optionally refresh the grid or indicate success to the user
+      this.showAlert('Selected users have been processed.', 'success');
+      await this.loadCampaignData(this.selectedCampaign); // Refresh the data
+
+    },
   }
 }
 </script>
@@ -789,6 +851,7 @@ export default {
 
 /* ... other styles ... */
 </style>
+
 
 
 

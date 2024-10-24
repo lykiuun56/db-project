@@ -77,6 +77,12 @@ const menuSections = ref([
       { title: 'Campaign', icon: 'mdi-email', route: '/campaign-grid' },
     ],
   },
+  {
+    title: 'Gmail',
+    items: [
+      { title: 'Gmail', icon: 'mdi-email', route: '/gmail-api' },
+    ],
+  },
 
 
 ]);

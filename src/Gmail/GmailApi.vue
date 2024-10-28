@@ -278,12 +278,9 @@ export default {
       this.loading = true;
       try {
         const res = await axios.get(`${apiBaseUrl}/api/gmail/inbox/received`, { params: { userId: this.userId } });
-        const res = await axios.get(`${apiBaseUrl}/api/gmail/inbox/received`, { params: { userId: this.userId } });
         this.emails = this.formatEmails(res.data);
       } catch (error) {
         console.error('Error fetching inbox emails:', error);
-      } finally {
-        this.loading = false;
       } finally {
         this.loading = false;
       }
@@ -316,9 +313,6 @@ export default {
           to: headers.To,
           subject: headers.Subject,
           date: headers.Date,
-          snippet: email.snippet || 'No snippet available',
-          isUnread: email.labelIds.includes('UNREAD'),
-          labels: email.labelIds.filter(label => !['INBOX', 'UNREAD', 'SENT', 'IMPORTANT'].includes(label))
           snippet: email.snippet || 'No snippet available',
           isUnread: email.labelIds.includes('UNREAD'),
           labels: email.labelIds.filter(label => !['INBOX', 'UNREAD', 'SENT', 'IMPORTANT'].includes(label))

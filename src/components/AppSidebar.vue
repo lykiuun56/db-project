@@ -37,18 +37,37 @@ const menuSections = ref([
     ],
   },
   {
-    title: 'Projects',
+    title: 'Campaign',
     items: [
-      { title: 'Total Projects', icon: 'mdi-view-grid', route: '/tp-grid' },
-      { title: 'Collaborated Projects', icon: 'mdi-account-group', route: '/cp-grid' },
-      ],
+      { title: 'Campaign', icon: 'mdi-email', route: '/campaign-grid' },
+    ],
   },
+  {
+    title: 'Gmail',
+    items: [
+      { title: 'Gmail', icon: 'mdi-email', route: '/gmail-api' },
+    ],
+  },
+  {
+    title: 'Status',
+    items: [
+      {title: 'Email Status', icon: 'mdi-email',route: '/email-status'},
+      {title: 'Live Status', icon: 'mdi-video',route:'/live-status'},
+    ],
+  }, 
   {
     title: 'Management',
     items: [
       { title: 'Agency Email', icon: 'mdi-email', route: '/md-grid' },
       { title: 'Black List', icon: 'mdi-block-helper', route: '/bl-grid' },
     ],
+  },
+  {
+    title: 'Projects',
+    items: [
+      { title: 'Total Projects', icon: 'mdi-view-grid', route: '/tp-grid' },
+      { title: 'Collaborated Projects', icon: 'mdi-account-group', route: '/cp-grid' },
+      ],
   },
   {
     title: 'Tools',
@@ -64,25 +83,8 @@ const menuSections = ref([
       { title: 'Handle Name', icon: 'mdi-alpha-n-box-outline', route: '/tik-search-name' },
     ],
   },
-  {
-    title: 'Status',
-    items: [
-      {title: 'Email Status', icon: 'mdi-email',route: '/email-status'},
-      {title: 'Live Status', icon: 'mdi-video',route:'/live-status'},
-    ],
-  }, 
-  {
-    title: 'Campaign',
-    items: [
-      { title: 'Campaign', icon: 'mdi-email', route: '/campaign-grid' },
-    ],
-  },
-  {
-    title: 'Gmail',
-    items: [
-      { title: 'Gmail', icon: 'mdi-email', route: '/gmail-api' },
-    ],
-  },
+
+
 
 
 ]);

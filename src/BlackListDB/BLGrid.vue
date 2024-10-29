@@ -80,9 +80,10 @@
         :title="'Add to Black List'"
         :fields="fields"
         :formData="formData"
+        :showFileUpload="true"
         @close="showAddForm = false"
         @save="submitAdd"
-        @saveFile="submitFileAdd"
+        @saveFile="showFileUpload"
     />
     <persistent-alert
         :show="alert.show"
@@ -287,6 +288,49 @@ export default {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    },
+    async showFileUpload(formData) {
+      try {
+        // Extract the file from the FormData
+        const file = formData.get('file');
+        
+        // Create a new FormData with just the file
+        const fileFormData = new FormData();
+        fileFormData.append('file', file);
+
+        await axios.post(`${apiBaseUrl}/api/black_list/addByFile`, fileFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        this.showAlert('File uploaded and processed successfully', 'success');
+        await this.refreshGridData();
+        this.showAddForm = false;
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        this.showAlert(error.response?.data || 'Error uploading file', 'error');
+      }
+    },
+    async uploadFile() {
+      try {
+        const formData = new FormData();
+        formData.append('file', this.selectedFile);
+
+        await axios.post(`${apiBaseUrl}/api/black_list/addByFile`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        this.showAlert('File uploaded and processed successfully', 'success');
+        await this.refreshGridData();
+        this.selectedFile = null;
+        this.showAddForm = false;
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        this.showAlert(error.response?.data || 'Error uploading file', 'error');
+      }
     },
   },
 };

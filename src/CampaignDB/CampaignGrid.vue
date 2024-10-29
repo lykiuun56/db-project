@@ -168,13 +168,87 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <edit-pop-out
-    v-model="showEditDialog"
-    :row-data="editEntry"
-    :non-editable-fields="['id', 'campaign_id']"
-    @close="closeEditDialog"
-    @save="handleEditEntry"
-  />
+    <v-dialog v-model="showEditDialog" max-width="600px">
+      <v-card>
+        <v-card-title>Edit Entry</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="handleEditEntry">
+            <v-text-field
+              v-model="editEntry.handleName"
+              label="Handle Name"
+              required
+            ></v-text-field>
+            <v-text-field
+              v-model="editEntry.email"
+              label="Email"
+              type="email"
+              required
+            ></v-text-field>
+            <v-text-field
+              v-model="editEntry.tiktokUrl"
+              label="TikTok URL"
+              required
+            ></v-text-field>
+            <v-select
+              v-model="editEntry.status"
+              :items="statusOptions"
+              label="Status"
+              required
+            ></v-select>
+            <v-text-field
+              v-model="editEntry.poc"
+              label="POC"
+              required
+            ></v-text-field>
+            <v-text-field
+              v-model="editEntry.videoLink"
+              label="Video Link"
+              required
+            ></v-text-field>
+            <v-text-field
+              v-model="editEntry.nycScheduleDate"
+              label="NYC Schedule Date"
+              required
+            ></v-text-field>
+            <v-select
+              v-model="editEntry.attitude"
+              :items="attitudeOptions"
+              label="Coorperation Level"
+              required
+            ></v-select>
+            <v-text-field
+              v-model.number="editEntry.price"
+              label="Rate"
+              type="number"
+              prefix="$"
+              required
+            ></v-text-field>
+            <v-textarea
+              v-model="editEntry.note"
+              label="Note"
+              rows="3"
+            ></v-textarea>
+            <v-checkbox
+              v-model="editEntry.completion"
+              label="Completion"
+            ></v-checkbox>
+            <v-select
+              v-model="editEntry.type"
+              :items="typeOptions"
+              label="Type"
+              multiple
+              chips
+              required
+            ></v-select>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeEditDialog">Cancel</v-btn>
+          <v-btn color="blue darken-1" text @click="handleEditEntry">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <!-- Add file upload dialog -->
     <v-dialog v-model="showFileUploadDialog" max-width="500px">
@@ -226,14 +300,12 @@ import { AgGridVue } from "ag-grid-vue3";
 import PersistentAlert from "@/components/PersistentAlert.vue";
 import AddEntryDialog from '@/components/AddEntryDialog.vue';
 
-import EditPopOut from '@/components/EditPopOut.vue';
 export default {
   name: 'CampaignGrid',
   components: {
     PersistentAlert,
     AgGridVue,
     AddEntryDialog,
-    EditPopOut,
   },
   data() {
     return {
@@ -331,15 +403,21 @@ export default {
         tiktokUrl: '',
         status: '',
         poc: '',
+        videoLink: '',
+        nycScheduleDate: '',
+        attitude: '',
         price: null,
         note: '',
         completion: false,
-        type: ''
-      }, // Add your category options here
+        type: []
+      },
       showFileUploadDialog: false,
       selectedFile: null,
       fileError: '',
       isUploading: false,
+      statusOptions: ['Briefing', 'Lauching', 'Completed'],
+      typeOptions: ['In Person', 'Online'],
+      attitudeOptions: ['High', 'Medium', 'Low'],
     };
   },
   computed: {
@@ -389,11 +467,14 @@ export default {
       try {
         const response = await axios.get(`${apiBaseUrl}/api/campaigns/${campaignId}`);
         console.log('Campaign data response:', response.data);
-        // Add data transformation if needed
-        this.rowData = response.data.entries.map(entry => ({
-          ...entry,
-          handleName: entry.handleName || entry.handle_name || ''  // Ensure handleName is properly mapped
-        }));        await this.fetchCompletionData(campaignId);
+        // Directly map the response data since it's now a list
+        const entries = response.data.entries || [];
+
+        this.rowData = entries.map(entry => ({
+      ...entry,
+      handleName: entry.handleName || entry.handle_name || ''
+    }));
+    await this.fetchCompletionData(campaignId);
       } catch (error) {
         console.error('Error loading campaign data:', error);
         this.rowData = [];
@@ -631,58 +712,66 @@ export default {
       }
     },
     onRowDoubleClicked(params) {
-    const rowData = params.data;
-    console.log('Original row data:', rowData);
-    
-    this.editEntry = { 
-        ...rowData  // Copy all original data including campaign_id
-    };
-    
-    console.log('Edit entry data:', this.editEntry);
-    this.showEditDialog = true;
-},
-    // Close dialog and reset form
-    closeEditDialog() {
-    this.showEditDialog = false;
-    this.editEntry = {
-      id: null,
-      handleName: '',
-      email: '',
-      tiktokUrl: '',
-      status: '',
-      poc: '',
-      price: null,
-      note: '',
-      completion: false,
-      type: ''
-    };
-  },
-
-    // Handle edit submission
-    async handleEditEntry(updatedData) {
-    try {
-      this.isLoading = true;
+      const rowData = params.data;
+      console.log('Original row data:', rowData);
       
-      console.log('Updating entry with data:', updatedData);
+      this.editEntry = { 
+        ...rowData,
+        type: rowData.type ? rowData.type.split(',') : []
+      };
+      
+      console.log('Edit entry data:', this.editEntry);
+      this.showEditDialog = true;
+    },
 
-      await axios.put(
-        `${apiBaseUrl}/api/campaigns/${this.selectedCampaign.id}/entries/update/${updatedData.id}`,
-        updatedData
-      );
-
-      await this.loadCampaignData(this.selectedCampaign);
-      this.showAlert('Entry updated successfully!', 'success');
+    closeEditDialog() {
       this.showEditDialog = false;
-    } catch (error) {
-      console.error('Error updating entry:', error);
-      this.showAlert(
-        `Failed to update entry: ${error.response?.data?.message || error.message}`,
-        'error'
-      );
-    } finally {
-      this.isLoading = false;
-    }
-  },
+      this.editEntry = {
+        id: null,
+        handleName: '',
+        email: '',
+        tiktokUrl: '',
+        status: '',
+        poc: '',
+        videoLink: '',
+        nycScheduleDate: '',
+        attitude: '',
+        price: null,
+        note: '',
+        completion: false,
+        type: []
+      };
+    },
+
+    async handleEditEntry() {
+      try {
+        this.isLoading = true;
+        
+        const dataToSubmit = {
+          ...this.editEntry,
+          type: Array.isArray(this.editEntry.type) ? this.editEntry.type.join(',') : this.editEntry.type
+        };
+        
+        console.log('Updating entry with data:', dataToSubmit);
+
+        await axios.put(
+          `${apiBaseUrl}/api/campaigns/${this.selectedCampaign.id}/entries/update/${dataToSubmit.id}`,
+          dataToSubmit
+        );
+
+        await this.loadCampaignData(this.selectedCampaign);
+        this.showAlert('Entry updated successfully!', 'success');
+        this.showEditDialog = false;
+      } catch (error) {
+        console.error('Error updating entry:', error);
+        this.showAlert(
+          `Failed to update entry: ${error.response?.data?.message || error.message}`,
+          'error'
+        );
+      } finally {
+        this.isLoading = false;
+      }
+    },
 
     openFileUploadDialog() {
       if (!this.selectedCampaign) {

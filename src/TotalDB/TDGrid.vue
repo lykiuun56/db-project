@@ -79,6 +79,9 @@
             <v-list-item @click="openSelectRandomDialog">
               <v-list-item-title>Random Select</v-list-item-title>
             </v-list-item>
+            <v-list-item @click="showArchiveTagDialog">
+              <v-list-item-title>Archive & Delete Tag</v-list-item-title>
+            </v-list-item>
 
           </v-list>
         </v-menu>
@@ -353,6 +356,42 @@
       </v-card>
     </v-dialog>
 
+    <!-- Archive & Delete Tag Dialog -->
+    <v-dialog v-model="isArchiveTagDialogVisible" max-width="600px">
+      <v-card color="#222222">
+        <v-card-title>
+          <span class="headline">Archive & Delete Tag</span>
+        </v-card-title>
+        <v-card-text>
+          <v-form ref = "archiveTagForm">
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-select
+                  v-model="tagToArchive"
+                  :items="mailchimpTags"
+                  label="Select Tag to Archive & Delete"
+                  required
+                /></v-col>
+              </v-row>
+            </v-container>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeArchiveTagDialog">Cancel</v-btn>
+      <v-btn 
+        color="red darken-1" 
+        text 
+        @click="archiveAndDeleteTag"
+        :disabled="!tagToArchive"
+      >
+        Archive & Delete
+      </v-btn>
+    </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <edit-pop-out
         v-model="isEditDialogVisible"
         :rowData="selectedRow"
@@ -500,6 +539,8 @@ export default {
       uploadProgress: 0,
       uploadedCount: 0,
       totalUploadCount: 0,
+      isArchiveTagDialogVisible: false,
+      tagToArchive: '',
     };
   },
   created() {
@@ -520,6 +561,30 @@ export default {
     },
     dismissAlert() {
       this.alert.show = false;
+    },
+
+    showArchiveTagDialog() {
+      this.isArchiveTagDialogVisible = true;
+    },
+    closeArchiveTagDialog() {
+      this.isArchiveTagDialogVisible = false;
+    },  
+    async archiveAndDeleteTag() {
+      if(!this.tagToArchive) {
+        this.showAlert('Please select a tag to archive and delete.');
+        return;
+      }
+      try {
+       await axios.post(`${apiBaseUrl}/api/total/archive-and-delete-tag`, {
+          tagName: this.tagToArchive,
+        });
+        this.showAlert('Tag archived and deleted successfully.');
+        await this.fetchTags();
+        this.closeArchiveTagDialog();
+      } catch (error) {
+        console.error('Error archiving and deleting tag:', error);
+        this.showAlert('Failed to archive and delete the tag.');
+      }
     },
     // Fetch Mailchimp templates for dropdown
     async fetchMailchimpTemplates() {

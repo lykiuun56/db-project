@@ -32,8 +32,25 @@
             required
           ></v-text-field>
           <v-text-field
+            v-model="entry.videoLink"
+            label="Video Link"
+            required
+          ></v-text-field>
+          <v-text-field
+            v-model="entry.nycScheduleDate"
+            label="NYC Schedule Date"
+            required
+          ></v-text-field>
+          <v-select
+            v-model="entry.attitude"
+            :items="attitudeOptions"
+            label="Coorperation Level"
+
+            required
+          ></v-select>
+          <v-text-field
             v-model.number="entry.price"
-            label="Price"
+            label="Rate"
             type="number"
             prefix="$"
             required
@@ -51,6 +68,8 @@
             v-model="entry.type"
             :items="typeOptions"
             label="Type"
+            multiple
+            chips
             required
           ></v-select>
         </v-form>
@@ -82,10 +101,11 @@ export default {
         price: null,
         note: '',
         completion: false,
-        type: '',
+        type: [],
       },
-      statusOptions: ['Active', 'Inactive', 'Pending'], // Adjust as needed
-      typeOptions: ['Type 1', 'Type 2', 'Type 3'], // Adjust as needed
+      statusOptions: ['Briefing', 'Lauching', 'Completed'], // Adjust as needed
+      typeOptions: ['In Person', 'Online'], // Adjust as needed
+      attitudeOptions: ['High', 'Medium', 'Low'], // Adjust as needed
     };
   },
   watch: {
@@ -103,7 +123,11 @@ export default {
     },
     submitForm() {
       if (this.validateForm()) {
-        this.$emit('submit', this.entry);
+        const submissionData = {
+          ...this.entry,
+          type: Array.isArray(this.entry.type) ? this.entry.type.join(',') : this.entry.type
+        };
+        this.$emit('submit', submissionData);
         this.close();
       }
     },
@@ -122,7 +146,7 @@ export default {
         price: null,
         note: '',
         completion: false,
-        type: '',
+        type: [],
       };
     },
   },

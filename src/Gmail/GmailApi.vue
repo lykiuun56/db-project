@@ -7,14 +7,38 @@
     </v-row>
     <v-row justify="center">
       <v-col cols="12" md="6">
-        <v-text-field v-model="userId" label="User ID" outlined></v-text-field>
+        <v-text-field v-model="userId" label="Gmail" outlined></v-text-field>
       </v-col>
     </v-row>
     <v-row justify="center">
       <v-col cols="12" class="text-center">
-        <v-btn color="primary" @click="getInboxEmails">Get Inbox Emails</v-btn>
-        <v-btn color="primary" @click="showSendEmailDialog">Send Email</v-btn>
-        <v-btn color="primary" @click="showSendEmailDialog">Send Email</v-btn>
+        <v-btn 
+          color="primary" 
+          class="mx-2"
+          @click="getInboxEmails"
+          :disabled="!isAuthorized"
+        >
+          GET INBOX EMAILS
+        </v-btn>
+
+        <v-btn 
+          color="primary"
+          class="mx-2"
+          @click="showSendEmailDialog"
+          :disabled="!isAuthorized"
+        >
+          SEND EMAIL
+        </v-btn>
+
+        <v-btn 
+          color="primary" 
+          class="mx-2"
+          @click="initiateGmailAuthorization"
+          :loading="authorizationInProgress"
+          :disabled="authorizationInProgress"
+        >
+          {{ authorizationInProgress ? 'Authorizing...' : 'Authorize Gmail Access' }}
+        </v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -175,7 +199,7 @@
               </v-col>
 
               <v-col cols="12" sm="6">
-                <v-text-field v-model="campaignEntry.handle_name" label="Handle Name"></v-text-field>
+                <v-text-field v-model="campaignEntry.handleName" label="Handle Name"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field v-model="campaignEntry.tiktokUrl" label="Tiktok Url"></v-text-field>
@@ -184,7 +208,7 @@
                 <v-select v-model="campaignEntry.status" :items="statusOptions" label="Status"></v-select>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-select v-model="campaignEntry.poc" :items="pocOptions" label="POC"></v-select>
+                <v-text-field v-model="campaignEntry.poc" label="POC"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field v-model="campaignEntry.nycScheduleDate" label="NYC Schedule Date" type="date"></v-text-field>
@@ -193,7 +217,7 @@
                 <v-text-field v-model="campaignEntry.videoLink" label="Video Link"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="campaignEntry.attitude" label="Attitude"></v-text-field>
+                <v-text-field v-model="campaignEntry.attitude" label="Coorperation Level"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field v-model="campaignEntry.price" label="Price" type="number"></v-text-field>
@@ -231,7 +255,7 @@ export default {
   },
   data() {
     return {
-      userId: 'me', // Use 'me' to refer to the authenticated user
+      userId: '', // Use 'me' to refer to the authenticated user
       emails: [],
       emailDetailsDialog: false,
       selectedEmail: {},
@@ -254,7 +278,7 @@ export default {
       selectedCampaignForEntry: null,
       campaigns: [], // Will be populated with available campaigns
       campaignEntry: {
-        handle_name: '',
+        handleName: '',
         email: '',
         tiktokUrl: '',
         status: '',
@@ -267,17 +291,22 @@ export default {
         completion: null,
         type: '',
       },
-      statusOptions: ['Pending', 'In Progress', 'Completed'],
-      pocOptions: ['A', 'B'],
-      typeOptions: ['Type A', 'Type B'],
+      statusOptions: ['Briefing', 'Lauching', 'Completed'],
+      typeOptions: ['In person', 'Online'],
+      isAuthorized: false,
+      authorizationInProgress: false,
     };
   },
   methods: {
     async getInboxEmails() {
-      this.loading = true;
+      const canProceed = await this.beforeFetchEmails();
+      if (!canProceed) return;
+
       this.loading = true;
       try {
-        const res = await axios.get(`${apiBaseUrl}/api/gmail/inbox/received`, { params: { userId: this.userId } });
+        const res = await axios.get(`${apiBaseUrl}/api/gmail/inbox/received`, { 
+          params: { userId: this.userId } 
+        });
         this.emails = this.formatEmails(res.data);
       } catch (error) {
         console.error('Error fetching inbox emails:', error);
@@ -572,7 +601,7 @@ export default {
     showAddToCampaignDialog() {
       // Reset the form and pre-fill the email
       this.campaignEntry = {
-        handle_name: '',
+        handleName: '',
         email: this.getSenderEmail(this.selectedEmail.from), // Extract email from the sender
         tiktokUrl: '',
         status: '',
@@ -600,12 +629,21 @@ export default {
       }
 
       try {
+            const selectedCampaign = this.campaigns.find(
+          campaign => campaign.id === this.selectedCampaignForEntry
+        );
+
+        if (!selectedCampaign) {
+          console.error('Selected campaign not found');
+          return;
+        }
+
          await axios.post(
           `${apiBaseUrl}/api/gmail/addToCampaignEntry`,
           this.campaignEntry,
           {
             params: {
-              projectName: this.selectedCampaignForEntry
+              projectName: selectedCampaign.name 
             }
           }
         );
@@ -615,7 +653,7 @@ export default {
         
         // Reset form
         this.campaignEntry = {
-          handle_name: '',
+          handleName: '',
           email: '',
           tiktokUrl: '',
           status: '',
@@ -634,9 +672,71 @@ export default {
         // Show error message
       }
     },
+    async checkAuthorization() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/gmail/checkAuthorization`, {
+          params: { userId: this.userId }
+        });
+        this.isAuthorized = response.data;
+        return response.data;
+      } catch (error) {
+        console.error('Error checking authorization:', error);
+        this.isAuthorized = false;
+        return false;
+      }
+    },
+    async initiateGmailAuthorization() {
+      this.authorizationInProgress = true;
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/gmail/authorize`, {
+          params: { userId: this.userId }
+        });
+        
+        // Open the authorization URL in a new window
+        const authWindow = window.open(
+          response.data.link,
+          'Gmail Authorization',
+          'width=600,height=700'
+        );
+
+        // Poll to check if authorization is complete
+        const checkAuthInterval = setInterval(async () => {
+          const isAuthorized = await this.checkAuthorization();
+          if (isAuthorized) {
+            clearInterval(checkAuthInterval);
+            if (authWindow) {
+              authWindow.close();
+            }
+            // Refresh email data
+            await this.getInboxEmails();
+          }
+        }, 2000); // Check every 2 seconds
+
+        // Clear interval if window is closed
+        const windowCheckInterval = setInterval(() => {
+          if (authWindow && authWindow.closed) {
+            clearInterval(checkAuthInterval);
+            clearInterval(windowCheckInterval);
+          }
+        }, 1000);
+
+      } catch (error) {
+        console.error('Error initiating authorization:', error);
+      } finally {
+        this.authorizationInProgress = false;
+      }
+    },
+    async beforeFetchEmails() {
+      const isAuthorized = await this.checkAuthorization();
+      if (!isAuthorized) {
+        await this.initiateGmailAuthorization();
+        return false;
+      }
+      return true;
+    },
   },
   mounted() {
-    this.getInboxEmails();
+    this.checkAuthorization();
   }
 };
 </script>

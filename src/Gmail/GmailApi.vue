@@ -673,58 +673,58 @@ export default {
       }
     },
     async checkAuthorization() {
-      try {
-        const response = await axios.get(`${apiBaseUrl}/api/gmail/checkAuthorization`, {
-          params: { userId: this.userId }
-        });
-        this.isAuthorized = response.data;
-        return response.data;
-      } catch (error) {
-        console.error('Error checking authorization:', error);
-        this.isAuthorized = false;
-        return false;
-      }
+        try {
+            const response = await axios.get(`${apiBaseUrl}/api/gmail/checkAuthorization`, {
+                params: { userId: this.userId }
+            });
+            this.isAuthorized = response.data;
+            return response.data;
+        } catch (error) {
+            console.error('Error checking authorization:', error);
+            return false;
+        }
     },
     async initiateGmailAuthorization() {
-      this.authorizationInProgress = true;
-      try {
-        const response = await axios.get(`${apiBaseUrl}/api/gmail/authorize`, {
-          params: { userId: this.userId }
-        });
-        
-        // Open the authorization URL in a new window
-        const authWindow = window.open(
-          response.data.link,
-          'Gmail Authorization',
-          'width=600,height=700'
-        );
+        this.authorizationInProgress = true;
+        try {
+            // Initiate authorization request
+            const response = await axios.get(`${apiBaseUrl}/api/gmail/authorize`, {
+                params: { userId: this.userId }
+            });
+            
+            const authUrl = response.data.link;
+            // Open the authorization URL in a new window
+            const authWindow = window.open(
+                authUrl,
+                'Gmail Authorization',
+                'width=600,height=700'
+            );
 
-        // Poll to check if authorization is complete
-        const checkAuthInterval = setInterval(async () => {
-          const isAuthorized = await this.checkAuthorization();
-          if (isAuthorized) {
-            clearInterval(checkAuthInterval);
-            if (authWindow) {
-              authWindow.close();
-            }
-            // Refresh email data
-            await this.getInboxEmails();
-          }
-        }, 2000); // Check every 2 seconds
+            // Poll for authorization status every 5 seconds (adjust frequency as needed)
+            const checkAuthInterval = setInterval(async () => {
+                const isAuthorized = await this.checkAuthorization();
+                if (isAuthorized) {
+                    clearInterval(checkAuthInterval);
+                    if (authWindow && !authWindow.closed) {
+                        authWindow.close(); // Attempt to close the window if it's still open
+                    }
+                    await this.getInboxEmails(); // Refresh inbox upon successful authorization
+                }
+            }, 5000);
 
-        // Clear interval if window is closed
-        const windowCheckInterval = setInterval(() => {
-          if (authWindow && authWindow.closed) {
-            clearInterval(checkAuthInterval);
-            clearInterval(windowCheckInterval);
-          }
-        }, 1000);
+            // Optional: Clear interval if authorization window is manually closed
+            const windowCheckInterval = setInterval(() => {
+                if (authWindow && authWindow.closed) {
+                    clearInterval(checkAuthInterval);
+                    clearInterval(windowCheckInterval);
+                    this.authorizationInProgress = false;
+                }
+            }, 1000);
 
-      } catch (error) {
-        console.error('Error initiating authorization:', error);
-      } finally {
-        this.authorizationInProgress = false;
-      }
+        } catch (error) {
+            console.error('Error initiating authorization:', error);
+            this.authorizationInProgress = false;
+        }
     },
     async beforeFetchEmails() {
       const isAuthorized = await this.checkAuthorization();

@@ -1,30 +1,19 @@
 module.exports = {
+  publicPath: '/',
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://creator-tools.us-east-1.elasticbeanstalk.com', // Proxy API requests to the backend
+        target: 'https://api.puffmedia.co',
         changeOrigin: true,
       },
     },
   },
-  
-  configureWebpack: {
-    module: {
-      rules: [
-        {
-          test: /\.(xlsx|xls)$/,
-          use: [
-            {
-              loader: 'file-loader',
-              options: {
-                name: '[name].[ext]',
-                outputPath: 'assets/files/', // Optional: customize output path
-              },
-            },
-          ],
-        },
-      ],
-    },
-  },
 
+  chainWebpack: (config) => {
+    config.module
+      .rule('xlsx')
+      .test(/\.(xlsx|xls)$/)
+      .use('xlsx-loader')
+      .loader('xlsx-loader');
+  },
 };

@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12" md="8">
+      <v-col cols="12" md="9">
         <v-row align="center" class="mb-4">
           <v-col cols="auto">
             <v-menu v-model="menu" :close-on-content-click="false">
@@ -113,10 +113,10 @@
       </v-col>
       
       <!-- New completion areas -->
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="3">
         <v-card class="mb-4">
-          <v-card-title style="color: red; font-size: 3.0em;" align="center">
-            TARGET {{ completionCount || 0 }}/{{ selectedCampaign?.target || 0 }}
+          <v-card-title style="color: white; font-size: 18px;" align="center">
+            PROGRESS {{ completionCount || 0 }}/{{ selectedCampaign?.target || 0 }}
           </v-card-title>
           <v-card-text>
             <v-progress-linear

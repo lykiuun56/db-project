@@ -217,7 +217,7 @@
                 <v-text-field v-model="campaignEntry.videoLink" label="Video Link"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="campaignEntry.attitude" label="Coorperation Level"></v-text-field>
+                <v-text-field v-model="campaignEntry.attitude" :items="coorperationOptions" label ="Coorperation Level"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field v-model="campaignEntry.price" label="Price" type="number"></v-text-field>
@@ -293,6 +293,7 @@ export default {
       },
       statusOptions: ['Briefing', 'Lauching', 'Completed'],
       typeOptions: ['In person', 'Online'],
+      coorperationOptions:['Low','Medium','High'],
       isAuthorized: false,
       authorizationInProgress: false,
     };

@@ -273,6 +273,12 @@
             :error-messages="fileError"
             @change="handleFileChange"
           ></v-file-input>
+          <v-col cols="auto">
+            <v-btn color="#00b19e" @click="downloadTemplate" class="elevation-2">
+              <v-icon left>mdi-file-download</v-icon>
+              Template
+            </v-btn>
+          </v-col>
 
         
         </v-card-text>
@@ -299,6 +305,7 @@ import axios from 'axios';
 import { AgGridVue } from "ag-grid-vue3";
 import PersistentAlert from "@/components/PersistentAlert.vue";
 import AddEntryDialog from '@/components/AddEntryDialog.vue';
+import templateFile from "@/assets/CampaignEntryTemplate.xlsx";
 
 export default {
   name: 'CampaignGrid',
@@ -903,6 +910,14 @@ export default {
       this.showAlert('Selected users have been processed.', 'success');
       await this.loadCampaignData(this.selectedCampaign); // Refresh the data
 
+    },
+    downloadTemplate() {
+      const link = document.createElement('a');
+      link.href = templateFile;
+      link.setAttribute('download', 'CampaignEntryTemplate.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
   }
 }

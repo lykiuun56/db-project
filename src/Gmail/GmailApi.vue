@@ -217,7 +217,11 @@
                 <v-text-field v-model="campaignEntry.videoLink" label="Video Link"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="campaignEntry.attitude" :items="coorperationOptions" label ="Coorperation Level"></v-text-field>
+                <v-select
+                    v-model="campaignEntry.attitude"
+                    :items="coorperationOptions"
+                    label="Cooperation Level"
+                ></v-select>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field v-model="campaignEntry.price" label="Price" type="number"></v-text-field>
@@ -226,7 +230,12 @@
                 <v-textarea v-model="campaignEntry.note" label="Note"></v-textarea>
               </v-col>
               <v-col cols="12" sm="6">
-                <v-text-field v-model="campaignEntry.completion" label="Completion" type="number"></v-text-field>
+                <v-switch
+                    v-model="campaignEntry.completion"
+                    label="Completion"
+                    true-value="true"
+                    false-value="false">
+                </v-switch>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select v-model="campaignEntry.type" :items="typeOptions" label="Type"></v-select>

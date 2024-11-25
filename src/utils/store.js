@@ -11,7 +11,8 @@ export default createStore({
         userPoc:localStorage.getItem('userPoc') || null,
         wishlists: [],
         mailchimpTags: [],
-        mailchimpTemplates:[]
+        mailchimpTemplates:[],
+        isLoadingTemplates:false
         // ... other state properties
     },
     mutations: {
@@ -35,10 +36,13 @@ export default createStore({
             state.mailchimpTags =tags;
         },
         SET_MAILCHIMP_TEMPLATES(state, templates) {
-            state.mailchimpTemplate = templates;
+            // Only update if the value is different
+            if (JSON.stringify(state.mailchimpTemplates) !== JSON.stringify(templates)) {
+                state.mailchimpTemplates = templates;
+            }
         },
-        SET_LOADING_TEMPLATES(state, isLoading) {
-            state.isLoadingTemplates = isLoading;
+        SET_LOADING_TEMPLATES(state, loading) {
+            state.isLoadingTemplates = loading;
         },
         CLEAR_AUTH(state) {
             state.userId = null;
@@ -106,10 +110,10 @@ export default createStore({
             try {
                 const userId = state.userId;
                 const response = await axios.post(`${apiBaseUrl}/api/wishlists/create`,null, {
-                   params:{
-                       name,
-                       userId,
-                   }
+                    params:{
+                        name,
+                        userId,
+                    }
                 });
                 commit('ADD_WISHLIST', response.data);
                 return response.data;
@@ -165,34 +169,29 @@ export default createStore({
                 commit('SET_MAILCHIMP_TAGS', []);
             }
         },
-        async fetchMailchimpTemplates({ state, commit }) {
-            // Prevent multiple simultaneous requests
-            if (state.isLoadingTemplates) {
-                return;
-            }
-
-            commit('SET_LOADING_TEMPLATES', true);
-            try {
-                const response = await axios.get(`${apiBaseUrl}/api/total/templates`, {
-                    params: {
-                        pocName: state.userPoc
-                    },
-                    headers: {
-                        Authorization: `Bearer ${state.authToken}`
-                    }
-                });
-
-                const templates = Array.isArray(response.data) ? response.data : [];
-                commit('SET_MAILCHIMP_TEMPLATES', templates);
-                return templates;
-            } catch (error) {
-                console.error('Error fetching templates:', error);
-                commit('SET_MAILCHIMP_TEMPLATES', []);
-                throw error;
-            } finally {
-                commit('SET_LOADING_TEMPLATES', false);
-            }
-        }
+        // async fetchMailchimpTemplates({ state, commit }) {
+        //     // Prevent duplicate fetches
+        //     if (state.isLoadingTemplates || state.mailchimpTemplates !== null) {
+        //         return;
+        //     }
+        //
+        //     commit('SET_LOADING_TEMPLATES', true);
+        //
+        //     try {
+        //         const response = await axios.get(`${apiBaseUrl}/api/total/templates`);
+        //         if (response.data && Array.isArray(response.data)) {
+        //             commit('SET_MAILCHIMP_TEMPLATES', response.data);
+        //         } else {
+        //             console.error('Invalid template data received:', response.data);
+        //             commit('SET_MAILCHIMP_TEMPLATES', []);
+        //         }
+        //     } catch (error) {
+        //         console.error('Failed to fetch templates:', error);
+        //         commit('SET_MAILCHIMP_TEMPLATES', []);
+        //     } finally {
+        //         commit('SET_LOADING_TEMPLATES', false);
+        //     }
+        // },
         // ... other actions
     },
     getters: {
@@ -202,7 +201,7 @@ export default createStore({
         getUserRole: (state) => state.userRole,  // Add getter for user role
         getUserPoc: (state) => state.userPoc,
         getMailchimpTags: (state) => state.mailchimpTags,
-        getMailhimpTemplates:(state) => state.mailchimpTemplates,
+        getMailchimpTemplates:(state) => state.mailchimpTemplates,
         // ... other getters
     },
 });

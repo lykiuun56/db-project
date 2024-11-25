@@ -193,11 +193,7 @@
                     :items="mailchimpTemplates"
                     label="Select Template"
                     required
-                    :loading="isLoadingTemplates"
-                    :disabled="isLoadingTemplates || !mailchimpTemplates.length"
-                    persistent-hint
-                    :hint="templateSelectionHint"
-                >
+                    >
                   <template v-slot:no-data>
                     <v-list-item>
                       <v-list-item-title>
@@ -630,9 +626,11 @@ export default {
     // Fetch Mailchimp templates for dropdown
     async fetchMailchimpTemplates() {
       try {
-        await this.fetchMailchimpTemplates();
-        console.log('Templates loaded:', this.mailchimpTemplates);
+        // Fetch templates from the backend
+        const response = await axios.get(`${apiBaseUrl}/api/total/templates`);
 
+        // Since only names are returned, map them directly to the dropdown
+        this.mailchimpTemplates = response.data;  // response.data is now just a list of names
       } catch (error) {
         console.error('Error fetching Mailchimp templates:', error);
       }

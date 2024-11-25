@@ -10,6 +10,7 @@ export default createStore({
         userRole: localStorage.getItem('userRole') || null,  // Add user role
         userPoc:localStorage.getItem('userPoc') || null,
         wishlists: [],
+        mailchimpTags: [],
         // ... other state properties
     },
     mutations: {
@@ -28,6 +29,9 @@ export default createStore({
         SET_AUTH_TOKEN(state, payload) {
             state.authToken = payload;
             localStorage.setItem('authToken', payload);
+        },
+        SET_MAILCHIMP_TAGS(state, tags) {
+            state.mailchimpTags =tags;
         },
         CLEAR_AUTH(state) {
             state.userId = null;
@@ -119,6 +123,24 @@ export default createStore({
                 console.error('Failed to fetch wishlists:', error);
                 throw error;
             }
+        },
+        async fetchMailchimpTags({ state, commit }) {
+            try {
+                const response = await axios.get(`${apiBaseUrl}/api/total/tags`, {
+                    headers: { Authorization: `Bearer ${state.authToken}` },
+                });
+                const tags = response.data;
+
+                if (state.userPoc) {
+                    // Filter tags based on POC if it's available
+                    const filteredTags = tags.filter(tag => tag.includes(state.userPoc));
+                    commit('SET_MAILCHIMP_TAGS', filteredTags);
+                } else {
+                    commit('SET_MAILCHIMP_TAGS', tags);
+                }
+            } catch (error) {
+                console.error('Error fetching Mailchimp tags:', error);
+            }
         }
 
         // ... other actions
@@ -129,6 +151,7 @@ export default createStore({
         getWishlists: (state) => state.wishlists,
         getUserRole: (state) => state.userRole,  // Add getter for user role
         getUserPoc: (state) => state.userPoc,
+        getMailchimpTags: (state) => state.mailchimpTags,
         // ... other getters
     },
 });

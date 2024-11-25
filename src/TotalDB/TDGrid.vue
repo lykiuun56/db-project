@@ -471,6 +471,7 @@ export default {
     ...mapState({
       authToken: state => state.authToken, // Get token from Vuex state
       userPoc: state => state.userPoc,
+      mailchimpTags: state => state.mailchimpTags,
     }),
   },
   data() {

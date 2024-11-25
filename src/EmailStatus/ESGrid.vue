@@ -2,9 +2,30 @@
   <v-container fluid>
     <v-row>
       <v-col cols = "12">
-        <h1 style="color: white">Status</h1>
+        <h1 style="color: white">Email Status</h1>
       </v-col>
     </v-row>
+
+
+    <!-- Export Options Button -->
+    <v-col cols="auto">
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-btn color="#4700cf" v-bind="props">
+            Export Options
+            <v-icon right>mdi-chevron-down</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="exportAllToExcel">
+            <v-list-item-title>Export All</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="exportSelectedToExcel">
+            <v-list-item-title>Export Selected</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-col>
 
 
     <v-row>
@@ -52,6 +73,7 @@ import axios from 'axios';
 import {AgGridVue} from "ag-grid-vue3";
 import { mapState } from 'vuex';
 import PersistentAlert from "@/components/PersistentAlert.vue";
+import { exportToExcel } from '@/utils/exportUtils';
 
 
 export default {
@@ -129,6 +151,20 @@ export default {
     dismissAlert() {
       this.alert.show = false;
     },
+
+    exportAllToExcel() {
+      const allDisplayedData = [];
+      this.gridApi.forEachNodeAfterFilterAndSort((node) => {
+        allDisplayedData.push(node.data);
+      });
+      exportToExcel(allDisplayedData, 'LiveStatus_All');
+    },
+    exportSelectedToExcel() {
+      const selectedNodes = this.gridApi.getSelectedNodes();
+      const selectedData = selectedNodes.map((node) => node.data);
+      exportToExcel(selectedData, 'LiveStatus_Selected');
+    },
+
 
     async updateCampaignRates(campaignId) {
       try {

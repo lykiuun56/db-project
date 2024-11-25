@@ -1,5 +1,5 @@
 <template>
-    <v-container fluid class="pa-0">
+  <v-container fluid class="pa-0">
     <v-row>
       <v-col cols="12"  >
         <h1 style="color: white">Total Database</h1>
@@ -64,9 +64,9 @@
             <v-list-item @click="showCBDForm">
               <v-list-item-title>Write To CBD</v-list-item-title>
             </v-list-item>
-<!--            <v-list-item @click="showMailchimpForm">-->
-<!--              <v-list-item-title>Send Mailchimp Email</v-list-item-title>-->
-<!--            </v-list-item>-->
+            <!--            <v-list-item @click="showMailchimpForm">-->
+            <!--              <v-list-item-title>Send Mailchimp Email</v-list-item-title>-->
+            <!--            </v-list-item>-->
             <v-list-item @click="fetchScheduledCampaigns">
               <v-list-item-title>View Scheduled Campaigns</v-list-item-title>
             </v-list-item>
@@ -188,23 +188,43 @@
                 </v-col>
                 <!-- Template Dropdown -->
                 <v-col cols="12" sm="6">
-                  <v-select
-                    v-if="mailchimpTemplates.length > 0"
+                <v-select
                     v-model="selectedTemplateName"
                     :items="mailchimpTemplates"
                     label="Select Template"
                     required
-                  />
+                    :loading="isLoadingTemplates"
+                    :disabled="isLoadingTemplates || !mailchimpTemplates.length"
+                    persistent-hint
+                    :hint="templateSelectionHint"
+                >
+                  <template v-slot:no-data>
+                    <v-list-item>
+                      <v-list-item-title>
+                        {{ isLoadingTemplates ? 'Loading templates...' : 'No templates available' }}
+                      </v-list-item-title>
+                    </v-list-item>
+                  </template>
+                </v-select>
                 </v-col>
                 <!-- Tag Selection -->
                 <v-col cols="12" sm="6">
                   <v-select
-                    v-if="mailchimpTags.length > 0"
-                    v-model="selectedTag"
-                    :items="mailchimpTags"
-                    label="Select Tag"
-                    required
-                  />
+                      v-model="selectedTag"
+                      :items="mailchimpTags"
+                      label="Select Tag"
+                      required
+                      :loading="isLoadingTags"
+                      :disabled="isLoadingTags || !mailchimpTags.length"
+                  >
+                    <template v-slot:no-data>
+                      <v-list-item>
+                        <v-list-item-title>
+                          {{ isLoadingTags ? 'Loading tags...' : 'No tags available for your POC' }}
+                        </v-list-item-title>
+                      </v-list-item>
+                    </template>
+                  </v-select>
                 </v-col>
                 <!-- Schedule time -->
                 <v-col cols="12">
@@ -246,26 +266,26 @@
                 <!-- Dropdown for Categories -->
                 <v-col cols="12" sm="6">
                   <v-select
-                    v-model="tagCategories"
-                    :items="categoriesList"
-                    label="Categories"
-                    required
+                      v-model="tagCategories"
+                      :items="categoriesList"
+                      label="Categories"
+                      required
                   />
                 </v-col>
                 <!-- POC Field -->
                 <v-col cols="12" sm="6">
                   <v-text-field
-                    v-model="tagPoc"
-                    label="POC"
-                    required
+                      v-model="tagPoc"
+                      label="POC"
+                      required
                   />
                 </v-col>
                 <!-- Project Name Field -->
                 <v-col cols="12" sm="6">
                   <v-text-field
-                    v-model="tagProjectName"
-                    label="Project Name"
-                    required
+                      v-model="tagProjectName"
+                      label="Project Name"
+                      required
                   />
                 </v-col>
               </v-row>
@@ -342,10 +362,10 @@
         <v-card-text>
           <!-- Dropdown for listing scheduled campaigns -->
           <v-select
-            v-model="selectedCampaign"
-            :items="campaignsList"
-            label="Select a Scheduled Campaign"
-            required
+              v-model="selectedCampaign"
+              :items="campaignsList"
+              label="Select a Scheduled Campaign"
+              required
           />
         </v-card-text>
         <v-card-actions>
@@ -368,11 +388,11 @@
               <v-row>
                 <v-col cols="12">
                   <v-select
-                  v-model="tagToArchive"
-                  :items="mailchimpTags"
-                  label="Select Tag to Archive & Delete"
-                  required
-                /></v-col>
+                      v-model="tagToArchive"
+                      :items="mailchimpTags"
+                      label="Select Tag to Archive & Delete"
+                      required
+                  /></v-col>
               </v-row>
             </v-container>
           </v-form>
@@ -380,15 +400,15 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeArchiveTagDialog">Cancel</v-btn>
-      <v-btn 
-        color="red darken-1" 
-        text 
-        @click="archiveAndDeleteTag"
-        :disabled="!tagToArchive"
-      >
-        Archive & Delete
-      </v-btn>
-    </v-card-actions>
+          <v-btn
+              color="red darken-1"
+              text
+              @click="archiveAndDeleteTag"
+              :disabled="!tagToArchive"
+          >
+            Archive & Delete
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -413,37 +433,37 @@
         @saveToDB="submitAddToDB"
         @saveToBoth="submitAddToBoth"
         @saveFile="submitFileAdd"
-        >
-        <v-select
+    >
+      <v-select
           v-model="formData.categories"
           :items="categoriesList"
           label="Categories"
           required
-        />
-    </add-pop-out>
-      <persistent-alert
-          :show="alert.show"
-          :message="alert.message"
-          :type="alert.type"
-          :dismissible="alert.dismissible"
-          @dismiss="dismissAlert"
       />
+    </add-pop-out>
+    <persistent-alert
+        :show="alert.show"
+        :message="alert.message"
+        :type="alert.type"
+        :dismissible="alert.dismissible"
+        @dismiss="dismissAlert"
+    />
 
-      <!-- Add this progress bar component -->
-      <v-dialog v-model="showProgressBar" persistent max-width="300">
-        <v-card>
-          <v-card-text>
-            Uploading file...
-            <v-progress-linear
+    <!-- Add this progress bar component -->
+    <v-dialog v-model="showProgressBar" persistent max-width="300">
+      <v-card>
+        <v-card-text>
+          Uploading file...
+          <v-progress-linear
               :value="uploadProgress"
               color="primary"
               height="25"
-            >
-              <strong>{{ Math.ceil(uploadProgress) }}%</strong>
-            </v-progress-linear>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
+          >
+            <strong>{{ Math.ceil(uploadProgress) }}%</strong>
+          </v-progress-linear>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -456,7 +476,7 @@ import { exportToExcel } from '@/utils/exportUtils';
 import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
 import AddPopOut from '@/components/AddPopOut.vue';
 import templateFile from '@/assets/td_template.xlsx';
-import {mapState} from "vuex";
+import {mapActions, mapState} from "vuex";
 import PersistentAlert from "@/components/PersistentAlert.vue";
 
 export default {
@@ -472,6 +492,8 @@ export default {
       authToken: state => state.authToken, // Get token from Vuex state
       userPoc: state => state.userPoc,
       mailchimpTags: state => state.mailchimpTags,
+      mailchimpTemplates : state => state.mailchimpTemplates,
+      isLoadingTemplates: state => state.isLoadingTemplates,
     }),
   },
   data() {
@@ -494,10 +516,7 @@ export default {
       mailchimpReply: '',
       mailchimpPoc: '',
       mailchimpProjectName: '',
-      selectedTemplateName: '',  // Store the selected template ID
-      mailchimpTemplates: [],  // Store all template options
       selectedTag: '',
-      mailchimpTags: [],
       formData: {
         handle_name: '',
         followers: '',
@@ -542,17 +561,38 @@ export default {
       totalUploadCount: 0,
       isArchiveTagDialogVisible: false,
       tagToArchive: '',
+      isLoadingTags: false,
+      isLoadingTemplates: false,
+      mailchimpTemplates:[],
+      selectedTemplateName:null,
+      localTemplates: [], // Local copy of templates
+      templateLoadAttempted: false,
     };
   },
   created() {
     this.fetchCategories();
     this.fetchMailchimpTemplates();
-    this.fetchTags();
+    this.fetchMailchimpTags();
   },
-  // mounted() {
-  //   this.fetchMailchimpTemplates();
-  // },
+// mounted() {
+//   this.fetchMailchimpTemplates();
+// },
   methods: {
+    ...mapActions(['fetchMailchimpTags','fetchMailchimpTemplates']),
+    async loadTemplates() {
+      if (this.templateLoadAttempted) {
+        return;
+      }
+
+      this.templateLoadAttempted = true;
+      try {
+        await this.$store.dispatch('fetchMailchimpTemplates');
+        this.localTemplates = [...this.storeTemplates];
+      } catch (error) {
+        console.error('Failed to load templates:', error);
+        this.showAlert('Failed to load templates. Please try again.', 'error');
+      }
+    },
     showAlert(message, type = 'info') {
       this.alert = {
         show: true,
@@ -569,14 +609,14 @@ export default {
     },
     closeArchiveTagDialog() {
       this.isArchiveTagDialogVisible = false;
-    },  
+    },
     async archiveAndDeleteTag() {
       if(!this.tagToArchive) {
         this.showAlert('Please select a tag to archive and delete.');
         return;
       }
       try {
-       await axios.post(`${apiBaseUrl}/api/total/archive-and-delete-tag`, {
+        await axios.post(`${apiBaseUrl}/api/total/archive-and-delete-tag`, {
           tagName: this.tagToArchive,
         });
         this.showAlert('Tag archived and deleted successfully.');
@@ -590,11 +630,9 @@ export default {
     // Fetch Mailchimp templates for dropdown
     async fetchMailchimpTemplates() {
       try {
-        // Fetch templates from the backend
-        const response = await axios.get(`${apiBaseUrl}/api/total/templates`);
+        await this.fetchMailchimpTemplates();
+        console.log('Templates loaded:', this.mailchimpTemplates);
 
-        // Since only names are returned, map them directly to the dropdown
-        this.mailchimpTemplates = response.data;  // response.data is now just a list of names
       } catch (error) {
         console.error('Error fetching Mailchimp templates:', error);
       }
@@ -602,39 +640,69 @@ export default {
 
     async fetchTags() {
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/total/tags`);
-        this.mailchimpTags = response.data;
-      } catch(error) {
-        console.error('Error fetching Mailchimp tags:', error)
+        await this.fetchMailchimpTags(); // This will update the store
+
+        // If you need to do additional processing with the tags
+        if (this.mailchimpTags.length > 0) {
+          // Any additional processing you need
+          this.selectedTag = ''; // Reset selected tag if needed
+        }
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+        this.showAlert('Failed to fetch Mailchimp tags.', 'error');
       }
     },
 
     // Show Mailchimp email form dialog
-    showMailchimpForm() {
+    async showMailchimpForm() {
       this.isMailchimpDialogVisible = true;
+      this.isLoadingTags = true;
+      this.isLoadingTemplates = true;
+      this.templateLoadAttempted = false;
+
+      try {
+        await this.fetchMailchimpTags();
+        await this.fetchMailchimpTemplates();
+
+      } catch (error) {
+        console.error('Error loading tags:', error);
+        console.error('Error loading templates:',error);
+        this.showAlert('Failed to load Mailchimp tags', 'error');
+      } finally {
+        this.isLoadingTags = false;
+      }
     },
     closeMailchimpForm() {
       this.isMailchimpDialogVisible = false;
+      this.mailchimpSubject = '';
+      this.selectedTemplateName = null;
+      this.selectedTag = null;
+      this.scheduledTime = '';
+      this.mailchimpFrom = '';
+      this.mailchimpReply = '';
+      this.mailchimpProjectName = '';
     },
 
     // Submit the Mailchimp email form
     async submitMailchimpForm() {
-      if (!this.scheduledTime || !this.selectedTag|| !this.mailchimpSubject || !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply) {
+      if (!this.scheduledTime || !this.selectedTag || !this.mailchimpSubject ||
+          !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply) {
         this.showAlert('Please fill in all the required fields.');
         return;
       }
+
       try {
         await axios.post(`${apiBaseUrl}/api/total/createCampaign`, {
           subject: this.mailchimpSubject,
-          from_name :this.mailchimpFrom,
+          from_name: this.mailchimpFrom,
           reply_to: this.mailchimpReply,
           templateName: this.selectedTemplateName,
           tag: this.selectedTag,
           scheduledTime: this.scheduledTime,
           poc: this.userPoc,
-          projectName : this.mailchimpProjectName,
+          projectName: this.mailchimpProjectName,
         });
-        this.showAlert('Tag successfully scheduled.');
+        this.showAlert('Campaign successfully scheduled.');
         this.closeMailchimpForm();
       } catch (error) {
         console.error('Error sending Mailchimp Campaign:', error);
@@ -1073,14 +1141,14 @@ export default {
           }
 
           await axios.post(`${apiBaseUrl}/api/total/add`, dataOrFile)
-            .then(() => {
-              this.refreshGridData();  // Refresh grid data after successful add
-              this.showAddForm = false; // Close the form
-              this.showAlert('Entry added successfully.', 'success');
-            }).catch(error => {
-              console.error('Error adding data:', error);
-              this.showAlert('Failed to add entry.', 'error');
-            });
+              .then(() => {
+                this.refreshGridData();  // Refresh grid data after successful add
+                this.showAddForm = false; // Close the form
+                this.showAlert('Entry added successfully.', 'success');
+              }).catch(error => {
+                console.error('Error adding data:', error);
+                this.showAlert('Failed to add entry.', 'error');
+              });
         }
       } catch (error) {
         console.error('Unexpected error:', error);
@@ -1114,21 +1182,21 @@ export default {
             }
           },
         });
-        
+
         clearInterval(progressInterval);
         this.uploadProgress = 95; // Show processing state
-        
+
         // Simulate processing time
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         this.uploadProgress = 100;
-        
+
         this.totalUploadCount = response.data.totalCount || 0;
         this.uploadedCount = response.data.uploadedCount || 0;
-        
+
         this.refreshGridData();
         this.showAddForm = false;
-        
+
         const duplicates = response.data.duplicates;
         const blacklisted = response.data.blacklisted;
         let message = `File processed successfully. ${this.uploadedCount} entries were added.`;
@@ -1375,10 +1443,10 @@ html, body {
   padding: 0;
 }
 .total-database-wrapper {
-   background-color: #121212; /* Match the body background color */
-   min-height: 100vh;
-   width: 100%;
- }
+  background-color: #121212; /* Match the body background color */
+  min-height: 100vh;
+  width: 100%;
+}
 
 /* Ensure Vuetify container doesn't add unwanted padding */
 .v-container.pa-0 {

@@ -11,6 +11,7 @@ export default createStore({
         userPoc:localStorage.getItem('userPoc') || null,
         wishlists: [],
         mailchimpTags: [],
+        mailchimpTemplates:[]
         // ... other state properties
     },
     mutations: {
@@ -32,6 +33,12 @@ export default createStore({
         },
         SET_MAILCHIMP_TAGS(state, tags) {
             state.mailchimpTags =tags;
+        },
+        SET_MAILCHIMP_TEMPLATES(state, templates) {
+            state.mailchimpTemplate = templates;
+        },
+        SET_LOADING_TEMPLATES(state, isLoading) {
+            state.isLoadingTemplates = isLoading;
         },
         CLEAR_AUTH(state) {
             state.userId = null;
@@ -126,23 +133,66 @@ export default createStore({
         },
         async fetchMailchimpTags({ state, commit }) {
             try {
-                const response = await axios.get(`${apiBaseUrl}/api/total/tags`, {
-                    headers: { Authorization: `Bearer ${state.authToken}` },
-                });
-                const tags = response.data;
+                console.log('Fetching tags with POC:', state.userPoc); // Add logging
 
-                if (state.userPoc) {
-                    // Filter tags based on POC if it's available
-                    const filteredTags = tags.filter(tag => tag.includes(state.userPoc));
-                    commit('SET_MAILCHIMP_TAGS', filteredTags);
+                const response = await axios.get(`${apiBaseUrl}/api/total/tags`, {
+                    params: {
+                        pocName: state.userPoc
+                    },
+                    headers: {
+                        Authorization: `Bearer ${state.authToken}`
+                    },
+                });
+
+                console.log('Received tags:', response.data); // Add logging
+
+                if (Array.isArray(response.data)) {
+                    if (state.userPoc) {
+                        const filteredTags = response.data.filter(tag =>
+                            tag && typeof tag === 'string' && tag.includes(state.userPoc)
+                        );
+                        console.log('Filtered tags:', filteredTags); // Add logging
+                        commit('SET_MAILCHIMP_TAGS', filteredTags);
+                    } else {
+                        commit('SET_MAILCHIMP_TAGS', response.data);
+                    }
                 } else {
-                    commit('SET_MAILCHIMP_TAGS', tags);
+                    console.error('Unexpected response format:', response.data);
+                    commit('SET_MAILCHIMP_TAGS', []);
                 }
             } catch (error) {
-                console.error('Error fetching Mailchimp tags:', error);
+                console.error('Error fetching Mailchimp tags:', error.response || error);
+                commit('SET_MAILCHIMP_TAGS', []);
+            }
+        },
+        async fetchMailchimpTemplates({ state, commit }) {
+            // Prevent multiple simultaneous requests
+            if (state.isLoadingTemplates) {
+                return;
+            }
+
+            commit('SET_LOADING_TEMPLATES', true);
+            try {
+                const response = await axios.get(`${apiBaseUrl}/api/total/templates`, {
+                    params: {
+                        pocName: state.userPoc
+                    },
+                    headers: {
+                        Authorization: `Bearer ${state.authToken}`
+                    }
+                });
+
+                const templates = Array.isArray(response.data) ? response.data : [];
+                commit('SET_MAILCHIMP_TEMPLATES', templates);
+                return templates;
+            } catch (error) {
+                console.error('Error fetching templates:', error);
+                commit('SET_MAILCHIMP_TEMPLATES', []);
+                throw error;
+            } finally {
+                commit('SET_LOADING_TEMPLATES', false);
             }
         }
-
         // ... other actions
     },
     getters: {
@@ -152,6 +202,7 @@ export default createStore({
         getUserRole: (state) => state.userRole,  // Add getter for user role
         getUserPoc: (state) => state.userPoc,
         getMailchimpTags: (state) => state.mailchimpTags,
+        getMailhimpTemplates:(state) => state.mailchimpTemplates,
         // ... other getters
     },
 });

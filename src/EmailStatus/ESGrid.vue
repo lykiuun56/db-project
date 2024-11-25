@@ -109,7 +109,9 @@ export default {
           flex: 1.5,
           valueFormatter: params => (params.value * 100).toFixed(2) + '%',  // Format as percentage
         },
-        { headerName: 'Poc', field:'poc', sortable: true, filter: true, flex:1.5 }
+        { headerName: 'Poc', field:'poc', sortable: true, filter: true, flex:1.5 },
+        { headerName: 'Date',field: 'date',sortable: true,filter:true,flex:1.5},
+        { headerName: 'Subject Line', field: 'subject',sortable: true,filter: true,flex: 1.5}
       ],
       rowData: [],
       gridOptions: {

@@ -169,6 +169,41 @@ export default createStore({
                 commit('SET_MAILCHIMP_TAGS', []);
             }
         },
+        async fetchTemplates({ state, commit }) {
+            commit('SET_LOADING_TEMPLATES', true);
+        
+            try {
+                console.log('Attempting to fetch templates with POC Name:', state.userPoc);
+                
+        
+                const response = await axios.get(`${apiBaseUrl}/api/total/templates`, {
+                    params: {
+                        pocName: state.userPoc, // Pass the POC name
+                    },
+                    headers: {
+                        Authorization: `Bearer ${state.authToken}`, // Include the token in the headers
+                    },
+                });
+        
+                // Check the response and handle it
+                console.log('Response received:', response); // Log the raw response
+        
+                if (response.data && Array.isArray(response.data)) {
+                    console.log('Templates fetched successfully:', response.data); // Log the template names
+                    commit('SET_MAILCHIMP_TEMPLATES', response.data);
+                } else {
+                    console.error('Unexpected data format in response:', response.data);
+                    commit('SET_MAILCHIMP_TEMPLATES', []); // Set an empty array to prevent errors
+                }
+            } catch (error) {
+                console.error('Error fetching Mailchimp templates:', error);
+                commit('SET_MAILCHIMP_TEMPLATES', []); // Reset templates on error
+            } finally {
+                commit('SET_LOADING_TEMPLATES', false);
+            }
+        },
+        
+        
         // async fetchMailchimpTemplates({ state, commit }) {
         //     // Prevent duplicate fetches
         //     if (state.isLoadingTemplates || state.mailchimpTemplates !== null) {

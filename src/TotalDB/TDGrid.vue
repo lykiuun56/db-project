@@ -627,10 +627,11 @@ export default {
     async fetchMailchimpTemplates() {
       try {
         // Fetch templates from the backend
-        const response = await axios.get(`${apiBaseUrl}/api/total/templates`);
+        await this.$store.dispatch('fetchTemplates');
+        this.mailchimpTemplates = this.$store.state.mailchimpTemplates;
 
         // Since only names are returned, map them directly to the dropdown
-        this.mailchimpTemplates = response.data;  // response.data is now just a list of names
+        // this.mailchimpTemplates = response.data;  // response.data is now just a list of names
       } catch (error) {
         console.error('Error fetching Mailchimp templates:', error);
       }

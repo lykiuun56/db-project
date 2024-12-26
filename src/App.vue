@@ -10,9 +10,9 @@
         v-if="isLoggedIn"
     >
       <!-- App title or logo -->
-      <v-app-bar-title class="text-h5 font-weight-bold color:#121212">
-        <img src="@/assets/log1.png" alt="Puff-Media Logo" style="height: 120px; width: auto; object-fit: contain;">
-      </v-app-bar-title>
+<!--      <v-app-bar-title class="text-h5 font-weight-bold color:#121212">-->
+<!--        <img src="@/assets/log1.png" alt="Puff-Media Logo" style="height: 120px; width: auto; object-fit: contain;">-->
+<!--      </v-app-bar-title>-->
 
       <v-spacer></v-spacer>
 

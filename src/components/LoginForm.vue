@@ -3,11 +3,12 @@
     <v-row align="center" justify="center">
       <v-col cols="12" sm="8" md="6" lg="4">
         <v-card color = "#222222" elevation="8" rounded="lg" class="login-card bg-indigo-800">
-          <v-card-title class="text-center py-4">
-            <div class="mx-auto mb-4 w-24 h-24 bg-purple-600 rounded-full flex items-center justify-center">
-              <img src="@/assets/logo.png" alt="Puff-Media Logo" style="height: 120px; width: 120px; object-fit: contain;">
-            </div>
-          </v-card-title>
+<!--          logo-->
+<!--          <v-card-title class="text-center py-4">-->
+<!--            <div class="mx-auto mb-4 w-24 h-24 bg-purple-600 rounded-full flex items-center justify-center">-->
+<!--              <img src="@/assets/logo.png" alt="Puff-Media Logo" style="height: 120px; width: 120px; object-fit: contain;">-->
+<!--            </div>-->
+<!--          </v-card-title>-->
           <v-card-text>
             <v-form @submit.prevent="handleSubmit" v-model="valid" lazy-validation>
               <v-text-field

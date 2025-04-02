@@ -300,6 +300,65 @@ export default {
     AddPopOut,
     PersistentAlert,
   },
+  data() {
+    return {
+      // Grid related
+      columnDefs: [
+        { field: 'id', headerName: 'ID', checkboxSelection: true },
+        { field: 'handleName', headerName: 'Handle Name' },
+        { field: 'email', headerName: 'Email' },
+        { field: 'location', headerName: 'Location' },
+        { field: 'country', headerName: 'Country' },
+        { field: 'sentTimes', headerName: 'Sent Times' },
+        { field: 'openTimes', headerName: 'Open Times' },
+        { field: 'openRate', headerName: 'Open Rate' }
+      ],
+      rowData: [],
+      gridOptions: {
+        defaultColDef: {
+          sortable: true,
+          filter: true,
+          resizable: true
+        }
+      },
+      
+      // Dialog controls
+      isEditDialogVisible: false,
+      isMailchimpDialogVisible: false,
+      isTagDialogVisible: false,
+      isScheduledCampaignsDialogVisible: false,
+      isArchiveTagDialogVisible: false,
+      
+      // Form data
+      selectedRow: null,
+      mailchimpSubject: '',
+      selectedTemplateName: null,
+      selectedTag: null,
+      scheduledTime: '',
+      mailchimpFrom: '',
+      mailchimpReply: '',
+      mailchimpProjectName: '',
+      
+      // Tag form data
+      tagCategories: '',
+      categoriesList: ['Category 1', 'Category 2', 'Category 3'], // Update with your categories
+      tagPoc: '',
+      tagProjectName: '',
+      tagToArchive: null,
+      
+      // Campaign data
+      selectedCampaign: null,
+      campaignsList: [],
+      
+      // Notifications
+      snackbar: {
+        show: false,
+        message: '',
+        color: 'success'
+      },
+      isLoadingTags: false
+    }
+  },
   computed: {
     ...mapState({
       authToken: state => state.authToken, // Get token from Vuex state
@@ -309,5 +368,75 @@ export default {
       isLoadingTemplates: state => state.isLoadingTemplates,
     }),
   },
+  methods: {
+    async onGridReady(params) {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/api/email-open-stats`);
+        this.rowData = response.data;
+      } catch (error) {
+        this.showSnackbar('Error loading data', 'error');
+      }
+    },
+    
+    onRowDoubleClicked(event) {
+      this.selectedRow = event.data;
+      this.isEditDialogVisible = true;
+    },
+    
+    async onSaveEdit(updatedData) {
+      try {
+        await axios.put(`${apiBaseUrl}/api/email-open-stats/${updatedData.id}`, updatedData);
+        this.showSnackbar('Record updated successfully', 'success');
+        await this.onGridReady();
+      } catch (error) {
+        this.showSnackbar('Error updating record', 'error');
+      }
+      this.isEditDialogVisible = false;
+    },
+    
+    showSnackbar(message, color = 'success') {
+      this.snackbar.message = message;
+      this.snackbar.color = color;
+      this.snackbar.show = true;
+    },
+    
+    // Export methods
+    async exportAllToExcel() {
+      await exportToExcel(this.rowData, 'email_open_stats');
+    },
+    
+    async exportSelectedToExcel() {
+      const selectedNodes = this.$refs.agGrid.api.getSelectedNodes();
+      const selectedData = selectedNodes.map(node => node.data);
+      await exportToExcel(selectedData, 'selected_email_open_stats');
+    },
+    
+    // Dialog control methods
+    showMailchimpForm() {
+      this.isMailchimpDialogVisible = true;
+    },
+    
+    closeMailchimpForm() {
+      this.isMailchimpDialogVisible = false;
+    },
+    
+    showTagForm() {
+      this.isTagDialogVisible = true;
+    },
+    
+    closeTagForm() {
+      this.isTagDialogVisible = false;
+    },
+    
+    showArchiveTagDialog() {
+      this.isArchiveTagDialogVisible = true;
+    },
+    
+    closeArchiveTagDialog() {
+      this.isArchiveTagDialogVisible = false;
+    },
+    
+    // ... Add other required methods for campaign management, tag management, etc.
+  }
 }
 </script>

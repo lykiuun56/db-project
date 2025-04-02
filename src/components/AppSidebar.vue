@@ -34,6 +34,7 @@ const menuSections = ref([
     items: [
       { title: 'Total Database', icon: 'mdi-home-circle', route: '/td-grid' },
       { title: 'Collaborated', icon: 'mdi-account-group', route: '/cd-grid' },
+      { title: 'Email Open', icon: 'mdi-email', route: '/email-open' },
     ],
   },
   {

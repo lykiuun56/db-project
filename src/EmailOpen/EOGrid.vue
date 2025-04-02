@@ -286,9 +286,7 @@ import axios from '@/axios';
 import EditPopOut from '@/components/EditPopOut.vue';
 import { apiBaseUrl } from '@/config';
 import { exportToExcel } from '@/utils/exportUtils';
-import { deleteRecord, removeRecordFromGrid } from '@/utils/deleteUtils';
-import AddPopOut from "@/components/AddPopOut.vue";
-import PersistentAlert from "@/components/PersistentAlert.vue";
+
 import {mapState} from "vuex";
 
 
@@ -297,8 +295,6 @@ export default {
   components: {
     EditPopOut,
     AgGridVue,
-    AddPopOut,
-    PersistentAlert,
   },
   data() {
     return {
@@ -369,9 +365,9 @@ export default {
     }),
   },
   methods: {
-    async onGridReady(params) {
+    async onGridReady( ) {
       try {
-        const response = await axios.get(`${apiBaseUrl}/api/email-open-stats`);
+        const response = await axios.get(`${apiBaseUrl}/open-status/all`);
         this.rowData = response.data;
       } catch (error) {
         this.showSnackbar('Error loading data', 'error');
@@ -436,7 +432,83 @@ export default {
       this.isArchiveTagDialogVisible = false;
     },
     
-    // ... Add other required methods for campaign management, tag management, etc.
+    async submitMailchimpForm() {
+      if (!this.scheduledTime || !this.selectedTag || !this.mailchimpSubject ||
+          !this.selectedTemplateName || !this.mailchimpFrom || !this.mailchimpReply) {
+        this.showSnackbar('Please fill in all the required fields', 'error');
+        return;
+      }
+
+      try {
+        await axios.post(`${apiBaseUrl}/open-status/createCampaign`, {
+          subject: this.mailchimpSubject,
+          from_name: this.mailchimpFrom,
+          reply_to: this.mailchimpReply,
+          templateName: this.selectedTemplateName,
+          tag: this.selectedTag,
+          scheduledTime: this.scheduledTime,
+          poc: this.userPoc,
+          projectName: this.mailchimpProjectName,
+        });
+        this.showSnackbar('Campaign successfully scheduled', 'success');
+        this.closeMailchimpForm();
+      } catch (error) {
+        console.error('Error sending Mailchimp Campaign:', error);
+        this.showSnackbar('Failed to send Campaign Info', 'error');
+      }
+    },
+    
+    async fetchScheduledCampaigns() {
+      try {
+        const response = await axios.get(`${apiBaseUrl}/open-status/campaigns`);
+        if (response.data) {
+          this.campaignsList = response.data; // response.data is now a list of subject lines
+          this.isScheduledCampaignsDialogVisible = true; // Open the dialog
+        } else {
+          this.showSnackbar('No scheduled campaigns found.', 'warning');
+        }
+      } catch (error) {
+        console.error('Error fetching scheduled campaigns:', error);
+        this.showSnackbar('Failed to fetch scheduled campaigns.', 'error');
+      }
+    },
+
+    closeScheduledCampaignsDialog() {
+      this.isScheduledCampaignsDialogVisible = false;
+      this.selectedCampaign = null;
+    },
+
+    async unscheduleCampaign() {
+      if (!this.selectedCampaign) {
+        this.showSnackbar('Please select a campaign to unschedule.', 'warning');
+        return;
+      }
+      try {
+        await axios.post(`${apiBaseUrl}/open-status/campaigns/unschedule`, this.selectedCampaign);
+        this.showSnackbar('Campaign unscheduled successfully.', 'success');
+        this.closeScheduledCampaignsDialog();
+      } catch (error) {
+        console.error('Error unscheduling campaign:', error);
+        this.showSnackbar('Failed to unschedule campaign.', 'error');
+      }
+    },
+
+    async deleteCampaign() {
+      if (!this.selectedCampaign) {
+        this.showSnackbar('Please select a campaign to delete.', 'warning');
+        return;
+      }
+      try {
+        await axios.delete(`${apiBaseUrl}/open-status/campaigns/delete`, {
+          data: this.selectedCampaign
+        });
+        this.showSnackbar('Campaign deleted successfully.', 'success');
+        this.closeScheduledCampaignsDialog();
+      } catch (error) {
+        console.error('Error deleting campaign:', error);
+        this.showSnackbar('Failed to delete campaign.', 'error');
+      }
+    },
   }
 }
 </script>

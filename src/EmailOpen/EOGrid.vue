@@ -300,8 +300,7 @@ export default {
     return {
       // Grid related
       columnDefs: [
-        { field: 'id', headerName: 'ID', checkboxSelection: true },
-        { field: 'handleName', headerName: 'Handle Name' },
+        { field: 'handleName', headerName: 'Handle Name',checkboxSelection: true },
         { field: 'email', headerName: 'Email' },
         { field: 'location', headerName: 'Location' },
         { field: 'country', headerName: 'Country' },

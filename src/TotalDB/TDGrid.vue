@@ -524,6 +524,7 @@ export default {
         { name: 'followers', label: 'Followers' },
         { name: 'categories', label: 'Categories', type: 'select', options: this.categoriesList },
         { name: 'state', label: 'State'},
+        { name: 'Country', label: 'Country'},
 
       ],
       columnDefs: this.getColumnDefs(),
@@ -862,6 +863,7 @@ export default {
         },
         { headerName: 'Categories', field: 'categories', sortable: true, filter: true},
         { headerName: 'State', field: 'state', sortable: true, filter: true},
+        { headerName: 'Country', field: 'country',sortable: true, filter: true},
       ];
     },
 
